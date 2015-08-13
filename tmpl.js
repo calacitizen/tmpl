@@ -54,14 +54,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var AST = __webpack_require__(1),
+	var Traverse = __webpack_require__(1),
 	    functionalStrategy = __webpack_require__(15);
 	module.exports = {
-	  parse: AST.parse,
+	  parse: Traverse.parse,
 	  traverse: function traverse(ast, data) {
 	    return {
 	      handle: function (success, broke) {
-	        AST.traverse(ast, data).when(success, broke);
+	        Traverse.traverse(ast, data).when(success, broke);
 	      }
 	    }
 	  },

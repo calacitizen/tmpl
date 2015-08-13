@@ -1,11 +1,11 @@
-var AST = require("./AST"),
+var Traverse = require("./traverse"),
     functionalStrategy = require("./functionalStrategy");
 module.exports = {
-  parse: AST.parse,
+  parse: Traverse.parse,
   traverse: function traverse(ast, data) {
     return {
       handle: function (success, broke) {
-        AST.traverse(ast, data).when(success, broke);
+        Traverse.traverse(ast, data).when(success, broke);
       }
     }
   },
