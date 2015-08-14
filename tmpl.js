@@ -267,6 +267,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    tag.children = this.actionOnMainArray([], inner);
 	    return tag;
 	  },
+	  /**
+	   * Traversing tag with children
+	   */
 	  traverseTagWithChildren: function traverseTagWithChildren(takeTag, data) {
 	    return this.traversingAST(takeTag.children, data).when(
 	      function traverseTagSuccess(ast) {
@@ -1972,10 +1975,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var assignModuleVar = tag.attribs.name.trim(),
 	      template = tag.attribs.template.trim(),
 	      templatePath = template + '.tmpl',
-	      templateBody, req, text, ast;
+	      templateBody, req, text, ast,
+	      isNode = utils.isNode();
 
-	      if (utils.isNode() === false) {
-	        !(__WEBPACK_AMD_DEFINE_RESULT__ = function restrain() {
+	      if (isNode === false) {
+	        !(__WEBPACK_AMD_DEFINE_RESULT__ = function restrainFs() {
 	          return {};
 	        }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	      }
@@ -2015,18 +2019,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return vow.promise;
 	    }
 
+	    function resolveInclude(object) {
+	      data[assignModuleVar] = object;
+	      return data;
+	    }
+
 	    function resolveStatement() {
-	      if (utils.isNode() === false) {
+	      if (isNode === false) {
 	        req = createRequest(templatePath);
-	        return workOutAsync.call(this, req).when(function resolveInclude(object) {
-	          data[assignModuleVar] = object;
-	          return data;
-	        });
+	        return workOutAsync.call(this, req).when(resolveInclude);
 	      }
-	      return readFile.call(this, templatePath).when(function resolveInclude(object) {
-	        data[assignModuleVar] = object;
-	        return data;
-	      });
+	      return readFile.call(this, templatePath).when(resolveInclude);
 	    }
 
 	    return function includeResolve() {
@@ -2045,22 +2048,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  module: function partialModule(tag, data) {
 	    var assignModuleVar = tag.attribs.data.trim(),
 	        template = tag.attribs.template.trim(),
-	        rootVar = 'root';
+	        rootVar = 'root',
+	        scopeData = {};
+	    
 	    function resolveStatement(data) {
 	      var vow = VOW.make();
-	      this._includeStack[template].when(function partialInclude(templateData) {
-	        if (templateData[template]) {
-	          var scopeData = {};
-	          scopeData[rootVar] = data[assignModuleVar];
-	          this.traversingAST(templateData[template], scopeData).when(function partialTraversing(modAST) {
-	            vow.keep(modAST);
-	          }, function broken(reason) {
-	            throw new Error(reason);
-	          });
-	        } else {
-	          vow.break('Include tag for "' + template + '" is not found!');
+	      this._includeStack[template].when(
+	        function partialInclude(templateData) {
+	          if (templateData[template]) {
+	            scopeData[rootVar] = data[assignModuleVar];
+	            this.traversingAST(templateData[template], scopeData).when(function partialTraversing(modAST) {
+	              vow.keep(modAST);
+	            }, function brokenTraverse(reason) {
+	              throw new Error(reason);
+	            });
+	          } else {
+	            vow.break('Include tag for "' + template + '" is not found!');
+	          }
+	        }.bind(this),
+	        function brokenPartial(reason) {
+	          throw new Error(reason);
 	        }
-	      }.bind(this));
+	      );
 	      return vow.promise;
 	    }
 

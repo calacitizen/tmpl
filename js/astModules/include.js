@@ -5,10 +5,11 @@ module.exports = {
     var assignModuleVar = tag.attribs.name.trim(),
       template = tag.attribs.template.trim(),
       templatePath = template + '.tmpl',
-      templateBody, req, text, ast;
+      templateBody, req, text, ast,
+      isNode = utils.isNode();
 
-      if (utils.isNode() === false) {
-        define('fs', function restrain() {
+      if (isNode === false) {
+        define('fs', function restrainFs() {
           return {};
         });
       }
@@ -48,18 +49,17 @@ module.exports = {
       return vow.promise;
     }
 
+    function resolveInclude(object) {
+      data[assignModuleVar] = object;
+      return data;
+    }
+
     function resolveStatement() {
-      if (utils.isNode() === false) {
+      if (isNode === false) {
         req = createRequest(templatePath);
-        return workOutAsync.call(this, req).when(function resolveInclude(object) {
-          data[assignModuleVar] = object;
-          return data;
-        });
+        return workOutAsync.call(this, req).when(resolveInclude);
       }
-      return readFile.call(this, templatePath).when(function resolveInclude(object) {
-        data[assignModuleVar] = object;
-        return data;
-      });
+      return readFile.call(this, templatePath).when(resolveInclude);
     }
 
     return function includeResolve() {
