@@ -1,16 +1,17 @@
 var State = (function() {
   'use strict';
 
+  if (typeof setImmediate !== 'function') {
+    setImmediate = function setImmediate(func, fate) {
+      'use strict';
+      return setTimeout(function setTimeoutHandle() {
+        func(fate);
+      }, 0);
+    };
+  }
+
   function enlighten(queue, fate) {
     queue.forEach(function queueForEach(func) {
-      if (typeof setImmediate !== 'function') {
-        setImmediate = function setImmediate(func, fate) {
-          'use strict';
-          return setTimeout(function setTimeoutHandle() {
-            func(fate);
-          }, 0);
-        };
-      }
       setImmediate(func, fate);
     });
   }
