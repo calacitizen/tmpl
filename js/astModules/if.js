@@ -1,6 +1,6 @@
 var checkSource = require('../helpers/checkSource'),
   scopeHold = require('../helpers/scopeHold'),
-  VOW = require('../helpers/VOW');
+  State = require('../helpers/State');
 module.exports = {
   module: function ifModule(tag, data) {
     var
@@ -31,19 +31,19 @@ module.exports = {
     }
 
     function resolveStatement(condition) {
-      var vow = VOW.make();
+      var state = State.make();
       if (condition) {
         if (tag.children !== undefined) {
           this.traversingAST(tag.children, data).when(function ifObjectTraverse(modAST) {
-            vow.keep(modAST[0]);
+            state.keep(modAST[0]);
           }, function brokenIf(reason) {
             throw new Error(reason);
           });
         }
       } else {
-        vow.keep(undefined)
+        state.keep(undefined)
       }
-      return vow.promise;
+      return state.promise;
     }
 
     return function ifModuleReturnable() {

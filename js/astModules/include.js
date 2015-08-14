@@ -1,4 +1,4 @@
-var VOW = require('../helpers/VOW'),
+var State = require('../helpers/State'),
     utils = require('../helpers/utils');
 module.exports = {
   module: function requireOrRetire(tag, data, cb) {
@@ -23,7 +23,7 @@ module.exports = {
 
     function readFile(url) {
       var fs,
-        vow = VOW.make();
+        state = State.make();
       try {
         fs = requirejs('fs');
       } catch (e) {
@@ -31,22 +31,22 @@ module.exports = {
       }
       fs.readFile('./' + url, function readFileCallback(err, data) {
         if (err) {
-          vow.break(err);
+          state.break(err);
         } else {
-          vow.keep(this.parse(data));
+          state.keep(this.parse(data));
         }
       }.bind(this));
-      return vow.promise;
+      return state.promise;
     }
 
     function workOutAsync(req) {
-      var vow = VOW.make();
+      var state = State.make();
       req.onreadystatechange = function requestHandler() {
         if (req.readyState == 4 && req.status == 200) {
-          vow.keep(this.parse(req.responseText));
+          state.keep(this.parse(req.responseText));
         }
       }.bind(this);
-      return vow.promise;
+      return state.promise;
     }
 
     function resolveInclude(object) {

@@ -2,7 +2,7 @@ var checkSource = require('../helpers/checkSource'),
   scopeUtils = require('../helpers/scopeUtils'),
   whatType = require('../helpers/whatType'),
   utils = require('../helpers/utils'),
-  VOW = require('../helpers/VOW');
+  State = require('../helpers/State');
 module.exports = {
   module: function forModule(tag, data) {
     var
@@ -58,7 +58,7 @@ module.exports = {
       for (var i = 0; i < array.length; i++) {
         children.push(this.traversingAST(utils.clone(tag.children), scrapeChildren(array, data, i, firstArgument)));
       }
-      return VOW.every(children);
+      return State.every(children);
     }
 
     function fObject(object, data) {
@@ -68,7 +68,7 @@ module.exports = {
           children.push(this.traversingAST(utils.clone(tag.children), scrapeChildren(object, data, key, firstArgument)));
         }
       }
-      return VOW.every(children);
+      return State.every(children);
     }
 
     function resolveStatement(dataToIterate) {

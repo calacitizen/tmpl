@@ -2,7 +2,7 @@ var
   htmlparser = require('htmlparser'),
   utils = require('./helpers/utils'),
   scopeUtils = require('./helpers/scopeUtils'),
-  VOW = require('./helpers/VOW');
+  State = require('./helpers/State');
 module.exports = {
   _astTypes: ['tag', 'text', 'directive', 'comment', 'style', 'script'],
   _modules: {
@@ -51,7 +51,7 @@ module.exports = {
    * Removing unnecessary stuf from strings
    */
   _replaceAllUncertainStuff: function replaceAllUncertainStuff(string) {
-    return string.replace(this.safeReplaceSingleQuotesReg, this.safeReplaceSingleQuotesPlace).replace(this.safeReplaceCaseReg, this.safeReplaceCasePlace);
+    return string.trim().replace(this.safeReplaceSingleQuotesReg, this.safeReplaceSingleQuotesPlace).replace(this.safeReplaceCaseReg, this.safeReplaceCasePlace);
   },
   /**
    * Searching for vars in string
@@ -132,7 +132,7 @@ module.exports = {
     return modAST;
   },
   /**
-   * Collecting vows from traversing tree
+   * Collecting states from traversing tree
    */
   _collect: function collect(traverseMethod, value, scopeData) {
     var ps = traverseMethod.call(this, value, scopeData);
@@ -158,7 +158,7 @@ module.exports = {
         }
       }
     }
-    return VOW.every(psArray);
+    return State.every(psArray);
   },
   /**
    * Starting point
@@ -209,15 +209,15 @@ module.exports = {
    * Main function for tag traversing
    */
   _traverseTag: function traverseTag(tag, scopeData) {
-    var vow,
+    var state,
       attribs = this._traverseTagAttributes(tag.attribs, scopeData),
       takeTag = this._createTag(tag.name, tag.data, tag.raw, attribs, tag.children);
     if (takeTag.children && takeTag.children.length > 0) {
       return this.traverseTagWithChildren(takeTag, scopeData);
     } else {
-      vow = VOW.make();
-      vow.keep(this._generatorFunctionForTags(takeTag))
-      return vow.promise;
+      state = State.make();
+      state.keep(this._generatorFunctionForTags(takeTag))
+      return state.promise;
     }
   },
   /**
@@ -232,10 +232,10 @@ module.exports = {
    */
   _traverseText: function traverseText(text, scopeData) {
     var text = utils.clone(text),
-      vow = VOW.make();
+      state = State.make();
     if (text.hasOwnProperty('type')) {
-      vow.keep(this._lookForStatements(text, scopeData));
-      return vow.promise;
+      state.keep(this._lookForStatements(text, scopeData));
+      return state.promise;
     }
     return this._lookForStatements(text, scopeData);
   },
