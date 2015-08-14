@@ -21,8 +21,13 @@ module.exports = {
     }
 
     function readFile(url) {
-      var fs = requirejs('fs'),
+      var fs,
         vow = VOW.make();
+      try {
+        fs = requirejs('fs');
+      } catch (e) {
+        throw new Error("There is no requirejs for node included");
+      }
       fs.readFile('./' + url, function readFileCallback(err, data) {
         if (err) {
           vow.break(err);
