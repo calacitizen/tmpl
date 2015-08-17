@@ -1762,7 +1762,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function checkSourceIns(iterator, array, value) {
 	     var type = whatType(value);
 	     if (array.length > (iterator + 1) && type !== 'object') {
-	       throw new Error('У значения ' + array[iterator] + ' нет свойства: ' + array[iterator + 1]);
+	       if (type !== 'array' && array[iterator+1] !== 'length') {
+	         throw new Error('У значения ' + array[iterator] + ' нет свойства: ' + array[iterator + 1]);
+	       }
 	     }
 	     return type;
 	  }
@@ -1775,7 +1777,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    type = checkSourceIns(i, valueArray, chase);
 	  }
-	  
+
 	  return type;
 	}
 
