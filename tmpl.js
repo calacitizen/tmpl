@@ -2044,7 +2044,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var State = __webpack_require__(5);
+	var State = __webpack_require__(5),
+	    utils = __webpack_require__(3);
 	module.exports = {
 	  module: function partialModule(tag, data) {
 	    var assignModuleVar = tag.attribs.data.trim(),
@@ -2053,11 +2054,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        scopeData = {};
 
 	    function resolveStatement(data) {
-	      var state = State.make();
+	      var state = State.make(),
+	          clonedData = utils.clone(data);
 	      this._includeStack[template].when(
 	        function partialInclude(templateData) {
 	          if (templateData[template]) {
-	            scopeData[rootVar] = data[assignModuleVar];
+	            scopeData[rootVar] = clonedData[assignModuleVar];
 	            this.traversingAST(templateData[template], scopeData).when(function partialTraversing(modAST) {
 	              state.keep(modAST);
 	            }, function brokenTraverse(reason) {

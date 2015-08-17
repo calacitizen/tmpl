@@ -1,4 +1,5 @@
-var State = require('../helpers/State');
+var State = require('../helpers/State'),
+    utils = require('../helpers/utils');
 module.exports = {
   module: function partialModule(tag, data) {
     var assignModuleVar = tag.attribs.data.trim(),
@@ -7,11 +8,12 @@ module.exports = {
         scopeData = {};
 
     function resolveStatement(data) {
-      var state = State.make();
+      var state = State.make(),
+          clonedData = utils.clone(data);
       this._includeStack[template].when(
         function partialInclude(templateData) {
           if (templateData[template]) {
-            scopeData[rootVar] = data[assignModuleVar];
+            scopeData[rootVar] = clonedData[assignModuleVar];
             this.traversingAST(templateData[template], scopeData).when(function partialTraversing(modAST) {
               state.keep(modAST);
             }, function brokenTraverse(reason) {
