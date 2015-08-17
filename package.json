@@ -8,6 +8,9 @@
   },
   "author": "",
   "license": "ISC",
+  "scripts": {
+    "test": "mocha test/html_test.js"
+  },
   "devDependencies": {
     "webpack": "^1.10.1",
     "htmlparser": "*",
