@@ -11,3 +11,4 @@ tmpl.traverse(source, data).handle(
   }
 );
 ```
+```javascript tmpl.parse(source) ``` function gets you to the html AST
