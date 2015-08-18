@@ -30,5 +30,44 @@ Traverse function gets prepared AST-html like objects data with resolved variabl
 ```javascript
 tmpl.traverse(source, data).handle(function handle() {});
 ```
-
+AST-html like data sample
+```javascript
+[ {
+  attribs: {
+    class: {
+      data: [
+        {
+          type: "text",
+          value: "button "
+        },
+        {
+          name: "root.name",
+          type: "var",
+          value: "mikkey"
+        }
+      ]
+    }
+  },
+  children: [
+    {
+      data: {
+        type: "text",
+        value: "Click on me, man!"
+      },
+      raw: "Click on me, man!",
+      type: "text"
+    }
+  ],
+  data: "button",
+  name: "button",
+  raw: "button",
+  type: "tag",
+}
+]
+```
+With this data you can create your own representative of html in any kind.
+getHTML function is a simple function, that generates html string.
+```javascript
+tmpl.getHTML(traversed);
+```
 
