@@ -13,5 +13,5 @@ tmpl.traverse(source, data).handle(
 ```
 Parse function gets you to the html AST
 ```javascript 
-  tmpl.parse(source) 
+tmpl.parse(source) 
 ``` 
