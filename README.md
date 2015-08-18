@@ -108,7 +108,7 @@ For directive can be used for arrays and objects.
   </div>
 </for>
 ```
-###Include && Parials
+###Include && Partials
 Include directive can be used at this time only with requirejs. In order to use it you need to at first include template:
 ```html
 <include template="tmpl/button" name="button" />
