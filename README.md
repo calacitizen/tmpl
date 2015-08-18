@@ -31,7 +31,7 @@ AST looks like this
 ###Traverse 
 Function gets prepared AST-html like objects data with resolved variables and directives.
 ```javascript
-tmpl.traverse(source, data).handle(function handle() {});
+tmpl.traverse(source, data).handle(function handle(traversed) {});
 ```
 AST-html like data sample
 ```javascript
