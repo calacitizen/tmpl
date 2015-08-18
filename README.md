@@ -73,7 +73,12 @@ getHTML function is a simple function, that generates html string.
 ```javascript
 tmpl.getHTML(traversed);
 ```
-## HTML Directives
+## HTML
+### Variables
+You can use variables in any place except directives:
+```html
+<header class="maybe {{ activeClass }}">{{bambam}} I'm the biggest header in the world</header>
+```
 ### If
 If directive is using simple if logic.
 
