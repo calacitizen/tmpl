@@ -104,7 +104,8 @@ For directive can be used for arrays and objects.
       <for data="run in rabbit.runs">
         {{ run.num }} ll{{pumb}}
       </for>
-  </if>
+    </div>
+  </div>
 </for>
 ```
 ###Include && Parials
