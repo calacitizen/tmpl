@@ -1,4 +1,5 @@
 # TMPL
+## Javascript api
 Templating engine with valid html directives. TMPL uses three step to generate form you need to get html.
 ```javascript
 var AST = tmpl.parse(source);
