@@ -481,7 +481,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (this._done)
 				return;
 			this._done = true;
-		
+
 			//Push any unparsed text into a final element in the element list
 			if (this._buffer.length) {
 				var rawData = this._buffer;
@@ -496,7 +496,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				this.parseAttribs(element);
 				this._elements.push(element);
 			}
-		
+
 			this.writeHandler();
 			this._handler.done();
 		}
@@ -520,7 +520,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			this._tagStack = [];
 			this._handler.reset();
 		}
-		
+
 		//**Private**//
 		//Properties//
 		Parser.prototype._options = null; //Parser options for how to behave
@@ -543,33 +543,32 @@ return /******/ (function(modules) { // webpackBootstrap
 		Parser.prototype.parseTagAttribs = function Parser$parseTagAttribs (elements) {
 			var idxEnd = elements.length;
 			var idx = 0;
-		
+
 			while (idx < idxEnd) {
 				var element = elements[idx++];
 				if (element.type == ElementType.Tag || element.type == ElementType.Script || element.type == ElementType.style)
 					this.parseAttribs(element);
 			}
-		
+
 			return(elements);
 		}
 
-		//Takes an element and adds an "attribs" property for any element attributes found 
+		//Takes an element and adds an "attribs" property for any element attributes found
 		Parser.prototype.parseAttribs = function Parser$parseAttribs (element) {
 			//Only parse attributes for tags
 			if (element.type != ElementType.Script && element.type != ElementType.Style && element.type != ElementType.Tag)
 				return;
-		
 			var tagName = element.data.split(Parser._reWhitespace, 1)[0];
 			var attribRaw = element.data.substring(tagName.length);
 			if (attribRaw.length < 1)
 				return;
-		
 			var match;
 			Parser._reAttrib.lastIndex = 0;
 			while (match = Parser._reAttrib.exec(attribRaw)) {
 				if (element.attribs == undefined)
 					element.attribs = {};
-		
+
+
 				if (typeof match[1] == "string" && match[1].length) {
 					element.attribs[match[1]] = match[2];
 				} else if (typeof match[3] == "string" && match[3].length) {
@@ -600,16 +599,15 @@ return /******/ (function(modules) { // webpackBootstrap
 				this._next = Parser._reTags.lastIndex - 1;
 				var tagSep = this._buffer.charAt(this._next); //The currently found tag marker
 				var rawData = this._buffer.substring(this._current, this._next); //The next chunk of data to parse
-		
 				//A new element to eventually be appended to the element list
 				var element = {
 					  raw: rawData
 					, data: (this._parseState == ElementType.Text) ? rawData : rawData.replace(Parser._reTrim, "")
 					, type: this._parseState
 				};
-		
+
 				var elementName = this.parseTagName(element.data);
-		
+
 				//This section inspects the current tag stack and modifies the current
 				//element if we're actually parsing a special area (script/comment/style tag)
 				if (this._tagStack.length) { //We're parsing inside a script/comment/style tag
@@ -682,12 +680,12 @@ return /******/ (function(modules) { // webpackBootstrap
 						}
 					}
 				}
-		
+
 				//Processing of non-special tags
 				if (element.type == ElementType.Tag) {
 					element.name = elementName;
 					var elementNameCI = elementName.toLowerCase();
-					
+
 					if (element.raw.indexOf("!--") == 0) { //This tag is really comment
 						element.type = ElementType.Comment;
 						delete element["name"];
@@ -723,7 +721,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					if (element.name && element.name.charAt(0) == "/")
 						element.data = element.name;
 				}
-		
+
 				//Add all tags and non-empty text elements to the element list
 				if (element.raw != "" || element.type != ElementType.Text) {
 					if (this._options.includeLocation && !element.location) {
@@ -761,7 +759,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 			this._buffer = (this._current <= bufferEnd) ? this._buffer.substring(this._current) : "";
 			this._current = 0;
-		
+
 			this.writeHandler();
 		}
 
@@ -770,7 +768,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				l = this._location,
 				end = this._current - (startTag ? 1 : 0),
 				chunk = startTag && l.charOffset == 0 && this._current == 0;
-			
+
 			for (; l.charOffset < end; l.charOffset++) {
 				c = this._buffer.charAt(l.charOffset);
 				if (c == '\n') {
@@ -992,16 +990,16 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 		DefaultHandler.prototype.writeTag = function DefaultHandler$writeTag (element) {
 			this.handleElement(element);
-		} 
+		}
 		DefaultHandler.prototype.writeText = function DefaultHandler$writeText (element) {
 			if (this._options.ignoreWhitespace)
 				if (DefaultHandler.reWhitespace.test(element.data))
 					return;
 			this.handleElement(element);
-		} 
+		}
 		DefaultHandler.prototype.writeComment = function DefaultHandler$writeComment (element) {
 			this.handleElement(element);
-		} 
+		}
 		DefaultHandler.prototype.writeDirective = function DefaultHandler$writeDirective (element) {
 			this.handleElement(element);
 		}
@@ -1024,7 +1022,7 @@ return /******/ (function(modules) { // webpackBootstrap
 						return;
 				this._callback(error, this.dom);
 		}
-		
+
 		DefaultHandler.prototype.isEmptyTag = function(element) {
 			var name = element.name.toLowerCase();
 			if (name.charAt(0) == '/') {
@@ -1032,7 +1030,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 			return this._options.enforceEmptyTags && !!DefaultHandler._emptyTags[name];
 		};
-		
+
 		DefaultHandler.prototype.handleElement = function DefaultHandler$handleElement (element) {
 			if (this._done)
 				this.handleCallback(new Error("Writing to the handler after done() called is not allowed without a reset()"));
@@ -1093,7 +1091,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				if (!element) {
 					return false;
 				}
-		
+
 				for (var key in options) {
 					if (key == "tag_name") {
 						if (element.type != "tag" && element.type != "script" && element.type != "style") {
@@ -1119,10 +1117,10 @@ return /******/ (function(modules) { // webpackBootstrap
 						}
 					}
 				}
-			
+
 				return true;
 			}
-		
+
 			, getElements: function DomUtils$getElements (options, currentElement, recurse, limit) {
 				recurse = (recurse === undefined || recurse === null) || !!recurse;
 				limit = isNaN(parseInt(limit)) ? -1 : parseInt(limit);
@@ -1130,7 +1128,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				if (!currentElement) {
 					return([]);
 				}
-		
+
 				var found = [];
 				var elementList;
 
@@ -1142,7 +1140,7 @@ return /******/ (function(modules) { // webpackBootstrap
 						options[key] = getTest(options[key]);
 					}
 				}
-		
+
 				if (DomUtils.testElement(options, currentElement)) {
 					found.push(currentElement);
 				}
@@ -1158,26 +1156,26 @@ return /******/ (function(modules) { // webpackBootstrap
 				} else {
 					return(found);
 				}
-		
+
 				for (var i = 0; i < elementList.length; i++) {
 					found = found.concat(DomUtils.getElements(options, elementList[i], recurse, limit));
 					if (limit >= 0 && found.length >= limit) {
 						break;
 					}
 				}
-		
+
 				return(found);
 			}
-			
+
 			, getElementById: function DomUtils$getElementById (id, currentElement, recurse) {
 				var result = DomUtils.getElements({ id: id }, currentElement, recurse, 1);
 				return(result.length ? result[0] : null);
 			}
-			
+
 			, getElementsByTagName: function DomUtils$getElementsByTagName (name, currentElement, recurse, limit) {
 				return(DomUtils.getElements({ tag_name: name }, currentElement, recurse, limit));
 			}
-			
+
 			, getElementsByTagType: function DomUtils$getElementsByTagType (type, currentElement, recurse, limit) {
 				return(DomUtils.getElements({ tag_type: type }, currentElement, recurse, limit));
 			}
@@ -1697,13 +1695,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = {
 	  module: function ifModule(tag, data) {
 	    var
-	      source = tag.attribs.data.trim(),
 	      concreteSourceStrings = {
-	        operators: ['&&', '||', '===', '!==', '<', '>', '<=', '>=']
+	        operators: [{ name: ' lt ', value: '<' }, { name: ' gt ', value: '>' }, { name: ' le ', value: '<=' }, { name: ' ge ',  value: '>=' }]
 	      },
-	      type = checkSource(source, data),
+	      source = replaceGreaterLess(tag.attribs.data.trim()),
 	      arrVars = lookUniqueVariables(source),
 	      condition = readConditionalExpression(source, arrVars);
+
+	    function replaceGreaterLess(source) {
+	      for (var i = 0; i < concreteSourceStrings.operators.length; i++) {
+	        source = source.replace(concreteSourceStrings.operators[i].name, concreteSourceStrings.operators[i].value);
+	      }
+	      return source;
+	    }
 
 	    function lookUniqueVariables(expression) {
 	      var variables = expression.match(/([A-z]+)/g),
@@ -1728,7 +1732,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (condition) {
 	        if (tag.children !== undefined) {
 	          this.traversingAST(tag.children, data).when(function ifObjectTraverse(modAST) {
-	            state.keep(modAST[0]);
+	            state.keep(modAST);
 	          }, function brokenIf(reason) {
 	            throw new Error(reason);
 	          });
@@ -1754,6 +1758,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var whatType = __webpack_require__(10);
 	module.exports = function checkSource(variableString, scopeData) {
+	  console.log(variableString);
 
 	  var varianleSeparator = '.',
 	      valueArray = variableString.split(varianleSeparator),

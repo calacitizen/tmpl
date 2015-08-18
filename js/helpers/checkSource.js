@@ -1,5 +1,6 @@
 var whatType = require('./whatType');
 module.exports = function checkSource(variableString, scopeData) {
+  console.log(variableString);
 
   var varianleSeparator = '.',
       valueArray = variableString.split(varianleSeparator),

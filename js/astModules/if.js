@@ -4,13 +4,19 @@ var checkSource = require('../helpers/checkSource'),
 module.exports = {
   module: function ifModule(tag, data) {
     var
-      source = tag.attribs.data.trim(),
       concreteSourceStrings = {
-        operators: ['&&', '||', '===', '!==', '<', '>', '<=', '>=']
+        operators: [{ name: ' lt ', value: '<' }, { name: ' gt ', value: '>' }, { name: ' le ', value: '<=' }, { name: ' ge ',  value: '>=' }]
       },
-      type = checkSource(source, data),
+      source = replaceGreaterLess(tag.attribs.data.trim()),
       arrVars = lookUniqueVariables(source),
       condition = readConditionalExpression(source, arrVars);
+
+    function replaceGreaterLess(source) {
+      for (var i = 0; i < concreteSourceStrings.operators.length; i++) {
+        source = source.replace(concreteSourceStrings.operators[i].name, concreteSourceStrings.operators[i].value);
+      }
+      return source;
+    }
 
     function lookUniqueVariables(expression) {
       var variables = expression.match(/([A-z]+)/g),
@@ -35,7 +41,7 @@ module.exports = {
       if (condition) {
         if (tag.children !== undefined) {
           this.traversingAST(tag.children, data).when(function ifObjectTraverse(modAST) {
-            state.keep(modAST[0]);
+            state.keep(modAST);
           }, function brokenIf(reason) {
             throw new Error(reason);
           });
