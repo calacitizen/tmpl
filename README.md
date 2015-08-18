@@ -1,5 +1,5 @@
 # TMPL
-## Javascript api
+## Javascript API
 Templating engine with valid html directives. TMPL uses three step to generate form you need to get html.
 ```javascript
 var AST = tmpl.parse(source);
@@ -12,7 +12,8 @@ tmpl.traverse(source, data).handle(
   }
 );
 ```
-Parse function gets you to the html AST
+###Parse 
+Function gets you to the html AST
 ```javascript 
 tmpl.parse(source) 
 ``` 
@@ -27,7 +28,8 @@ AST looks like this
   }
 ]
 ```
-Traverse function gets prepared AST-html like objects data with resolved variables and directives.
+###Traverse 
+Function gets prepared AST-html like objects data with resolved variables and directives.
 ```javascript
 tmpl.traverse(source, data).handle(function handle() {});
 ```
@@ -71,4 +73,57 @@ getHTML function is a simple function, that generates html string.
 ```javascript
 tmpl.getHTML(traversed);
 ```
+## HTML Directives
+### If
+If directive is using simple if logic.
+
+Wherever expressions are allowed, they are treated as JavaScript expressions and copied out to the compiled template verbatim. However, you can choose to use alternate versions of the following JavaScript operators:
+
+JavaScript Operator | TMPL Equivalent
+------------------- | -----------------
+`&&`                 | `&&`
+<code>&#124;&#124;</code>                | <code>&#124;&#124;</code>
+`===`               | `===`
+`!==`               | `!==`
+`<`                 | `lt`
+`>`                 | `gt`
+`<=`                | `le`
+`>=`                | `ge`
+
+```html
+<if data="number === 123">
+  <div class="sample">Sample</div>
+</if>
+```
+###For
+For directive can be used for arrays and objects.
+```html
+<for data="rabbit in rabbits.names">
+  <div class="rabbit {{ rabbit.type }}">{{ rabbit.name }}</div>
+    <div class="runs">
+      <for data="run in rabbit.runs">
+        {{ run.num }} ll{{pumb}}
+      </for>
+  </if>
+</for>
+```
+###Include && Parials
+Include directive can be used at this time only with requirejs. In order to use it you need to at first include template:
+```html
+<include template="tmpl/button" name="button" />
+```
+and then use partial:
+```html
+<partial template="button" data="rabbit" />
+```
+or in loop:
+```html
+<for data="rabbit in rabbits.names">
+  <partial template="button" data="rabbit" />
+</for>
+```
+In the partial template you can grab main data object with var name of "root".
+
+
+
 
