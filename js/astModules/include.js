@@ -1,7 +1,7 @@
 var State = require('../helpers/State'),
     utils = require('../helpers/utils');
 module.exports = {
-  module: function requireOrRetire(tag, data, cb) {
+  module: function requireOrRetire(tag) {
     var assignModuleVar = tag.attribs.name.trim(),
       template = tag.attribs.template.trim(),
       templatePath = template + '.tmpl',
@@ -50,8 +50,7 @@ module.exports = {
     }
 
     function resolveInclude(object) {
-      data[assignModuleVar] = object;
-      return data;
+      return object;
     }
 
     function resolveStatement() {

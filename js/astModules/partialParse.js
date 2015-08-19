@@ -1,5 +1,4 @@
-var State = require('../helpers/State'),
-    utils = require('../helpers/utils');
+var utils = require('../helpers/utils');
 module.exports = {
   module: function partialModule(tag) {
     var assignModuleVar = tag.attribs.data.trim(),

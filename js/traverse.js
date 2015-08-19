@@ -1,13 +1,10 @@
 var
   htmlparser = require('htmlparser'),
   utils = require('./helpers/utils'),
-  scopeUtils = require('./helpers/scopeUtils'),
+  scopeUtils = require('./helpers/skipVars'),
   State = require('./helpers/State');
 module.exports = {
-  _astTypes: ['tag', 'text', 'directive', 'comment', 'style', 'script'],
   _modules: {
-    'if': require('./astModules/if'),
-    'for': require('./astModules/for'),
     'include': require('./astModules/include'),
     'partial': require('./astModules/partial')
   },
@@ -17,7 +14,6 @@ module.exports = {
   safeReplaceCaseReg: /\r|\n|\t|\/\*[\s\S]*?\*\//g,
   safeReplaceCasePlace: "",
   _includeStack: {},
-  _tagStack: [],
   /**
    * Parsing html string to the directive state
    */
@@ -64,9 +60,9 @@ module.exports = {
   /**
    * Replacing and creating statements for variables and text chunks
    */
-  _replaceAndCreateStatements: function replaceAndCreateStatements(data, scopeData, arrOfVars) {
+  _replaceAndCreateStatements: function replaceAndCreateStatements(data, arrOfVars) {
     return utils.mapForLoop(data, function searchInScope(value) {
-      ssCheck = scopeUtils.checkStatementForInners(value, scopeData, arrOfVars);
+      ssCheck = scopeUtils.checkStatementForInners(value, arrOfVars);
       if (ssCheck.isVar) {
         return this._createDataVar(value, ssCheck.value);
       }
@@ -76,7 +72,7 @@ module.exports = {
   /**
    * Preparing string for structured tree
    */
-  _replaceMatch: function replaceMatch(str, scopeData) {
+  _replaceMatch: function replaceMatch(str) {
     var
       regExForVar = /\{\{ ?(.*?) ?\}\}/g,
       resString = this._replaceAllUncertainStuff(str.data),
@@ -89,7 +85,7 @@ module.exports = {
     }
     resultingObject.data = resString.split(regExForVar);
     if (arrOfVarsClean) {
-      resultingObject.data = this._replaceAndCreateStatements(resultingObject.data, scopeData, arrOfVarsClean);
+      resultingObject.data = this._replaceAndCreateStatements(resultingObject.data, arrOfVarsClean);
     } else {
       resultingObject.data = this._createDataText(resultingObject.data[0]);
     }
@@ -98,8 +94,8 @@ module.exports = {
   /**
    * Looking for variables in strings
    */
-  _lookForStatements: function lookForStatements(statement, scopeData) {
-    return this._replaceMatch(statement, scopeData);
+  _lookForStatements: function lookForStatements(statement) {
+    return this._replaceMatch(statement);
   },
   /**
    * Resolving method to handle tree childs
@@ -134,8 +130,8 @@ module.exports = {
   /**
    * Collecting states from traversing tree
    */
-  _collect: function collect(traverseMethod, value, scopeData) {
-    var ps = traverseMethod.call(this, value, scopeData);
+  _collect: function collect(traverseMethod, value) {
+    var ps = traverseMethod.call(this, value);
     if (this.isTagInclude(value.name)) {
       this._includeStack[value.attribs.name] = ps;
     } else {
@@ -145,14 +141,14 @@ module.exports = {
   /**
    * Recursive traverse method
    */
-  traversingAST: function traversingAST(ast, scopeData) {
+  traversingAST: function traversingAST(ast) {
     var traverseMethod,
       psArray = [],
       collect;
     for (var i = 0; i < ast.length; i++) {
       traverseMethod = this._whatMethodShouldYouUse(ast[i]);
       if (traverseMethod) {
-        collect = this._collect(traverseMethod, ast[i], scopeData);
+        collect = this._collect(traverseMethod, ast[i]);
         if (collect !== undefined) {
           psArray.push(collect);
         }
@@ -163,8 +159,8 @@ module.exports = {
   /**
    * Starting point
    */
-  traverse: function (ast, data, config) {
-    return this.traversingAST(ast, data).when(
+  traverse: function (ast, config) {
+    return this.traversingAST(ast).when(
       function resulting(data) {
         return this.actionOnMainArray([], data);
       }.bind(this),
@@ -176,9 +172,9 @@ module.exports = {
   /**
    * Loading module function
    */
-  _loadModuleFunction: function loadModuleFunction(tagModule, tag, scopeData) {
+  _loadModuleFunction: function loadModuleFunction(tagModule, tag) {
     var
-      moduleFunction = tagModule(tag, scopeData),
+      moduleFunction = tagModule(tag),
       res = moduleFunction.call(this);
     if (res) {
       return res;
@@ -208,12 +204,12 @@ module.exports = {
   /**
    * Main function for tag traversing
    */
-  _traverseTag: function traverseTag(tag, scopeData) {
+  _traverseTag: function traverseTag(tag) {
     var state,
-      attribs = this._traverseTagAttributes(tag.attribs, scopeData),
+      attribs = this._traverseTagAttributes(tag.attribs),
       takeTag = this._createTag(tag.name, tag.data, tag.raw, attribs, tag.children);
     if (takeTag.children && takeTag.children.length > 0) {
-      return this.traverseTagWithChildren(takeTag, scopeData);
+      return this.traverseTagWithChildren(takeTag);
     } else {
       state = State.make();
       state.keep(this._generatorFunctionForTags(takeTag))
@@ -223,21 +219,21 @@ module.exports = {
   /**
    * Main function for finding traverse method for module
    */
-  _traverseModule: function traverseModule(tag, scopeData) {
+  _traverseModule: function traverseModule(tag) {
     var tagModule = this._moduleMatcher(tag);
-    return this._loadModuleFunction(tagModule, tag, scopeData);
+    return this._loadModuleFunction(tagModule, tag);
   },
   /**
    * Text node traversing
    */
-  _traverseText: function traverseText(text, scopeData) {
+  _traverseText: function traverseText(text) {
     var text = utils.clone(text),
       state = State.make();
     if (text.hasOwnProperty('type')) {
-      state.keep(this._lookForStatements(text, scopeData));
+      state.keep(this._lookForStatements(text));
       return state.promise;
     }
-    return this._lookForStatements(text, scopeData);
+    return this._lookForStatements(text);
   },
   /**
    * Is tag?

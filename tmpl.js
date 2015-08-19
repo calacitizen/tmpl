@@ -55,13 +55,13 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var Traverse = __webpack_require__(1),
-	    functionalStrategy = __webpack_require__(15);
+	    functionalStrategy = __webpack_require__(10);
 	module.exports = {
 	  parse: Traverse.parse,
-	  traverse: function traverse(ast, data) {
+	  traverse: function traverse(ast) {
 	    return {
 	      handle: function (success, broke) {
-	        Traverse.traverse(ast, data).when(success, broke);
+	        Traverse.traverse(ast).when(success, broke);
 	      }
 	    }
 	  },
@@ -79,12 +79,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  scopeUtils = __webpack_require__(4),
 	  State = __webpack_require__(5);
 	module.exports = {
-	  _astTypes: ['tag', 'text', 'directive', 'comment', 'style', 'script'],
 	  _modules: {
-	    'if': __webpack_require__(8),
-	    'for': __webpack_require__(12),
-	    'include': __webpack_require__(13),
-	    'partial': __webpack_require__(14)
+	    'include': __webpack_require__(8),
+	    'partial': __webpack_require__(9)
 	  },
 	  _regex: {
 	    forVariables: /\{\{ ?(.*?) ?\}\}/g
@@ -92,7 +89,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  safeReplaceCaseReg: /\r|\n|\t|\/\*[\s\S]*?\*\//g,
 	  safeReplaceCasePlace: "",
 	  _includeStack: {},
-	  _tagStack: [],
 	  /**
 	   * Parsing html string to the directive state
 	   */
@@ -139,9 +135,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Replacing and creating statements for variables and text chunks
 	   */
-	  _replaceAndCreateStatements: function replaceAndCreateStatements(data, scopeData, arrOfVars) {
+	  _replaceAndCreateStatements: function replaceAndCreateStatements(data, arrOfVars) {
 	    return utils.mapForLoop(data, function searchInScope(value) {
-	      ssCheck = scopeUtils.checkStatementForInners(value, scopeData, arrOfVars);
+	      ssCheck = scopeUtils.checkStatementForInners(value, arrOfVars);
 	      if (ssCheck.isVar) {
 	        return this._createDataVar(value, ssCheck.value);
 	      }
@@ -151,7 +147,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Preparing string for structured tree
 	   */
-	  _replaceMatch: function replaceMatch(str, scopeData) {
+	  _replaceMatch: function replaceMatch(str) {
 	    var
 	      regExForVar = /\{\{ ?(.*?) ?\}\}/g,
 	      resString = this._replaceAllUncertainStuff(str.data),
@@ -164,7 +160,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    resultingObject.data = resString.split(regExForVar);
 	    if (arrOfVarsClean) {
-	      resultingObject.data = this._replaceAndCreateStatements(resultingObject.data, scopeData, arrOfVarsClean);
+	      resultingObject.data = this._replaceAndCreateStatements(resultingObject.data, arrOfVarsClean);
 	    } else {
 	      resultingObject.data = this._createDataText(resultingObject.data[0]);
 	    }
@@ -173,8 +169,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Looking for variables in strings
 	   */
-	  _lookForStatements: function lookForStatements(statement, scopeData) {
-	    return this._replaceMatch(statement, scopeData);
+	  _lookForStatements: function lookForStatements(statement) {
+	    return this._replaceMatch(statement);
 	  },
 	  /**
 	   * Resolving method to handle tree childs
@@ -209,8 +205,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Collecting states from traversing tree
 	   */
-	  _collect: function collect(traverseMethod, value, scopeData) {
-	    var ps = traverseMethod.call(this, value, scopeData);
+	  _collect: function collect(traverseMethod, value) {
+	    var ps = traverseMethod.call(this, value);
 	    if (this.isTagInclude(value.name)) {
 	      this._includeStack[value.attribs.name] = ps;
 	    } else {
@@ -220,14 +216,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Recursive traverse method
 	   */
-	  traversingAST: function traversingAST(ast, scopeData) {
+	  traversingAST: function traversingAST(ast) {
 	    var traverseMethod,
 	      psArray = [],
 	      collect;
 	    for (var i = 0; i < ast.length; i++) {
 	      traverseMethod = this._whatMethodShouldYouUse(ast[i]);
 	      if (traverseMethod) {
-	        collect = this._collect(traverseMethod, ast[i], scopeData);
+	        collect = this._collect(traverseMethod, ast[i]);
 	        if (collect !== undefined) {
 	          psArray.push(collect);
 	        }
@@ -238,8 +234,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Starting point
 	   */
-	  traverse: function (ast, data, config) {
-	    return this.traversingAST(ast, data).when(
+	  traverse: function (ast, config) {
+	    return this.traversingAST(ast).when(
 	      function resulting(data) {
 	        return this.actionOnMainArray([], data);
 	      }.bind(this),
@@ -251,9 +247,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Loading module function
 	   */
-	  _loadModuleFunction: function loadModuleFunction(tagModule, tag, scopeData) {
+	  _loadModuleFunction: function loadModuleFunction(tagModule, tag) {
 	    var
-	      moduleFunction = tagModule(tag, scopeData),
+	      moduleFunction = tagModule(tag),
 	      res = moduleFunction.call(this);
 	    if (res) {
 	      return res;
@@ -283,12 +279,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Main function for tag traversing
 	   */
-	  _traverseTag: function traverseTag(tag, scopeData) {
+	  _traverseTag: function traverseTag(tag) {
 	    var state,
-	      attribs = this._traverseTagAttributes(tag.attribs, scopeData),
+	      attribs = this._traverseTagAttributes(tag.attribs),
 	      takeTag = this._createTag(tag.name, tag.data, tag.raw, attribs, tag.children);
 	    if (takeTag.children && takeTag.children.length > 0) {
-	      return this.traverseTagWithChildren(takeTag, scopeData);
+	      return this.traverseTagWithChildren(takeTag);
 	    } else {
 	      state = State.make();
 	      state.keep(this._generatorFunctionForTags(takeTag))
@@ -298,21 +294,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Main function for finding traverse method for module
 	   */
-	  _traverseModule: function traverseModule(tag, scopeData) {
+	  _traverseModule: function traverseModule(tag) {
 	    var tagModule = this._moduleMatcher(tag);
-	    return this._loadModuleFunction(tagModule, tag, scopeData);
+	    return this._loadModuleFunction(tagModule, tag);
 	  },
 	  /**
 	   * Text node traversing
 	   */
-	  _traverseText: function traverseText(text, scopeData) {
+	  _traverseText: function traverseText(text) {
 	    var text = utils.clone(text),
 	      state = State.make();
 	    if (text.hasOwnProperty('type')) {
-	      state.keep(this._lookForStatements(text, scopeData));
+	      state.keep(this._lookForStatements(text));
 	      return state.promise;
 	    }
-	    return this._lookForStatements(text, scopeData);
+	    return this._lookForStatements(text);
 	  },
 	  /**
 	   * Is tag?
@@ -1282,7 +1278,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var utils = __webpack_require__(3);
 	module.exports = {
-	  checkStatementForInners: function checkStatementForInners(value, scopeData, arrVars) {
+	  checkStatementForInners: function checkStatementForInners(value, arrVars) {
 	    var
 	      variableSeparator = '.',
 	      stScope = value.split(variableSeparator),
@@ -1303,21 +1299,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	    }
 
-	    if (stScope.length > 1) {
-	      for (var i = 0; i < stScope.length; i++) {
-	        if (scopeData.hasOwnProperty(stScope[i]) && i === 0) {
-	          compress = scopeData[stScope[i]];
-	        } else {
-	          if (compress && compress.hasOwnProperty(stScope[i])) {
-	            compress = compress[stScope[i]];
-	          }
-	        }
-	      }
-	      return varOrNot(isVar, compress, value);
-	    }
-
 	    if (isVar === true) {
-	      return varOrNot(isVar, scopeData[value], value);
+	      return varOrNot(isVar, undefined, value);
 	    }
 
 	    return varOrNot(isVar, value);
@@ -1689,297 +1672,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var checkSource = __webpack_require__(9),
-	  scopeHold = __webpack_require__(11),
-	  State = __webpack_require__(5);
-	module.exports = {
-	  module: function ifModule(tag, data) {
-	    var
-	      concreteSourceStrings = {
-	        operators: [{ name: ' lt ', value: '<' }, { name: ' gt ', value: '>' }, { name: ' le ', value: '<=' }, { name: ' ge ',  value: '>=' }]
-	      },
-	      source = replaceGreaterLess(tag.attribs.data.trim()),
-	      arrVars = lookUniqueVariables(source),
-	      condition = readConditionalExpression(source, arrVars);
-
-	    function replaceGreaterLess(source) {
-	      for (var i = 0; i < concreteSourceStrings.operators.length; i++) {
-	        source = source.replace(concreteSourceStrings.operators[i].name, concreteSourceStrings.operators[i].value);
-	      }
-	      return source;
-	    }
-
-	    function lookUniqueVariables(expression) {
-	      var variables = expression.match(/([A-z]+)/g),
-	        length = variables.length,
-	        uniqueVariables = [],
-	        index = 0;
-	      while (index < length) {
-	        var variable = variables[index++];
-	        if (uniqueVariables.indexOf(variable) < 0) {
-	          uniqueVariables.push(variable);
-	        }
-	      }
-	      return uniqueVariables;
-	    }
-
-	    function readConditionalExpression(expression, uniqueVariables) {
-	      return Function.apply(null, uniqueVariables.concat("return " + expression));
-	    }
-
-	    function resolveStatement(condition) {
-	      var state = State.make();
-	      if (condition) {
-	        if (tag.children !== undefined) {
-	          this.traversingAST(tag.children, data).when(function ifObjectTraverse(modAST) {
-	            state.keep(modAST);
-	          }, function brokenIf(reason) {
-	            throw new Error(reason);
-	          });
-	        }
-	      } else {
-	        state.keep(undefined)
-	      }
-	      return state.promise;
-	    }
-
-	    return function ifModuleReturnable() {
-	      if (tag.children !== undefined) {
-	        return resolveStatement.call(this, condition.apply(this, scopeHold(arrVars, data)));
-	      }
-	    }
-	  }
-	}
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var whatType = __webpack_require__(10);
-	module.exports = function checkSource(variableString, scopeData) {
-	  console.log(variableString);
-
-	  var varianleSeparator = '.',
-	      valueArray = variableString.split(varianleSeparator),
-	      type;
-
-	  function checkSourceIns(iterator, array, value) {
-	     var type = whatType(value);
-	     if (array.length > (iterator + 1) && type !== 'object') {
-	       if (type !== 'array' && array[iterator+1] !== 'length') {
-	         throw new Error('У значения ' + array[iterator] + ' нет свойства: ' + array[iterator + 1]);
-	       }
-	     }
-	     return type;
-	  }
-
-	  for (var i = 0; i < valueArray.length; i++) {
-	    if (i === 0) {
-	      chase = scopeData[valueArray[i]];
-	    } else {
-	      chase = chase[valueArray[i]];
-	    }
-	    type = checkSourceIns(i, valueArray, chase);
-	  }
-
-	  return type;
-	}
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports) {
-
-	module.exports = function checkType(value) {
-
-	  var type = function checkTypeInside(o) {
-
-	    if (o === null) {
-	      return 'null';
-	    }
-
-	    if (o && (o.nodeType === 1 || o.nodeType === 9)) {
-	      return 'element';
-	    }
-
-	    var s = Object.prototype.toString.call(o);
-	    var type = s.match(/\[object (.*?)\]/)[1].toLowerCase();
-
-	    if (type === 'number') {
-	      if (isNaN(o)) {
-	        return 'nan';
-	      }
-	      if (!isFinite(o)) {
-	        return 'infinity';
-	      }
-	    }
-
-	    return type;
-	  };
-
-	  var types = [
-	    'Null',
-	    'Undefined',
-	    'Object',
-	    'Array',
-	    'String',
-	    'Number',
-	    'Boolean',
-	    'Function',
-	    'RegExp',
-	    'Element',
-	    'NaN',
-	    'Infinite'
-	  ];
-
-	  var generateMethod = function(t) {
-	    type['is' + t] = function(o) {
-	      return type(o) === t.toLowerCase();
-	    };
-	  };
-
-	  for (var i = 0; i < types.length; i++) {
-	    generateMethod(types[i]);
-	  }
-
-	  return type(value);
-
-	};
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var scopeUtils = __webpack_require__(4);
-	module.exports = function scopeHold(arrVars, scope) {
-	  var ms = [],
-	      variableSeparator = '.',
-	      stepVar;
-	  for (var i = 0; i < arrVars.length; i++) {
-	    if (scope.hasOwnProperty(arrVars[i])) {
-	      stepVar = scopeUtils.checkStatementForInners(arrVars[i], scope, arrVars);
-	      if (stepVar.isVar === true) {
-	        ms.push(stepVar.value);
-	      }
-	    }
-	  }
-	  return ms;
-	}
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var checkSource = __webpack_require__(9),
-	  scopeUtils = __webpack_require__(4),
-	  whatType = __webpack_require__(10),
-	  utils = __webpack_require__(3),
-	  State = __webpack_require__(5);
-	module.exports = {
-	  module: function forModule(tag, data) {
-	    var
-	      source = tag.attribs.data.trim(),
-	      types = {
-	        'array': fArray,
-	        'object': fObject
-	      },
-	      concreteSourceStrings = {
-	        splittingKey: ' in ',
-	        key: ' as '
-	      },
-	      forStampArguments = source.split(concreteSourceStrings.splittingKey),
-	      firstArgument,
-	      mainData;
-
-	    if (forStampArguments.length < 2) {
-	      throw new Error('Wrong arguments in for statement');
-	    }
-
-	    mainData = scopeUtils.checkStatementForInners(forStampArguments[1], data, [forStampArguments[1]]);
-
-	    if (!mainData.value) {
-	      throw new Error(mainData.name + ' variable is undefined');
-	    }
-
-	    firstArgument = forFindAllArguments(forStampArguments[0]);
-
-	    function forFindAllArguments(value) {
-	      var crStringArray = value.split(concreteSourceStrings.key);
-	      if (crStringArray.length > 1) {
-	        return {
-	          key: crStringArray[0],
-	          value: crStringArray[1]
-	        };
-	      }
-	      return {
-	        key: undefined,
-	        value: crStringArray[0]
-	      };
-	    }
-
-	    function scrapeChildren(object, data, key, firstArgument) {
-	      data[firstArgument.value] = object[key];
-	      if (firstArgument.key) {
-	        data[firstArgument.key] = key;
-	      }
-	      return data;
-	    }
-
-	    function fArray(array, data) {
-	      var children = [];
-	      for (var i = 0; i < array.length; i++) {
-	        children.push(this.traversingAST(utils.clone(tag.children), scrapeChildren(array, data, i, firstArgument)));
-	      }
-	      return State.every(children);
-	    }
-
-	    function fObject(object, data) {
-	      var children = [];
-	      for (var key in object) {
-	        if (object.hasOwnProperty(key)) {
-	          children.push(this.traversingAST(utils.clone(tag.children), scrapeChildren(object, data, key, firstArgument)));
-	        }
-	      }
-	      return State.every(children);
-	    }
-
-	    function resolveStatement(dataToIterate) {
-	      var scopeArray = dataToIterate.value,
-	        scopeData = utils.clone(data),
-	        typeFunction = types[whatType(scopeArray)],
-	        ps;
-	      if (typeFunction === undefined) {
-	        throw new Error('Wrong type in for statement arguments');
-	      }
-	      ps = types[whatType(scopeArray)].call(this, scopeArray, scopeData);
-	      ps.when(function resolveStatementFor(data) {
-	        return this.actionOnMainArray([], data);
-	      }.bind(this), function brokenFor(reason) {
-	        throw new Error(reason);
-	      });
-	      return ps;
-	    }
-
-	    return function forModuleReturnable() {
-	      if (tag.children !== undefined) {
-	        return resolveStatement.call(this, mainData);
-	      }
-	    }
-	  }
-	}
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
 	var __WEBPACK_AMD_DEFINE_RESULT__;var State = __webpack_require__(5),
 	    utils = __webpack_require__(3);
 	module.exports = {
-	  module: function requireOrRetire(tag, data, cb) {
+	  module: function requireOrRetire(tag) {
 	    var assignModuleVar = tag.attribs.name.trim(),
 	      template = tag.attribs.template.trim(),
 	      templatePath = template + '.tmpl',
@@ -2028,8 +1724,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    function resolveInclude(object) {
-	      data[assignModuleVar] = object;
-	      return data;
+	      return object;
 	    }
 
 	    function resolveStatement() {
@@ -2048,27 +1743,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var State = __webpack_require__(5),
 	    utils = __webpack_require__(3);
 	module.exports = {
-	  module: function partialModule(tag, data) {
+	  module: function partialModule(tag) {
 	    var assignModuleVar = tag.attribs.data.trim(),
 	        template = tag.attribs.template.trim(),
-	        rootVar = 'root',
-	        scopeData = {};
-
-	    function resolveStatement(data) {
-	      var state = State.make(),
-	          clonedData = utils.clone(data);
+	        rootVar = 'root';
+	    function resolveStatement() {
+	      var state = State.make();
 	      this._includeStack[template].when(
 	        function partialInclude(templateData) {
-	          if (templateData[template]) {
-	            scopeData[rootVar] = clonedData[assignModuleVar];
-	            this.traversingAST(templateData[template], scopeData).when(function partialTraversing(modAST) {
-	              state.keep(modAST);
+	          if (templateData) {
+	            this.traversingAST(templateData).when(function partialTraversing(modAST) {
+	              tag.children = modAST;
+	              state.keep(tag);
 	            }, function brokenTraverse(reason) {
 	              throw new Error(reason);
 	            });
@@ -2084,14 +1776,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    return function partialResolve() {
-	      return resolveStatement.call(this, data);
+	      return resolveStatement.call(this);
 	    }
 	  }
 	}
 
 
 /***/ },
-/* 15 */
+/* 10 */
 /***/ function(module, exports) {
 
 	module.exports = function universalHTMLGenerator(ast) {
