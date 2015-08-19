@@ -1329,7 +1329,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(setImmediate) {var State = (function() {
+	/* WEBPACK VAR INJECTION */(function(setImmediate) {var State = (function StateFunction() {
 	  'use strict';
 
 	  if (typeof setImmediate !== 'function') {

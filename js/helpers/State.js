@@ -1,4 +1,4 @@
-var State = (function() {
+var State = (function StateFunction() {
   'use strict';
 
   if (typeof setImmediate !== 'function') {
