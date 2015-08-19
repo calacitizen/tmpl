@@ -75,7 +75,7 @@ tmpl.getHTML(traversed);
 ```
 ## HTML
 ### Variables
-You can use variables in any place except directives:
+You can use variables in any place except data attributes in directives:
 ```html
 <header class="maybe {{ activeClass }}">{{bambam}} I'm the biggest header in the world</header>
 ```
