@@ -230,6 +230,7 @@ module.exports = {
     var text = utils.clone(text),
       state = State.make();
     if (text.hasOwnProperty('type')) {
+      text.raw = this._replaceAllUncertainStuff(text.raw);
       state.keep(this._lookForStatements(text));
       return state.promise;
     }
