@@ -3,7 +3,7 @@ var utils = require('./helpers/utils'),
 module.exports = {
   _modules: {
     'if': require('./astModules/if'),
-    // 'for': require('./astModules/for'),
+    'for': require('./astModules/for'),
     // 'partial': require('./astModules/partialParse')
   },
   getHTMLString: function getHTMLString(ast, data) {

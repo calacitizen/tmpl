@@ -56,7 +56,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Traverse = __webpack_require__(1),
 	    processing = __webpack_require__(10),
-	    functionalStrategy = __webpack_require__(16);
+	    functionalStrategy = __webpack_require__(17);
 	module.exports = {
 	  parse: Traverse.parse,
 	  processingAST: function processingAST(ast, data) {
@@ -1796,7 +1796,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = {
 	  _modules: {
 	    'if': __webpack_require__(12),
-	    // 'for': require('./astModules/for'),
+	    'for': __webpack_require__(16),
 	    // 'partial': require('./astModules/partialParse')
 	  },
 	  getHTMLString: function getHTMLString(ast, data) {
@@ -1964,7 +1964,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        return compress;
 	      }
-	      return scopeData[textData.value];
+	      return scopeData[textData.name];
 	    }
 	    return textData.value;
 	  }
@@ -2149,6 +2149,102 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var checkSource = __webpack_require__(13),
+	  scopeUtils = __webpack_require__(11),
+	  whatType = __webpack_require__(14),
+	  utils = __webpack_require__(3);
+	module.exports = {
+	  module: function forModule(tag, data) {
+	    var
+	      source = tag.attribs.data.data.value.trim(),
+	      types = {
+	        'array': fArray,
+	        'object': fObject
+	      },
+	      concreteSourceStrings = {
+	        splittingKey: ' in ',
+	        key: ' as '
+	      },
+	      forStampArguments = source.split(concreteSourceStrings.splittingKey),
+	      firstArgument,
+	      mainData;
+
+	    if (forStampArguments.length < 2) {
+	      throw new Error('Wrong arguments in for statement');
+	    }
+
+	    mainData = scopeUtils.checkStatementForInners(forStampArguments[1], data, [forStampArguments[1]]);
+
+	    if (!mainData.value) {
+	      throw new Error(mainData.name + ' variable is undefined');
+	    }
+
+	    firstArgument = forFindAllArguments(forStampArguments[0]);
+
+	    function forFindAllArguments(value) {
+	      var crStringArray = value.split(concreteSourceStrings.key);
+	      if (crStringArray.length > 1) {
+	        return {
+	          key: crStringArray[0],
+	          value: crStringArray[1]
+	        };
+	      }
+	      return {
+	        key: undefined,
+	        value: crStringArray[0]
+	      };
+	    }
+
+	    function scrapeChildren(object, data, key, firstArgument) {
+	      data[firstArgument.value] = object[key];
+	      if (firstArgument.key) {
+	        data[firstArgument.key] = key;
+	      }
+	      return data;
+	    }
+
+	    function fArray(array, data) {
+	      var children = [];
+	      for (var i = 0; i < array.length; i++) {
+	        children.push(this._process(utils.clone(tag.children), scrapeChildren(array, data, i, firstArgument)));
+	      }
+	      return children;
+	    }
+
+	    function fObject(object, data) {
+	      var children = [];
+	      for (var key in object) {
+	        if (object.hasOwnProperty(key)) {
+	          children.push(this._process(utils.clone(tag.children), scrapeChildren(object, data, key, firstArgument)));
+	        }
+	      }
+	      return children;
+	    }
+
+	    function resolveStatement(dataToIterate) {
+	      var scopeArray = dataToIterate.value,
+	        scopeData = utils.clone(data),
+	        typeFunction = types[whatType(scopeArray)],
+	        ps;
+	      if (typeFunction === undefined) {
+	        throw new Error('Wrong type in for statement arguments');
+	      }
+	      return types[whatType(scopeArray)].call(this, scopeArray, scopeData);
+	    }
+
+	    return function forModuleReturnable() {
+	      if (tag.children !== undefined) {
+	        return resolveStatement.call(this, mainData);
+	      }
+	    }
+	  }
+	}
+
+
+/***/ },
+/* 17 */
 /***/ function(module, exports) {
 
 	module.exports = function universalHTMLGenerator(ast) {

@@ -1,12 +1,11 @@
 var checkSource = require('../helpers/checkSource'),
   scopeUtils = require('../helpers/scopeUtils'),
   whatType = require('../helpers/whatType'),
-  utils = require('../helpers/utils'),
-  State = require('../helpers/State');
+  utils = require('../helpers/utils');
 module.exports = {
   module: function forModule(tag, data) {
     var
-      source = tag.attribs.data.trim(),
+      source = tag.attribs.data.data.value.trim(),
       types = {
         'array': fArray,
         'object': fObject
@@ -56,19 +55,19 @@ module.exports = {
     function fArray(array, data) {
       var children = [];
       for (var i = 0; i < array.length; i++) {
-        children.push(this.traversingAST(utils.clone(tag.children), scrapeChildren(array, data, i, firstArgument)));
+        children.push(this._process(utils.clone(tag.children), scrapeChildren(array, data, i, firstArgument)));
       }
-      return State.every(children);
+      return children;
     }
 
     function fObject(object, data) {
       var children = [];
       for (var key in object) {
         if (object.hasOwnProperty(key)) {
-          children.push(this.traversingAST(utils.clone(tag.children), scrapeChildren(object, data, key, firstArgument)));
+          children.push(this._process(utils.clone(tag.children), scrapeChildren(object, data, key, firstArgument)));
         }
       }
-      return State.every(children);
+      return children;
     }
 
     function resolveStatement(dataToIterate) {
@@ -79,13 +78,7 @@ module.exports = {
       if (typeFunction === undefined) {
         throw new Error('Wrong type in for statement arguments');
       }
-      ps = types[whatType(scopeArray)].call(this, scopeArray, scopeData);
-      ps.when(function resolveStatementFor(data) {
-        return this.actionOnMainArray([], data);
-      }.bind(this), function brokenFor(reason) {
-        throw new Error(reason);
-      });
-      return ps;
+      return types[whatType(scopeArray)].call(this, scopeArray, scopeData);
     }
 
     return function forModuleReturnable() {

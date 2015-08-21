@@ -59,7 +59,7 @@ module.exports = {
         }
         return compress;
       }
-      return scopeData[textData.value];
+      return scopeData[textData.name];
     }
     return textData.value;
   }
