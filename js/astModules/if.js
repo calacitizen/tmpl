@@ -6,7 +6,7 @@ module.exports = {
       concreteSourceStrings = {
         operators: [{ name: ' lt ', value: '<' }, { name: ' gt ', value: '>' }, { name: ' le ', value: '<=' }, { name: ' ge ',  value: '>=' }]
       },
-      source = replaceGreaterLess(tag.attribs.data.trim()),
+      source = replaceGreaterLess(tag.attribs.data.data.value.trim()),
       arrVars = lookUniqueVariables(source),
       condition = readConditionalExpression(source, arrVars);
 
@@ -36,19 +36,12 @@ module.exports = {
     }
 
     function resolveStatement(condition) {
-      var state = State.make();
       if (condition) {
         if (tag.children !== undefined) {
-          this.traversingAST(tag.children, data).when(function ifObjectTraverse(modAST) {
-            state.keep(modAST);
-          }, function brokenIf(reason) {
-            throw new Error(reason);
-          });
+          return this._process(tag.children, data);
         }
-      } else {
-        state.keep(undefined)
       }
-      return state.promise;
+      return;
     }
 
     return function ifModuleReturnable() {

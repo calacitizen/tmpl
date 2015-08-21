@@ -1,10 +1,10 @@
 var Traverse = require("./traverse"),
-    fnAST = require("./stamping"),
+    processing = require("./processing"),
     functionalStrategy = require("./functionalStrategy");
 module.exports = {
   parse: Traverse.parse,
-  stamping: function stamping(ast) {
-    return fnAST.stamping(ast);
+  processingAST: function processingAST(ast, data) {
+    return processing.getHTMLString(ast, data);
   },
   traverse: function traverse(ast) {
     return {

@@ -55,12 +55,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var Traverse = __webpack_require__(1),
-	    fnAST = __webpack_require__(10),
-	    functionalStrategy = __webpack_require__(18);
+	    processing = __webpack_require__(10),
+	    functionalStrategy = __webpack_require__(16);
 	module.exports = {
 	  parse: Traverse.parse,
-	  stamping: function stamping(ast) {
-	    return fnAST.stamping(ast);
+	  processingAST: function processingAST(ast, data) {
+	    return processing.getHTMLString(ast, data);
 	  },
 	  traverse: function traverse(ast) {
 	    return {
@@ -1796,154 +1796,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = {
 	  _modules: {
 	    'if': __webpack_require__(12),
-	    'for': __webpack_require__(16),
-	    'partial': __webpack_require__(17)
+	    // 'for': require('./astModules/for'),
+	    // 'partial': require('./astModules/partialParse')
 	  },
-	  fnDataName: "tm",
-	  mainVar: "ast",
-	  fnGenerateText: 'function createText(data, raw) { return { data: data, raw: raw, type: \'text\' } };',
-	  fnGenerateTag: 'function createTag(name, data, raw, attribs, children) { return { name: name, data: data, raw: raw, attribs: attribs, children: children, type: \'tag\' }; };',
-	  /**
-	   * Function generation
-	   */
-	  fnGen: function fnGen(inner) {
-	    return 'function templateGenAST(tm) { var ' + this.mainVar + '= []; ' + this.fnGenerateText + ' ' + this.fnGenerateTag + ' ' + inner + ' return ' + this.mainVar + '; }';
-	  },
-	  /**
-	   * Starting point
-	   */
-	  stamping: function stamping(ast) {
-	    return this.fnGen(this.stampingAST(ast));
-	  },
-	  /**
-	   * Tag string creation
-	   */
-	  createTagString: function createTagString(name, data, raw, attribs, children) {
-	    return this.mainVar + '.push(createTag(' + '\'' + name + '\'' + ', ' + '\'' + data + '\'' + ', ' + '\'' + raw + '\'' + ', ' + attribs + ', ' + children + '));';
-	  },
-	  /**
-	   * Text string creation
-	   */
-	  createTextString: function createTextString(data, raw) {
-	    return this.mainVar + '.push(createText(' + data + ',' + '\'' + raw + '\'' + '));';
-	  },
-	  /**
-	   *  create data text
-	   */
-	  createDataText: function createDataText(value) {
-	    return '{type:\'text\', value:\'' + value + '\'}';
-	  },
-	  /**
-	   * create data variable
-	   */
-	  createDataVar: function createDataVar(name, value) {
-	    return '{type:\'var\', name:\'' + name + '\', value:\'' + value + '\'}';
-	  },
-	  /**
-	   *
-	   */
-	  whatTypeOfData: function whatTypeOfVar(dataItem) {
-	    if (dataItem.type === 'var') {
-	      return this.createDataVar(dataItem.name, dataItem.value);
-	    }
-	    return this.createDataText(dataItem.value);
-	  },
-	  /**
-	   *
-	   */
-	  createDataArray: function createDataArray(data) {
-	    var string = '[';
-	    for (var i = 0; i < data.length; i++) {
-	      string += this.whatTypeOfData(data[i]);
-	      if ((data.length - 1) !== i) {
-	        string += ',';
-	      }
-	    }
-	    string += ']';
-	    return string;
-	  },
-	  createAttributeWithData: function createAttributeWithData(attrib, data) {
-	    return attrib + ':' + '{data:' + data + '},';
-	  },
-	  /**
-	   * Creating data array
-	   */
-	  createData: function createData(data) {
-	    if (data.length === undefined) {
-	      return this.whatTypeOfData(data);
-	    }
-	    return this.createDataArray(data);
-	  },
-	  /**
-	   * creating attributes
-	   */
-	  createAttribute: function createAttribute(name, data) {
-	    return this.createAttributeWithData(name, this.createData(data));
-	  },
-	  /**
-	   * Traversing tag with children
-	   */
-	  traverseTagWithChildren: function traverseTagWithChildren(takeTag) {
-	    return traversingAST(takeTag.children);
-	    return this.traversingAST(takeTag.children).when(
-	      function traverseTagSuccess(ast) {
-
-	      }.bind(this),
-	      function brokenTagTraversing(reason) {
-	        throw new Error(reason);
-	      }
-	    )
-	  },
-	  traverseTagAttributes: function traverseTagAttributes(attribs) {
-	    var string;
-	    if (attribs !== undefined) {
-	      string = '{';
-	      for (var attrib in attribs) {
-	        if (attribs.hasOwnProperty(attrib)) {
-	          string += this.createAttribute(attrib, attribs[attrib].data);
-	        }
-	      }
-	      string += '}';
-	    }
-	    return string;
-	  },
-	  /**
-	   * Main function for tag traversing
-	   */
-	  _traverseTag: function traverseTag(tag) {
-	    return this.createTagString(tag.name, tag.data, tag.raw, this.traverseTagAttributes(tag.attribs), '[]');
-	    // if (takeTag.children && takeTag.children.length > 0) {
-	    //   return this.createTagString(tag.name, tag.data, tag.raw, attribs, []);
-	    //   // return this.traverseTagWithChildren(takeTag);
-	    // } else {
-	    //   return this.createTagString(tag.name, tag.data, tag.raw, attribs, tag.children);
-	    // }
-	  },
-	  _traverseText: function traverseText(text) {
-	    return this.createTextString(this.createData(text.data), text.raw);
-	  },
-	  /**
-	   * Collecting states from traversing tree
-	   */
-	  _collect: function collect(traverseMethod, value) {
-	    return traverseMethod.call(this, value);
-	  },
-	  /**
-	   * Recursive traverse method
-	   */
-	  stampingAST: function stampingAST(ast) {
-	    var traverseMethod, string = "",
-	      collect;
-	    for (var i = 0; i < ast.length; i++) {
-	      traverseMethod = this._whatMethodShouldYouUse(ast[i]);
-	      if (traverseMethod) {
-	        collect = this._collect(traverseMethod, ast[i]);
-	        if (collect !== undefined) {
-	          string += collect;
-	        }
-	      }
-	    }
-	    return string;
+	  getHTMLString: function getHTMLString(ast, data) {
+	    return this._process(ast, data);
 	  },
 	  /**
 	   * Searching modules by the tag names
@@ -1952,19 +1809,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].module : false;
 	  },
 	  /**
-	   * Resolving method to handle tree childs
+	   * Loading module function
 	   */
-	  _whatMethodShouldYouUse: function whatMethodShouldYouUse(entity) {
-	    if (this._isTag(entity.type)) {
-	      if (this._modules[entity.name]) {
-	        return undefined;
-	        // return this._traverseModule;
-	      }
-	      return this._traverseTag;
-	    }
-	    if (this._isText(entity.type)) {
-	      return this._traverseText;
-	    }
+	  _loadModuleFunction: function loadModuleFunction(moduleFunction, tag, data) {
+	    var tagModule = moduleFunction(tag, data);
+	    return tagModule.call(this);
 	  },
 	  /**
 	   * Is tag?
@@ -1979,31 +1828,74 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return type === 'text';
 	  },
 	  /**
-	   * Loading module function
-	   */
-	  _loadModuleFunction: function loadModuleFunction(tagModule, tag, scopeData) {
-	    var
-	      moduleFunction = tagModule(tag, scopeData),
-	      res = moduleFunction.call(this);
-	    if (res) {
-	      return res;
-	    }
-	    return undefined;
-	  },
-	  /**
-	   * Generating tag and tag childs
-	   */
-	  _generatorFunctionForTags: function generatorFunctionForTags(tag, inner) {
-	    tag.children = this.actionOnMainArray([], inner);
-	    return tag;
-	  },
-	  /**
 	   * Main function for finding traverse method for module
 	   */
-	  _traverseModule: function traverseModule(tag, scopeData) {
-	    var tagModule = this._moduleMatcher(tag);
-	    return this._loadModuleFunction(tagModule, tag, scopeData);
-	  }
+	  _processModule: function traverseModule(tag, data) {
+	    var moduleFunction = this._moduleMatcher(tag);
+	    return this._loadModuleFunction(moduleFunction, tag, data);
+	  },
+	  /**
+	   * Resolving method to handle tree childs
+	   */
+	  _whatMethodShouldYouUse: function whatMethodShouldYouUse(entity) {
+	    if (this._isTag(entity.type)) {
+	      if (this._modules[entity.name]) {
+	        return this._processModule;
+	      }
+	      return this._processTag;
+	    }
+	    if (this._isText(entity.type)) {
+	      return this._processText;
+	    }
+	  },
+	  _seek: function _seek(entity, data) {
+	    var method = this._whatMethodShouldYouUse(entity);
+	    if (method) {
+	      return method.call(this, entity, data);
+	    }
+	    return;
+	  },
+	  _processDataTypes: function processDataTypes(unTextData, data) {
+	    return scopeUtils.seekForVars(unTextData, data);
+	  },
+	  _processData: function processData(textData, data) {
+	    var string = '';
+	    if (textData.length !== undefined) {
+	      for (var i = 0; i < textData.length; i++) {
+	        string += this._processDataTypes(textData[i], data);
+	      }
+	      return string;
+	    }
+	    return this._processDataTypes(textData, data)
+	  },
+	  _processAttributes: function processAttributes(attribs, data) {
+	    var string = '';
+	    if (attribs) {
+	      string += ' ';
+	      for (var attrib in attribs) {
+	        if (attribs.hasOwnProperty(attrib)) {
+	          string += (attrib + '="' + this._processData(attribs[attrib].data, data) + '"');
+	        }
+	      }
+	    }
+	    return string;
+	  },
+	  _processText: function processText(text, data) {
+	    return this._processData(text.data, data);
+	  },
+	  _processTag: function processTag(tag, data) {
+	    return '<' + tag.name + this._processAttributes(tag.attribs, data) + '>' + this._process(tag.children, data) + '</' + tag.name + '>';
+	  },
+	  _process: function process(ast, data) {
+	    var string = '', st;
+	    for (var i = 0; i < ast.length; i++) {
+	       st = this._seek(ast[i], data);
+	      if (st) {
+	        string += st;
+	      }
+	    }
+	    return string;
+	  },
 	};
 
 
@@ -2052,6 +1944,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    return varOrNot(isVar, value);
+	  },
+	  seekForVars: function seekForVars(textData, scopeData) {
+	    var
+	      variableSeparator = '.',
+	      stScope,
+	      compress;
+	    if (textData.type === 'var') {
+	      stScope = textData.name.split(variableSeparator);
+	      if (stScope.length > 1) {
+	        for (var i = 0; i < stScope.length; i++) {
+	          if (scopeData.hasOwnProperty(stScope[i]) && i === 0) {
+	            compress = scopeData[stScope[i]];
+	          } else {
+	            if (compress && compress.hasOwnProperty(stScope[i])) {
+	              compress = compress[stScope[i]];
+	            }
+	          }
+	        }
+	        return compress;
+	      }
+	      return scopeData[textData.value];
+	    }
+	    return textData.value;
 	  }
 	}
 
@@ -2068,7 +1983,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      concreteSourceStrings = {
 	        operators: [{ name: ' lt ', value: '<' }, { name: ' gt ', value: '>' }, { name: ' le ', value: '<=' }, { name: ' ge ',  value: '>=' }]
 	      },
-	      source = replaceGreaterLess(tag.attribs.data.trim()),
+	      source = replaceGreaterLess(tag.attribs.data.data.value.trim()),
 	      arrVars = lookUniqueVariables(source),
 	      condition = readConditionalExpression(source, arrVars);
 
@@ -2098,19 +2013,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    function resolveStatement(condition) {
-	      var state = State.make();
 	      if (condition) {
 	        if (tag.children !== undefined) {
-	          this.traversingAST(tag.children, data).when(function ifObjectTraverse(modAST) {
-	            state.keep(modAST);
-	          }, function brokenIf(reason) {
-	            throw new Error(reason);
-	          });
+	          return this._process(tag.children, data);
 	        }
-	      } else {
-	        state.keep(undefined)
 	      }
-	      return state.promise;
+	      return;
 	    }
 
 	    return function ifModuleReturnable() {
@@ -2241,148 +2149,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var checkSource = __webpack_require__(13),
-	  scopeUtils = __webpack_require__(11),
-	  whatType = __webpack_require__(14),
-	  utils = __webpack_require__(3),
-	  State = __webpack_require__(5);
-	module.exports = {
-	  module: function forModule(tag, data) {
-	    var
-	      source = tag.attribs.data.trim(),
-	      types = {
-	        'array': fArray,
-	        'object': fObject
-	      },
-	      concreteSourceStrings = {
-	        splittingKey: ' in ',
-	        key: ' as '
-	      },
-	      forStampArguments = source.split(concreteSourceStrings.splittingKey),
-	      firstArgument,
-	      mainData;
-
-	    if (forStampArguments.length < 2) {
-	      throw new Error('Wrong arguments in for statement');
-	    }
-
-	    mainData = scopeUtils.checkStatementForInners(forStampArguments[1], data, [forStampArguments[1]]);
-
-	    if (!mainData.value) {
-	      throw new Error(mainData.name + ' variable is undefined');
-	    }
-
-	    firstArgument = forFindAllArguments(forStampArguments[0]);
-
-	    function forFindAllArguments(value) {
-	      var crStringArray = value.split(concreteSourceStrings.key);
-	      if (crStringArray.length > 1) {
-	        return {
-	          key: crStringArray[0],
-	          value: crStringArray[1]
-	        };
-	      }
-	      return {
-	        key: undefined,
-	        value: crStringArray[0]
-	      };
-	    }
-
-	    function scrapeChildren(object, data, key, firstArgument) {
-	      data[firstArgument.value] = object[key];
-	      if (firstArgument.key) {
-	        data[firstArgument.key] = key;
-	      }
-	      return data;
-	    }
-
-	    function fArray(array, data) {
-	      var children = [];
-	      for (var i = 0; i < array.length; i++) {
-	        children.push(this.traversingAST(utils.clone(tag.children), scrapeChildren(array, data, i, firstArgument)));
-	      }
-	      return State.every(children);
-	    }
-
-	    function fObject(object, data) {
-	      var children = [];
-	      for (var key in object) {
-	        if (object.hasOwnProperty(key)) {
-	          children.push(this.traversingAST(utils.clone(tag.children), scrapeChildren(object, data, key, firstArgument)));
-	        }
-	      }
-	      return State.every(children);
-	    }
-
-	    function resolveStatement(dataToIterate) {
-	      var scopeArray = dataToIterate.value,
-	        scopeData = utils.clone(data),
-	        typeFunction = types[whatType(scopeArray)],
-	        ps;
-	      if (typeFunction === undefined) {
-	        throw new Error('Wrong type in for statement arguments');
-	      }
-	      ps = types[whatType(scopeArray)].call(this, scopeArray, scopeData);
-	      ps.when(function resolveStatementFor(data) {
-	        return this.actionOnMainArray([], data);
-	      }.bind(this), function brokenFor(reason) {
-	        throw new Error(reason);
-	      });
-	      return ps;
-	    }
-
-	    return function forModuleReturnable() {
-	      if (tag.children !== undefined) {
-	        return resolveStatement.call(this, mainData);
-	      }
-	    }
-	  }
-	}
-
-
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var utils = __webpack_require__(3);
-	module.exports = {
-	  module: function partialModule(tag) {
-	    var assignModuleVar = tag.attribs.data.trim(),
-	        template = tag.attribs.template.trim(),
-	        rootVar = 'root';
-	    function resolveStatement() {
-	      var state = State.make();
-	      this._includeStack[template].when(
-	        function partialInclude(templateData) {
-	          if (templateData) {
-	            this.traversingAST(templateData).when(function partialTraversing(modAST) {
-	              tag.children = modAST;
-	              state.keep(tag);
-	            }, function brokenTraverse(reason) {
-	              throw new Error(reason);
-	            });
-	          } else {
-	            state.break('Include tag for "' + template + '" is not found!');
-	          }
-	        }.bind(this),
-	        function brokenPartial(reason) {
-	          throw new Error(reason);
-	        }
-	      );
-	      return state.promise;
-	    }
-
-	    return function partialResolve() {
-	      return resolveStatement.call(this);
-	    }
-	  }
-	}
-
-
-/***/ },
-/* 18 */
 /***/ function(module, exports) {
 
 	module.exports = function universalHTMLGenerator(ast) {
