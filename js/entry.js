@@ -11,6 +11,5 @@ module.exports = {
         Traverse.traverse(ast).when(success, broke);
       }
     }
-  },
-  getHTML: functionalStrategy
+  }
 };

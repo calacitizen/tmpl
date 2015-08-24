@@ -67,8 +67,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        Traverse.traverse(ast).when(success, broke);
 	      }
 	    }
-	  },
-	  getHTML: functionalStrategy
+	  }
 	};
 
 
