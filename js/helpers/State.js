@@ -41,6 +41,7 @@ var State = (function StateFunction() {
             }
           } catch (e) {
             state.break(e);
+            throw new Error(e);
           }
         };
       }

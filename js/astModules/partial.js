@@ -3,10 +3,12 @@ var State = require('../helpers/State'),
 module.exports = {
   module: function partialModule(tag) {
     var assignModuleVar = tag.attribs.data.trim(),
-        template = tag.attribs.template.trim(),
-        rootVar = 'root';
+        template = tag.attribs.template.trim();
     function resolveStatement() {
       var state = State.make();
+      if (this._includeStack[template] === undefined) {
+        throw new Error('Include tag for "' + template + '" is not found!');
+      }
       this._includeStack[template].when(
         function partialInclude(templateData) {
           if (templateData) {

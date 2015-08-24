@@ -54,19 +54,19 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Traverse = __webpack_require__(1),
+	var traversing = __webpack_require__(1),
 	    processing = __webpack_require__(11);
 	module.exports = {
-	  parse: Traverse.parse,
+	  parse: traversing.parse,
 	  html: function html(ast, data) {
 	    return processing.getHTMLString(ast, data);
 	  },
 	  traverse: function traverse(ast) {
 	    return {
-	      handle: function (success, broke) {
-	        Traverse.traverse(ast).when(success, broke);
+	      handle: function handleTraverse(success, broke) {
+	        traversing.traverse(ast).when(success, broke);
 	      }
-	    }
+	    };
 	  }
 	};
 
@@ -1329,6 +1329,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	          } catch (e) {
 	            state.break(e);
+	            throw new Error(e);
 	          }
 	        };
 	      }
@@ -1758,10 +1759,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = {
 	  module: function partialModule(tag) {
 	    var assignModuleVar = tag.attribs.data.trim(),
-	        template = tag.attribs.template.trim(),
-	        rootVar = 'root';
+	        template = tag.attribs.template.trim();
 	    function resolveStatement() {
 	      var state = State.make();
+	      if (this._includeStack[template] === undefined) {
+	        throw new Error('Include tag for "' + template + '" is not found!');
+	      }
 	      this._includeStack[template].when(
 	        function partialInclude(templateData) {
 	          if (templateData) {
