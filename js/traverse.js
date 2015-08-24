@@ -2,7 +2,8 @@ var
   htmlparser = require('htmlparser'),
   utils = require('./helpers/utils'),
   scopeUtils = require('./helpers/skipVars'),
-  State = require('./helpers/State');
+  State = require('./helpers/State'),
+  entityHelpers = require('./helpers/entityHelpers');
 module.exports = {
   _modules: {
     'include': require('./astModules/include'),
@@ -36,12 +37,6 @@ module.exports = {
         data: attrib
       }, scopeData);
     }.bind(this));
-  },
-  /**
-   * Searching modules by the tag names
-   */
-  _moduleMatcher: function moduleMatcher(tag) {
-    return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].module : false;
   },
   /**
    * Removing unnecessary stuf from strings
@@ -101,13 +96,13 @@ module.exports = {
    * Resolving method to handle tree childs
    */
   _whatMethodShouldYouUse: function whatMethodShouldYouUse(entity) {
-    if (this._isTag(entity.type)) {
+    if (entityHelpers.isTag(entity.type)) {
       if (this._modules[entity.name]) {
         return this._traverseModule;
       }
       return this._traverseTag;
     }
-    if (this._isText(entity.type)) {
+    if (entityHelpers.isText(entity.type)) {
       return this._traverseText;
     }
   },
@@ -170,18 +165,6 @@ module.exports = {
     );
   },
   /**
-   * Loading module function
-   */
-  _loadModuleFunction: function loadModuleFunction(tagModule, tag) {
-    var
-      moduleFunction = tagModule(tag),
-      res = moduleFunction.call(this);
-    if (res) {
-      return res;
-    }
-    return undefined;
-  },
-  /**
    * Generating tag and tag childs
    */
   _generatorFunctionForTags: function generatorFunctionForTags(tag, inner) {
@@ -220,8 +203,8 @@ module.exports = {
    * Main function for finding traverse method for module
    */
   _traverseModule: function traverseModule(tag) {
-    var tagModule = this._moduleMatcher(tag);
-    return this._loadModuleFunction(tagModule, tag);
+    var tagModule = entityHelpers.moduleMatcher.call(this, tag);
+    return entityHelpers.loadModuleFunction.call(this, tagModule, tag);
   },
   /**
    * Text node traversing
@@ -235,18 +218,6 @@ module.exports = {
       return state.promise;
     }
     return this._lookForStatements(text);
-  },
-  /**
-   * Is tag?
-   */
-  _isTag: function isTag(type) {
-    return type === 'tag';
-  },
-  /**
-   * Is text?
-   */
-  _isText: function isText(type) {
-    return type === 'text';
   },
   /**
    * is Include
