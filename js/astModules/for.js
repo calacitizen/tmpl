@@ -5,7 +5,7 @@ var checkSource = require('../helpers/checkSource'),
 module.exports = {
   module: function forModule(tag, data) {
     var
-      source = tag.attribs.data.data.value.trim(),
+      source,
       types = {
         'array': fArray,
         'object': fObject
@@ -14,9 +14,16 @@ module.exports = {
         splittingKey: ' in ',
         key: ' as '
       },
-      forStampArguments = source.split(concreteSourceStrings.splittingKey),
+      forStampArguments,
       firstArgument,
       mainData;
+
+    if (tag.attribs.data.data === undefined) {
+      throw new Error('There is no data for "for" module to use');
+    }
+
+    source = tag.attribs.data.data.value.trim();
+    forStampArguments = source.split(concreteSourceStrings.splittingKey);
 
     if (forStampArguments.length < 2) {
       throw new Error('Wrong arguments in for statement');

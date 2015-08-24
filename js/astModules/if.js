@@ -4,11 +4,31 @@ module.exports = {
   module: function ifModule(tag, data) {
     var
       concreteSourceStrings = {
-        operators: [{ name: ' lt ', value: '<' }, { name: ' gt ', value: '>' }, { name: ' le ', value: '<=' }, { name: ' ge ',  value: '>=' }]
+        operators: [{
+          name: ' lt ',
+          value: '<'
+        }, {
+          name: ' gt ',
+          value: '>'
+        }, {
+          name: ' le ',
+          value: '<='
+        }, {
+          name: ' ge ',
+          value: '>='
+        }]
       },
-      source = replaceGreaterLess(tag.attribs.data.data.value.trim()),
-      arrVars = lookUniqueVariables(source),
-      condition = readConditionalExpression(source, arrVars);
+      source,
+      arrVars,
+      condition;
+
+    if (tag.attribs.data.data === undefined) {
+      throw new Error('There is no data for "if" module to use');
+    }
+
+    source = replaceGreaterLess(tag.attribs.data.data.value.trim();
+    arrVars = lookUniqueVariables(source);
+    condition = readConditionalExpression(source, arrVars);
 
     function replaceGreaterLess(source) {
       for (var i = 0; i < concreteSourceStrings.operators.length; i++) {
