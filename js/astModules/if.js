@@ -26,7 +26,7 @@ module.exports = {
       throw new Error('There is no data for "if" module to use');
     }
 
-    source = replaceGreaterLess(tag.attribs.data.data.value.trim();
+    source = replaceGreaterLess(tag.attribs.data.data.value.trim());
     arrVars = lookUniqueVariables(source);
     condition = readConditionalExpression(source, arrVars);
 

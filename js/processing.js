@@ -8,11 +8,23 @@ module.exports = {
     'for': require('./astModules/for'),
     'partial': require('./astModules/partialParse')
   },
+  /**
+   * Getting html string
+   * @param  {Array} ast  AST array of entities
+   * @param  {Object} data Data
+   * @return {String}      Generated html-string
+   */
   getHTMLString: function getHTMLString(ast, data) {
     return this._process(ast, data);
   },
   /**
    * Main function for finding traverse method for module
+   */
+  /**
+   * Main function for finding process method for module
+   * @param  {Object} tag  Tag
+   * @param  {Object} data Data object
+   * @return {Object}      Entity: tag or text
    */
   _processModule: function traverseModule(tag, data) {
     var moduleFunction = entityHelpers.moduleMatcher.call(this, tag);
@@ -20,6 +32,8 @@ module.exports = {
   },
   /**
    * Resolving method to handle tree childs
+   * @param  {Object} entity Tag, text, module
+   * @return {Function}        Process function
    */
   _whatMethodShouldYouUse: function whatMethodShouldYouUse(entity) {
     if (entityHelpers.isTag(entity.type)) {
@@ -32,6 +46,11 @@ module.exports = {
       return this._processText;
     }
   },
+  /**
+   * Concating arrays of entities
+   * @param  {Object} entity Tag, text
+   * @return {String}
+   */
   _stopArrs: function _stopArrs(entity) {
     var string = '';
     if (whatType(entity) === 'array') {
@@ -42,6 +61,12 @@ module.exports = {
     }
     return entity;
   },
+  /**
+   * Seek for methods
+   * @param  {Object} entity Tag, text, module
+   * @param  {Object} data   Data object
+   * @return {String}        Generated string
+   */
   _seek: function _seek(entity, data) {
     var method = this._whatMethodShouldYouUse(entity);
     if (method) {
@@ -49,10 +74,22 @@ module.exports = {
     }
     return;
   },
+  /**
+   * Processing data types of entities
+   * @param  {String} unTextData Value of data object
+   * @param  {Object} data       Data
+   * @return {String}
+   */
   _processDataTypes: function processDataTypes(unTextData, data) {
     var textVar = scopeUtils.seekForVars(unTextData, data);
     return (textVar !== undefined) ? textVar : '';
   },
+  /**
+   * Processing entity data objects
+   * @param  {Array} textData Array of data
+   * @param  {Object} data     Data
+   * @return {String}
+   */
   _processData: function processData(textData, data) {
     var string = '';
     if (textData.length !== undefined) {
@@ -63,6 +100,12 @@ module.exports = {
     }
     return this._processDataTypes(textData, data);
   },
+  /**
+   * Process attributes
+   * @param  {Object} attribs Tag attributes
+   * @param  {Object} data    Data
+   * @return {String}
+   */
   _processAttributes: function processAttributes(attribs, data) {
     var string = '';
     if (attribs) {
@@ -75,12 +118,30 @@ module.exports = {
     }
     return string;
   },
+  /**
+   * Process Text entity
+   * @param  {Object} text Text
+   * @param  {Object} data Data
+   * @return {String}
+   */
   _processText: function processText(text, data) {
     return this._processData(text.data, data);
   },
+  /**
+   * Process Tag entity
+   * @param  {Object} tag  Tag
+   * @param  {Object} data Array
+   * @return {String}
+   */
   _processTag: function processTag(tag, data) {
     return '<' + tag.name + this._processAttributes(tag.attribs, data) + '>' + this._process(tag.children, data) + '</' + tag.name + '>';
   },
+  /**
+   * Recursive function for string generation
+   * @param  {Array} ast  AST array
+   * @param  {Object} data Data
+   * @return {String}
+   */
   _process: function process(ast, data) {
     var string = '', st;
     for (var i = 0; i < ast.length; i++) {

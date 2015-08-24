@@ -91,9 +91,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  safeReplaceCaseReg: /\r|\n|\t|\/\*[\s\S]*?\*\//g,
 	  safeReplaceCasePlace: "",
+	  /**
+	   * Include promises stack
+	   * @type {Object}
+	   */
 	  _includeStack: {},
 	  /**
 	   * Parsing html string to the directive state
+	   * @param  {String} tmpl     string html template
+	   * @param  {Function} handler function for handling parsing result
+	   * @return {Array}           html AST
 	   */
 	  parse: function parse(tmpl, handler) {
 	    var
@@ -106,23 +113,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Atribute traverse in order to find variables
+	   * @param  {Array}        array of attributes
+	   * @return {Array}        array of attributes with variables
 	   */
-	  _traverseTagAttributes: function traverseTagAttributes(attribs, scopeData) {
+	  _traverseTagAttributes: function traverseTagAttributes(attribs) {
 	    var dataAttributes = utils.clone(attribs);
 	    return utils.eachObject(dataAttributes, function traverseTagAttributesEach(attrib) {
 	      return this._traverseText({
 	        data: attrib
-	      }, scopeData);
+	      });
 	    }.bind(this));
 	  },
 	  /**
-	   * Removing unnecessary stuf from strings
+	   * Removing unnecessary stuff from strings
+	   * @param  {String} string   data string
+	   * @return {String}         clean data string
 	   */
 	  _replaceAllUncertainStuff: function replaceAllUncertainStuff(string) {
 	    return string.trim().replace(this.safeReplaceSingleQuotesReg, this.safeReplaceSingleQuotesPlace).replace(this.safeReplaceCaseReg, this.safeReplaceCasePlace);
 	  },
 	  /**
 	   * Searching for vars in string
+	   * @param  {Array} arrOfVars array of variables and text
+	   * @return {Array}           array of variables
 	   */
 	  _searchForVars: function searchForVars(arrOfVars) {
 	    return utils.mapForLoop(arrOfVars, function searchForVarsLoop(value) {
@@ -131,6 +144,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Replacing and creating statements for variables and text chunks
+	   * @param  {Array} data         array of incoming data
+	   * @param  {Array} arrOfVars    array with variables
+	   * @return {Array}              array with objects
 	   */
 	  _replaceAndCreateStatements: function replaceAndCreateStatements(data, arrOfVars) {
 	    return utils.mapForLoop(data, function searchInScope(value) {
@@ -142,7 +158,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }.bind(this));
 	  },
 	  /**
-	   * Preparing string for structured tree
+	   * Preparing data-like string for structured tree
+	   * @param  {String} str incoming data string
+	   * @return {Object}     data object { data: { type: "text", value: 'wadawd' } }
 	   */
 	  _replaceMatch: function replaceMatch(str) {
 	    var
@@ -164,13 +182,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return resultingObject;
 	  },
 	  /**
-	   * Looking for variables in strings
+	   *  Looking for variables in strings
+	   * @param  {String} statement   string statement
+	   * @return {Object}             data object { data: { type: "text", value: 'wadawd' } }
 	   */
 	  _lookForStatements: function lookForStatements(statement) {
 	    return this._replaceMatch(statement);
 	  },
 	  /**
 	   * Resolving method to handle tree childs
+	   * @param  {Object} entity  tag, text or module
+	   * @return {Function}       traverse method to use
 	   */
 	  _whatMethodShouldYouUse: function whatMethodShouldYouUse(entity) {
 	    if (entityHelpers.isTag(entity.type)) {
@@ -185,6 +207,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Concating childs into the main array
+	   */
+	  /**
+	   * Perform action on main data array
+	   * @param  {Array} modAST         AST array
+	   * @param  {Object|Array} traverseObject object or array of objects with tag or text
+	   * @return {Array}                AST array
 	   */
 	  actionOnMainArray: function actionOnMainArray(modAST, traverseObject) {
 	    if (traverseObject !== undefined) {
@@ -201,17 +229,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Collecting states from traversing tree
+	   * @param  {Function} traverseMethod traverse function for entity
+	   * @param  {Object} value          Tag, text or module
+	   * @return {Object}                State promise
 	   */
 	  _collect: function collect(traverseMethod, value) {
 	    var ps = traverseMethod.call(this, value);
-	    if (this.isTagInclude(value.name)) {
+	    if (entityHelpers.isTagInclude(value.name)) {
 	      this._includeStack[value.attribs.name] = ps;
 	    } else {
 	      return ps;
 	    }
 	  },
+
 	  /**
-	   * Recursive traverse method
+	   * Traversing ast
+	   * @param  {Array} ast AST array
+	   * @return {Array}    array of State promises
 	   */
 	  traversingAST: function traversingAST(ast) {
 	    var traverseMethod,
@@ -230,8 +264,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Starting point
+	   * @param  {Array} ast    [description]
+	   * @return {Object}       State promise
 	   */
-	  traverse: function (ast, config) {
+	  traverse: function (ast) {
 	    return this.traversingAST(ast).when(
 	      function resulting(data) {
 	        return this.actionOnMainArray([], data);
@@ -243,6 +279,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Generating tag and tag childs
+	   * @param  {Object} tag   tag
+	   * @param  {Array} inner children
+	   * @return {Object}      Tag
 	   */
 	  _generatorFunctionForTags: function generatorFunctionForTags(tag, inner) {
 	    tag.children = this.actionOnMainArray([], inner);
@@ -250,11 +289,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Traversing tag with children
+	   * @param  {Object} tag
+	   * @return {Object}         State promise
 	   */
-	  traverseTagWithChildren: function traverseTagWithChildren(takeTag, data) {
-	    return this.traversingAST(takeTag.children, data).when(
+	  traverseTagWithChildren: function traverseTagWithChildren(tag) {
+	    return this.traversingAST(tag.children).when(
 	      function traverseTagSuccess(ast) {
-	        return this._generatorFunctionForTags(takeTag, ast);
+	        return this._generatorFunctionForTags(tag, ast);
 	      }.bind(this),
 	      function brokenTagTraversing(reason) {
 	        throw new Error(reason);
@@ -263,6 +304,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Main function for tag traversing
+	   * @param  {Object} tag
+	   * @return {Object}     State promise
 	   */
 	  _traverseTag: function traverseTag(tag) {
 	    var state,
@@ -278,6 +321,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Main function for finding traverse method for module
+	   * @param  {Object} tag
+	   * @return {Function}     Module function
 	   */
 	  _traverseModule: function traverseModule(tag) {
 	    var tagModule = entityHelpers.moduleMatcher.call(this, tag);
@@ -285,6 +330,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Text node traversing
+	   * @param  {Object} text
+	   * @return {Object}       promise or text
 	   */
 	  _traverseText: function traverseText(text) {
 	    var text = utils.clone(text),
@@ -297,13 +344,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return this._lookForStatements(text);
 	  },
 	  /**
-	   * is Include
-	   */
-	  isTagInclude: function isTagInclude(name) {
-	    return name === 'include';
-	  },
-	  /**
-	   * Creating vars for data
+	   * Create data object for variable
+	   * @param  {String} name  lexical name of variable
+	   * @param  {Undefined} value
+	   * @return {Object}       data object
 	   */
 	  _createDataVar: function createDataVar(name, value) {
 	    return {
@@ -314,6 +358,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Creating text chuncks
+	   * @param  {String} value
+	   * @return {Object}       Object
 	   */
 	  _createDataText: function createDataText(value) {
 	    return {
@@ -323,6 +369,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Creating tag
+	   * @param  {String} name
+	   * @param  {Array|Object} data
+	   * @param  {String} raw
+	   * @param  {Object} attribs
+	   * @param  {Array} children
+	   * @return {Object}
 	   */
 	  _createTag: function createTag(name, data, raw, attribs, children) {
 	    return {
@@ -336,6 +388,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Default handler for parsing
+	   * @param  {Error} error
+	   * @param  {Array} dom
+	   * @return
 	   */
 	  defaultHandler: function defaultHandler(error, dom) {
 	    if (error) {
@@ -1672,6 +1727,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  loadModuleFunction: function loadModuleFunction(moduleFunction, tag, data) {
 	    var tagModule = moduleFunction(tag, data);
 	    return tagModule.call(this);
+	  },
+	  isTagInclude: function isTagInclude(name) {
+	    return name === 'include';
 	  }
 	};
 
@@ -1806,11 +1864,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'for': __webpack_require__(17),
 	    'partial': __webpack_require__(18)
 	  },
+	  /**
+	   * Getting html string
+	   * @param  {Array} ast  AST array of entities
+	   * @param  {Object} data Data
+	   * @return {String}      Generated html-string
+	   */
 	  getHTMLString: function getHTMLString(ast, data) {
 	    return this._process(ast, data);
 	  },
 	  /**
 	   * Main function for finding traverse method for module
+	   */
+	  /**
+	   * Main function for finding process method for module
+	   * @param  {Object} tag  Tag
+	   * @param  {Object} data Data object
+	   * @return {Object}      Entity: tag or text
 	   */
 	  _processModule: function traverseModule(tag, data) {
 	    var moduleFunction = entityHelpers.moduleMatcher.call(this, tag);
@@ -1818,6 +1888,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  /**
 	   * Resolving method to handle tree childs
+	   * @param  {Object} entity Tag, text, module
+	   * @return {Function}        Process function
 	   */
 	  _whatMethodShouldYouUse: function whatMethodShouldYouUse(entity) {
 	    if (entityHelpers.isTag(entity.type)) {
@@ -1830,6 +1902,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return this._processText;
 	    }
 	  },
+	  /**
+	   * Concating arrays of entities
+	   * @param  {Object} entity Tag, text
+	   * @return {String}
+	   */
 	  _stopArrs: function _stopArrs(entity) {
 	    var string = '';
 	    if (whatType(entity) === 'array') {
@@ -1840,6 +1917,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return entity;
 	  },
+	  /**
+	   * Seek for methods
+	   * @param  {Object} entity Tag, text, module
+	   * @param  {Object} data   Data object
+	   * @return {String}        Generated string
+	   */
 	  _seek: function _seek(entity, data) {
 	    var method = this._whatMethodShouldYouUse(entity);
 	    if (method) {
@@ -1847,10 +1930,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return;
 	  },
+	  /**
+	   * Processing data types of entities
+	   * @param  {String} unTextData Value of data object
+	   * @param  {Object} data       Data
+	   * @return {String}
+	   */
 	  _processDataTypes: function processDataTypes(unTextData, data) {
 	    var textVar = scopeUtils.seekForVars(unTextData, data);
 	    return (textVar !== undefined) ? textVar : '';
 	  },
+	  /**
+	   * Processing entity data objects
+	   * @param  {Array} textData Array of data
+	   * @param  {Object} data     Data
+	   * @return {String}
+	   */
 	  _processData: function processData(textData, data) {
 	    var string = '';
 	    if (textData.length !== undefined) {
@@ -1861,6 +1956,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return this._processDataTypes(textData, data);
 	  },
+	  /**
+	   * Process attributes
+	   * @param  {Object} attribs Tag attributes
+	   * @param  {Object} data    Data
+	   * @return {String}
+	   */
 	  _processAttributes: function processAttributes(attribs, data) {
 	    var string = '';
 	    if (attribs) {
@@ -1873,12 +1974,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return string;
 	  },
+	  /**
+	   * Process Text entity
+	   * @param  {Object} text Text
+	   * @param  {Object} data Data
+	   * @return {String}
+	   */
 	  _processText: function processText(text, data) {
 	    return this._processData(text.data, data);
 	  },
+	  /**
+	   * Process Tag entity
+	   * @param  {Object} tag  Tag
+	   * @param  {Object} data Array
+	   * @return {String}
+	   */
 	  _processTag: function processTag(tag, data) {
 	    return '<' + tag.name + this._processAttributes(tag.attribs, data) + '>' + this._process(tag.children, data) + '</' + tag.name + '>';
 	  },
+	  /**
+	   * Recursive function for string generation
+	   * @param  {Array} ast  AST array
+	   * @param  {Object} data Data
+	   * @return {String}
+	   */
 	  _process: function process(ast, data) {
 	    var string = '', st;
 	    for (var i = 0; i < ast.length; i++) {
@@ -2035,11 +2154,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	  module: function ifModule(tag, data) {
 	    var
 	      concreteSourceStrings = {
-	        operators: [{ name: ' lt ', value: '<' }, { name: ' gt ', value: '>' }, { name: ' le ', value: '<=' }, { name: ' ge ',  value: '>=' }]
+	        operators: [{
+	          name: ' lt ',
+	          value: '<'
+	        }, {
+	          name: ' gt ',
+	          value: '>'
+	        }, {
+	          name: ' le ',
+	          value: '<='
+	        }, {
+	          name: ' ge ',
+	          value: '>='
+	        }]
 	      },
-	      source = replaceGreaterLess(tag.attribs.data.data.value.trim()),
-	      arrVars = lookUniqueVariables(source),
-	      condition = readConditionalExpression(source, arrVars);
+	      source,
+	      arrVars,
+	      condition;
+
+	    if (tag.attribs.data.data === undefined) {
+	      throw new Error('There is no data for "if" module to use');
+	    }
+
+	    source = replaceGreaterLess(tag.attribs.data.data.value.trim());
+	    arrVars = lookUniqueVariables(source);
+	    condition = readConditionalExpression(source, arrVars);
 
 	    function replaceGreaterLess(source) {
 	      for (var i = 0; i < concreteSourceStrings.operators.length; i++) {
@@ -2151,7 +2290,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = {
 	  module: function forModule(tag, data) {
 	    var
-	      source = tag.attribs.data.data.value.trim(),
+	      source,
 	      types = {
 	        'array': fArray,
 	        'object': fObject
@@ -2160,9 +2299,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        splittingKey: ' in ',
 	        key: ' as '
 	      },
-	      forStampArguments = source.split(concreteSourceStrings.splittingKey),
+	      forStampArguments,
 	      firstArgument,
 	      mainData;
+
+	    if (tag.attribs.data.data === undefined) {
+	      throw new Error('There is no data for "for" module to use');
+	    }
+
+	    source = tag.attribs.data.data.value.trim();
+	    forStampArguments = source.split(concreteSourceStrings.splittingKey);
 
 	    if (forStampArguments.length < 2) {
 	      throw new Error('Wrong arguments in for statement');

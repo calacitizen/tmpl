@@ -23,5 +23,8 @@ module.exports = {
   loadModuleFunction: function loadModuleFunction(moduleFunction, tag, data) {
     var tagModule = moduleFunction(tag, data);
     return tagModule.call(this);
+  },
+  isTagInclude: function isTagInclude(name) {
+    return name === 'include';
   }
 };

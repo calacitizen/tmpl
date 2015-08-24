@@ -14,9 +14,16 @@ module.exports = {
   },
   safeReplaceCaseReg: /\r|\n|\t|\/\*[\s\S]*?\*\//g,
   safeReplaceCasePlace: "",
+  /**
+   * Include promises stack
+   * @type {Object}
+   */
   _includeStack: {},
   /**
    * Parsing html string to the directive state
+   * @param  {String} tmpl     string html template
+   * @param  {Function} handler function for handling parsing result
+   * @return {Array}           html AST
    */
   parse: function parse(tmpl, handler) {
     var
@@ -29,23 +36,29 @@ module.exports = {
   },
   /**
    * Atribute traverse in order to find variables
+   * @param  {Array}        array of attributes
+   * @return {Array}        array of attributes with variables
    */
-  _traverseTagAttributes: function traverseTagAttributes(attribs, scopeData) {
+  _traverseTagAttributes: function traverseTagAttributes(attribs) {
     var dataAttributes = utils.clone(attribs);
     return utils.eachObject(dataAttributes, function traverseTagAttributesEach(attrib) {
       return this._traverseText({
         data: attrib
-      }, scopeData);
+      });
     }.bind(this));
   },
   /**
-   * Removing unnecessary stuf from strings
+   * Removing unnecessary stuff from strings
+   * @param  {String} string   data string
+   * @return {String}         clean data string
    */
   _replaceAllUncertainStuff: function replaceAllUncertainStuff(string) {
     return string.trim().replace(this.safeReplaceSingleQuotesReg, this.safeReplaceSingleQuotesPlace).replace(this.safeReplaceCaseReg, this.safeReplaceCasePlace);
   },
   /**
    * Searching for vars in string
+   * @param  {Array} arrOfVars array of variables and text
+   * @return {Array}           array of variables
    */
   _searchForVars: function searchForVars(arrOfVars) {
     return utils.mapForLoop(arrOfVars, function searchForVarsLoop(value) {
@@ -54,6 +67,9 @@ module.exports = {
   },
   /**
    * Replacing and creating statements for variables and text chunks
+   * @param  {Array} data         array of incoming data
+   * @param  {Array} arrOfVars    array with variables
+   * @return {Array}              array with objects
    */
   _replaceAndCreateStatements: function replaceAndCreateStatements(data, arrOfVars) {
     return utils.mapForLoop(data, function searchInScope(value) {
@@ -65,7 +81,9 @@ module.exports = {
     }.bind(this));
   },
   /**
-   * Preparing string for structured tree
+   * Preparing data-like string for structured tree
+   * @param  {String} str incoming data string
+   * @return {Object}     data object { data: { type: "text", value: 'wadawd' } }
    */
   _replaceMatch: function replaceMatch(str) {
     var
@@ -87,13 +105,17 @@ module.exports = {
     return resultingObject;
   },
   /**
-   * Looking for variables in strings
+   *  Looking for variables in strings
+   * @param  {String} statement   string statement
+   * @return {Object}             data object { data: { type: "text", value: 'wadawd' } }
    */
   _lookForStatements: function lookForStatements(statement) {
     return this._replaceMatch(statement);
   },
   /**
    * Resolving method to handle tree childs
+   * @param  {Object} entity  tag, text or module
+   * @return {Function}       traverse method to use
    */
   _whatMethodShouldYouUse: function whatMethodShouldYouUse(entity) {
     if (entityHelpers.isTag(entity.type)) {
@@ -108,6 +130,12 @@ module.exports = {
   },
   /**
    * Concating childs into the main array
+   */
+  /**
+   * Perform action on main data array
+   * @param  {Array} modAST         AST array
+   * @param  {Object|Array} traverseObject object or array of objects with tag or text
+   * @return {Array}                AST array
    */
   actionOnMainArray: function actionOnMainArray(modAST, traverseObject) {
     if (traverseObject !== undefined) {
@@ -124,17 +152,23 @@ module.exports = {
   },
   /**
    * Collecting states from traversing tree
+   * @param  {Function} traverseMethod traverse function for entity
+   * @param  {Object} value          Tag, text or module
+   * @return {Object}                State promise
    */
   _collect: function collect(traverseMethod, value) {
     var ps = traverseMethod.call(this, value);
-    if (this.isTagInclude(value.name)) {
+    if (entityHelpers.isTagInclude(value.name)) {
       this._includeStack[value.attribs.name] = ps;
     } else {
       return ps;
     }
   },
+
   /**
-   * Recursive traverse method
+   * Traversing ast
+   * @param  {Array} ast AST array
+   * @return {Array}    array of State promises
    */
   traversingAST: function traversingAST(ast) {
     var traverseMethod,
@@ -153,8 +187,10 @@ module.exports = {
   },
   /**
    * Starting point
+   * @param  {Array} ast    [description]
+   * @return {Object}       State promise
    */
-  traverse: function (ast, config) {
+  traverse: function (ast) {
     return this.traversingAST(ast).when(
       function resulting(data) {
         return this.actionOnMainArray([], data);
@@ -166,6 +202,9 @@ module.exports = {
   },
   /**
    * Generating tag and tag childs
+   * @param  {Object} tag   tag
+   * @param  {Array} inner children
+   * @return {Object}      Tag
    */
   _generatorFunctionForTags: function generatorFunctionForTags(tag, inner) {
     tag.children = this.actionOnMainArray([], inner);
@@ -173,11 +212,13 @@ module.exports = {
   },
   /**
    * Traversing tag with children
+   * @param  {Object} tag
+   * @return {Object}         State promise
    */
-  traverseTagWithChildren: function traverseTagWithChildren(takeTag, data) {
-    return this.traversingAST(takeTag.children, data).when(
+  traverseTagWithChildren: function traverseTagWithChildren(tag) {
+    return this.traversingAST(tag.children).when(
       function traverseTagSuccess(ast) {
-        return this._generatorFunctionForTags(takeTag, ast);
+        return this._generatorFunctionForTags(tag, ast);
       }.bind(this),
       function brokenTagTraversing(reason) {
         throw new Error(reason);
@@ -186,6 +227,8 @@ module.exports = {
   },
   /**
    * Main function for tag traversing
+   * @param  {Object} tag
+   * @return {Object}     State promise
    */
   _traverseTag: function traverseTag(tag) {
     var state,
@@ -201,6 +244,8 @@ module.exports = {
   },
   /**
    * Main function for finding traverse method for module
+   * @param  {Object} tag
+   * @return {Function}     Module function
    */
   _traverseModule: function traverseModule(tag) {
     var tagModule = entityHelpers.moduleMatcher.call(this, tag);
@@ -208,6 +253,8 @@ module.exports = {
   },
   /**
    * Text node traversing
+   * @param  {Object} text
+   * @return {Object}       promise or text
    */
   _traverseText: function traverseText(text) {
     var text = utils.clone(text),
@@ -220,13 +267,10 @@ module.exports = {
     return this._lookForStatements(text);
   },
   /**
-   * is Include
-   */
-  isTagInclude: function isTagInclude(name) {
-    return name === 'include';
-  },
-  /**
-   * Creating vars for data
+   * Create data object for variable
+   * @param  {String} name  lexical name of variable
+   * @param  {Undefined} value
+   * @return {Object}       data object
    */
   _createDataVar: function createDataVar(name, value) {
     return {
@@ -237,6 +281,8 @@ module.exports = {
   },
   /**
    * Creating text chuncks
+   * @param  {String} value
+   * @return {Object}       Object
    */
   _createDataText: function createDataText(value) {
     return {
@@ -246,6 +292,12 @@ module.exports = {
   },
   /**
    * Creating tag
+   * @param  {String} name
+   * @param  {Array|Object} data
+   * @param  {String} raw
+   * @param  {Object} attribs
+   * @param  {Array} children
+   * @return {Object}
    */
   _createTag: function createTag(name, data, raw, attribs, children) {
     return {
@@ -259,6 +311,9 @@ module.exports = {
   },
   /**
    * Default handler for parsing
+   * @param  {Error} error
+   * @param  {Array} dom
+   * @return
    */
   defaultHandler: function defaultHandler(error, dom) {
     if (error) {
