@@ -1,9 +1,8 @@
 var Traverse = require("./traverse"),
-    processing = require("./processing"),
-    functionalStrategy = require("./functionalStrategy");
+    processing = require("./processing");
 module.exports = {
   parse: Traverse.parse,
-  processingAST: function processingAST(ast, data) {
+  html: function html(ast, data) {
     return processing.getHTMLString(ast, data);
   },
   traverse: function traverse(ast) {
