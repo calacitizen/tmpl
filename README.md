@@ -3,9 +3,9 @@
 Templating engine with valid html directives. TMPL uses three step to generate form you need to get html.
 ```javascript
 var AST = tmpl.parse(source);
-tmpl.traverse(source, data).handle(
+tmpl.traverse(source).handle(
   function handle(traversed) {
-    tmpl.getHTML(traversed);
+    tmpl.html(traversed, data);
   },
   function errorHandle(error) {
     throw new Error(error);
@@ -46,7 +46,7 @@ AST-html like data sample
         {
           name: "root.name",
           type: "var",
-          value: "mikkey"
+          value: ""
         }
       ]
     }
@@ -69,9 +69,9 @@ AST-html like data sample
 ]
 ```
 With this data you can create your own representative of html in any kind.
-getHTML function is a simple function, that generates html string.
+getHTML function is a simple function, that generates html with given data string.
 ```javascript
-tmpl.getHTML(traversed);
+tmpl.html(traversed, data);
 ```
 ## HTML
 ### Variables
