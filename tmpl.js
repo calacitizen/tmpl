@@ -157,6 +157,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return this._createDataText(value);
 	    }.bind(this));
 	  },
+	  /**
+	   * Looking for variables in string data object
+	   * @param  {Object} strObjectData
+	   * @param  {Array} arrOfVarsClean Array of variables in data object
+	   * @return {Object}    
+	   */
 	  _createDataObject: function createDataObject(strObjectData, arrOfVarsClean) {
 	    if (arrOfVarsClean) {
 	      strObjectData.data = this._replaceAndCreateStatements(strObjectData.data, arrOfVarsClean);
@@ -1879,9 +1885,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  getHTMLString: function getHTMLString(ast, data) {
 	    return this._process(ast, data);
 	  },
-	  /**
-	   * Main function for finding traverse method for module
-	   */
 	  /**
 	   * Main function for finding process method for module
 	   * @param  {Object} tag  Tag

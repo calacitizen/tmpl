@@ -1,6 +1,6 @@
 {
   "name": "tmpl",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "tmpl.js",
   "scripts": {
@@ -9,7 +9,9 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "test": "mocha test/html_test.js"
+    "test": "mocha test/*.js",
+    "build:js": "webpack",
+    "build": "npm run build"
   },
   "devDependencies": {
     "webpack": "^1.10.1",
