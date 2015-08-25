@@ -55,7 +55,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var traversing = __webpack_require__(1),
-	    processing = __webpack_require__(11);
+	    processing = __webpack_require__(12);
 	module.exports = {
 	  parse: traversing.parse,
 	  html: function html(ast, data) {
@@ -84,7 +84,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = {
 	  _modules: {
 	    'include': __webpack_require__(9),
-	    'partial': __webpack_require__(10)
+	    'partial': __webpack_require__(11)
 	  },
 	  _regex: {
 	    forVariables: /\{\{ ?(.*?) ?\}\}/g
@@ -1744,67 +1744,19 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_RESULT__;var State = __webpack_require__(5),
-	    utils = __webpack_require__(3);
+	var requireFile = __webpack_require__(10);
 	module.exports = {
 	  module: function requireOrRetire(tag) {
 	    var assignModuleVar = tag.attribs.name.trim(),
 	      template = tag.attribs.template.trim(),
-	      templatePath = template + '.tmpl',
-	      templateBody, req, text, ast,
-	      isNode = utils.isNode();
-
-	      if (isNode === false) {
-	        !(__WEBPACK_AMD_DEFINE_RESULT__ = function restrainFs() {
-	          return {};
-	        }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	      }
-
-	    function createRequest(url) {
-	      var request = new XMLHttpRequest();
-	      request.open('GET', url);
-	      request.send();
-	      return request;
-	    }
-
-	    function readFile(url) {
-	      var fs,
-	        state = State.make();
-	      try {
-	        fs = requirejs('fs');
-	      } catch (e) {
-	        throw new Error("There is no requirejs for node included");
-	      }
-	      fs.readFile('./' + url, function readFileCallback(err, data) {
-	        if (err) {
-	          state.break(err);
-	        } else {
-	          state.keep(this.parse(data));
-	        }
-	      }.bind(this));
-	      return state.promise;
-	    }
-
-	    function workOutAsync(req) {
-	      var state = State.make();
-	      req.onreadystatechange = function requestHandler() {
-	        if (req.readyState == 4 && req.status == 200) {
-	          state.keep(this.parse(req.responseText));
-	        }
-	      }.bind(this);
-	      return state.promise;
-	    }
+	      templatePath = template + '.tmpl';
 
 	    function resolveInclude(object) {
 	      return object;
 	    }
 
 	    function resolveStatement() {
-	      if (isNode === false) {
-	        req = createRequest(templatePath);
-	        return workOutAsync.call(this, req).when(resolveInclude);
-	      }
-	      return readFile.call(this, templatePath).when(resolveInclude);
+	      return requireFile.call(this, templatePath).when(resolveInclude);
 	    }
 
 	    return function includeResolve() {
@@ -1816,6 +1768,66 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_RESULT__;var utils = __webpack_require__(3),
+	    State = __webpack_require__(5);
+
+	module.exports = function requireFile(url) {
+	  var isNode = utils.isNode();
+
+	  if (isNode === false) {
+	    !(__WEBPACK_AMD_DEFINE_RESULT__ = function restrainFs() {
+	      return {};
+	    }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	  }
+
+	  function createRequest(url) {
+	    var request = new XMLHttpRequest();
+	    request.open('GET', url);
+	    request.send();
+	    return request;
+	  }
+
+	  function readFileFs(url) {
+	    var fs,
+	        state = State.make();
+	    try {
+	      fs = requirejs('fs');
+	    } catch (e) {
+	      throw new Error("There is no requirejs for node included");
+	    }
+	    fs.readFile('./' + url, function readFileCallback(err, data) {
+	      if (err) {
+	        state.break(err);
+	      } else {
+	        state.keep(this.parse(data));
+	      }
+	    }.bind(this));
+	    return state.promise;
+	  }
+
+	  function readFileXMLHttpRequest(url) {
+	    var state = State.make(),
+	        req = createRequest(url);
+	    req.onreadystatechange = function requestHandler() {
+	      if (req.readyState == 4 && req.status == 200) {
+	        state.keep(this.parse(req.responseText));
+	      }
+	    }.bind(this);
+	    return state.promise;
+	  }
+
+	  if (isNode) {
+	    return readFileFs.call(this, url);
+	  }
+
+	  return readFileXMLHttpRequest.call(this, url);
+	};
+
+
+/***/ },
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var State = __webpack_require__(5),
@@ -1863,18 +1875,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3),
-	  scopeUtils = __webpack_require__(12),
-	  whatType = __webpack_require__(13),
+	  scopeUtils = __webpack_require__(13),
+	  whatType = __webpack_require__(14),
 	  entityHelpers = __webpack_require__(8);
 	module.exports = {
 	  _modules: {
-	    'if': __webpack_require__(14),
-	    'for': __webpack_require__(17),
-	    'partial': __webpack_require__(18)
+	    'if': __webpack_require__(15),
+	    'for': __webpack_require__(18),
+	    'partial': __webpack_require__(19)
 	  },
 	  /**
 	   * Getting html string
@@ -2021,7 +2033,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3);
@@ -2093,7 +2105,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports) {
 
 	module.exports = function checkType(value) {
@@ -2154,11 +2166,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var checkSource = __webpack_require__(15),
-	  scopeHold = __webpack_require__(16);
+	var checkSource = __webpack_require__(16),
+	  scopeHold = __webpack_require__(17);
 	module.exports = {
 	  module: function ifModule(tag, data) {
 	    var
@@ -2233,10 +2245,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var whatType = __webpack_require__(13);
+	var whatType = __webpack_require__(14);
 	module.exports = function checkSource(variableString, scopeData) {
 	  console.log(variableString);
 
@@ -2268,10 +2280,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var scopeUtils = __webpack_require__(12);
+	var scopeUtils = __webpack_require__(13);
 	module.exports = function scopeHold(arrVars, scope) {
 	  var ms = [],
 	      variableSeparator = '.',
@@ -2289,12 +2301,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var checkSource = __webpack_require__(15),
-	  scopeUtils = __webpack_require__(12),
-	  whatType = __webpack_require__(13),
+	var checkSource = __webpack_require__(16),
+	  scopeUtils = __webpack_require__(13),
+	  whatType = __webpack_require__(14),
 	  utils = __webpack_require__(3);
 	module.exports = {
 	  module: function forModule(tag, data) {
@@ -2392,7 +2404,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3);
