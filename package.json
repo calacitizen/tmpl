@@ -5,8 +5,7 @@
   "main": "tmpl.js",
   "scripts": {
     "test": "mocha test/*.js",
-    "build:js": "webpack",
-    "build": "npm run build"
+    "build": "webpack"
   },
   "author": "",
   "license": "ISC",
