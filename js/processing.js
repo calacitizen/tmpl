@@ -18,9 +18,6 @@ module.exports = {
     return this._process(ast, data);
   },
   /**
-   * Main function for finding traverse method for module
-   */
-  /**
    * Main function for finding process method for module
    * @param  {Object} tag  Tag
    * @param  {Object} data Data object
