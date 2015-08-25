@@ -80,6 +80,12 @@ module.exports = {
       return this._createDataText(value);
     }.bind(this));
   },
+  /**
+   * Looking for variables in string data object
+   * @param  {Object} strObjectData
+   * @param  {Array} arrOfVarsClean Array of variables in data object
+   * @return {Object}    
+   */
   _createDataObject: function createDataObject(strObjectData, arrOfVarsClean) {
     if (arrOfVarsClean) {
       strObjectData.data = this._replaceAndCreateStatements(strObjectData.data, arrOfVarsClean);
