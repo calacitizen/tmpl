@@ -157,29 +157,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return this._createDataText(value);
 	    }.bind(this));
 	  },
+	  _createDataObject: function createDataObject(strObjectData, arrOfVarsClean) {
+	    if (arrOfVarsClean) {
+	      strObjectData.data = this._replaceAndCreateStatements(strObjectData.data, arrOfVarsClean);
+	    } else {
+	      strObjectData.data = this._createDataText(strObjectData.data[0]);
+	    }
+	    return strObjectData;
+	  },
 	  /**
 	   * Preparing data-like string for structured tree
-	   * @param  {String} str incoming data string
+	   * @param  {Object} str incoming data string
 	   * @return {Object}     data object { data: { type: "text", value: 'wadawd' } }
 	   */
-	  _replaceMatch: function replaceMatch(str) {
+	  _replaceMatch: function replaceMatch(strObjectData) {
 	    var
-	      regExForVar = /\{\{ ?(.*?) ?\}\}/g,
-	      resString = this._replaceAllUncertainStuff(str.data),
-	      arrOfVars = resString.match(regExForVar),
-	      arrOfVarsClean,
-	      resultingObject = str,
-	      ssCheck;
+	      resString = this._replaceAllUncertainStuff(strObjectData.data),
+	      arrOfVars = resString.match(this._regex.forVariables),
+	      arrOfVarsClean;
 	    if (arrOfVars) {
 	      arrOfVarsClean = this._searchForVars(arrOfVars);
 	    }
-	    resultingObject.data = resString.split(regExForVar);
-	    if (arrOfVarsClean) {
-	      resultingObject.data = this._replaceAndCreateStatements(resultingObject.data, arrOfVarsClean);
-	    } else {
-	      resultingObject.data = this._createDataText(resultingObject.data[0]);
-	    }
-	    return resultingObject;
+	    strObjectData.data = resString.split(this._regex.forVariables);
+	    return this._createDataObject(strObjectData, arrOfVarsClean);
 	  },
 	  /**
 	   *  Looking for variables in strings
@@ -1813,25 +1813,31 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var State = __webpack_require__(5),
-	    utils = __webpack_require__(3);
+	  utils = __webpack_require__(3);
 	module.exports = {
 	  module: function partialModule(tag) {
 	    var assignModuleVar = tag.attribs.data.trim(),
-	        template = tag.attribs.template.trim();
+	      template = tag.attribs.template.trim();
+
 	    function resolveStatement() {
 	      var state = State.make();
+
 	      if (this._includeStack[template] === undefined) {
 	        throw new Error('Include tag for "' + template + '" is not found!');
 	      }
+
 	      this._includeStack[template].when(
 	        function partialInclude(templateData) {
 	          if (templateData) {
-	            this.traversingAST(templateData).when(function partialTraversing(modAST) {
-	              tag.children = modAST;
-	              state.keep(tag);
-	            }, function brokenTraverse(reason) {
-	              throw new Error(reason);
-	            });
+	            this.traversingAST(templateData).when(
+	              function partialTraversing(modAST) {
+	                tag.children = modAST;
+	                state.keep(tag);
+	              },
+	              function brokenTraverse(reason) {
+	                throw new Error(reason);
+	              }
+	            );
 	          } else {
 	            state.break('Include tag for "' + template + '" is not found!');
 	          }
@@ -2321,7 +2327,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    firstArgument = forFindAllArguments(forStampArguments[0]);
-
+	    
 	    function forFindAllArguments(value) {
 	      var crStringArray = value.split(concreteSourceStrings.key);
 	      if (crStringArray.length > 1) {

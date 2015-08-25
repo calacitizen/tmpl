@@ -80,29 +80,29 @@ module.exports = {
       return this._createDataText(value);
     }.bind(this));
   },
+  _createDataObject: function createDataObject(strObjectData, arrOfVarsClean) {
+    if (arrOfVarsClean) {
+      strObjectData.data = this._replaceAndCreateStatements(strObjectData.data, arrOfVarsClean);
+    } else {
+      strObjectData.data = this._createDataText(strObjectData.data[0]);
+    }
+    return strObjectData;
+  },
   /**
    * Preparing data-like string for structured tree
-   * @param  {String} str incoming data string
+   * @param  {Object} str incoming data string
    * @return {Object}     data object { data: { type: "text", value: 'wadawd' } }
    */
-  _replaceMatch: function replaceMatch(str) {
+  _replaceMatch: function replaceMatch(strObjectData) {
     var
-      regExForVar = /\{\{ ?(.*?) ?\}\}/g,
-      resString = this._replaceAllUncertainStuff(str.data),
-      arrOfVars = resString.match(regExForVar),
-      arrOfVarsClean,
-      resultingObject = str,
-      ssCheck;
+      resString = this._replaceAllUncertainStuff(strObjectData.data),
+      arrOfVars = resString.match(this._regex.forVariables),
+      arrOfVarsClean;
     if (arrOfVars) {
       arrOfVarsClean = this._searchForVars(arrOfVars);
     }
-    resultingObject.data = resString.split(regExForVar);
-    if (arrOfVarsClean) {
-      resultingObject.data = this._replaceAndCreateStatements(resultingObject.data, arrOfVarsClean);
-    } else {
-      resultingObject.data = this._createDataText(resultingObject.data[0]);
-    }
-    return resultingObject;
+    strObjectData.data = resString.split(this._regex.forVariables);
+    return this._createDataObject(strObjectData, arrOfVarsClean);
   },
   /**
    *  Looking for variables in strings

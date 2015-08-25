@@ -36,7 +36,7 @@ module.exports = {
     }
 
     firstArgument = forFindAllArguments(forStampArguments[0]);
-
+    
     function forFindAllArguments(value) {
       var crStringArray = value.split(concreteSourceStrings.key);
       if (crStringArray.length > 1) {
