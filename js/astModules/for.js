@@ -1,5 +1,4 @@
-var checkSource = require('../helpers/checkSource'),
-  scopeUtils = require('../helpers/scopeUtils'),
+var scopeUtils = require('../helpers/scopeUtils'),
   whatType = require('../helpers/whatType'),
   utils = require('../helpers/utils');
 module.exports = {
@@ -36,7 +35,7 @@ module.exports = {
     }
 
     firstArgument = forFindAllArguments(forStampArguments[0]);
-    
+
     function forFindAllArguments(value) {
       var crStringArray = value.split(concreteSourceStrings.key);
       if (crStringArray.length > 1) {

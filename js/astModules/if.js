@@ -1,5 +1,4 @@
-var checkSource = require('../helpers/checkSource'),
-  scopeHold = require('../helpers/scopeHold');
+var scopeHold = require('../helpers/scopeHold');
 module.exports = {
   module: function ifModule(tag, data) {
     var

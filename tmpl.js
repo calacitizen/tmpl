@@ -1710,30 +1710,45 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 	  /**
-	   * Is tag?
+	   * is entity - tag
+	   * @param  {String}  type
+	   * @return {Boolean}
 	   */
 	  isTag: function isTag(type) {
 	    return type === 'tag';
 	  },
 	  /**
-	   * Is text?
+	   * is entity - text
+	   * @param  {String}  type
+	   * @return {Boolean}
 	   */
 	  isText: function isText(type) {
 	    return type === 'text';
 	  },
 	  /**
-	   * Searching modules by the tag names
+	   * Match module by name
+	   * @param  {Object} tag
+	   * @return {Function}
 	   */
 	  moduleMatcher: function moduleMatcher(tag) {
 	    return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].module : false;
 	  },
 	  /**
-	   * Loading module function
+	   * Load module and execute function
+	   * @param  {Function} moduleFunction
+	   * @param  {Object} tag
+	   * @param  {Object} data
+	   * @return {Array}
 	   */
 	  loadModuleFunction: function loadModuleFunction(moduleFunction, tag, data) {
 	    var tagModule = moduleFunction(tag, data);
 	    return tagModule.call(this);
 	  },
+	  /**
+	   * is entity tag - include
+	   * @param  {String}  name
+	   * @return {Boolean}
+	   */
 	  isTagInclude: function isTagInclude(name) {
 	    return name === 'include';
 	  }
@@ -1885,8 +1900,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = {
 	  _modules: {
 	    'if': __webpack_require__(15),
-	    'for': __webpack_require__(18),
-	    'partial': __webpack_require__(19)
+	    'for': __webpack_require__(17),
+	    'partial': __webpack_require__(18)
 	  },
 	  /**
 	   * Getting html string
@@ -2169,8 +2184,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var checkSource = __webpack_require__(16),
-	  scopeHold = __webpack_require__(17);
+	var scopeHold = __webpack_require__(16);
 	module.exports = {
 	  module: function ifModule(tag, data) {
 	    var
@@ -2248,41 +2262,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var whatType = __webpack_require__(14);
-	module.exports = function checkSource(variableString, scopeData) {
-	  console.log(variableString);
-
-	  var varianleSeparator = '.',
-	      valueArray = variableString.split(varianleSeparator),
-	      type;
-
-	  function checkSourceIns(iterator, array, value) {
-	     var type = whatType(value);
-	     if (array.length > (iterator + 1) && type !== 'object') {
-	       if (type !== 'array' && array[iterator+1] !== 'length') {
-	         throw new Error('У значения ' + array[iterator] + ' нет свойства: ' + array[iterator + 1]);
-	       }
-	     }
-	     return type;
-	  }
-
-	  for (var i = 0; i < valueArray.length; i++) {
-	    if (i === 0) {
-	      chase = scopeData[valueArray[i]];
-	    } else {
-	      chase = chase[valueArray[i]];
-	    }
-	    type = checkSourceIns(i, valueArray, chase);
-	  }
-
-	  return type;
-	}
-
-
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
-
 	var scopeUtils = __webpack_require__(13);
 	module.exports = function scopeHold(arrVars, scope) {
 	  var ms = [],
@@ -2301,11 +2280,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var checkSource = __webpack_require__(16),
-	  scopeUtils = __webpack_require__(13),
+	var scopeUtils = __webpack_require__(13),
 	  whatType = __webpack_require__(14),
 	  utils = __webpack_require__(3);
 	module.exports = {
@@ -2342,7 +2320,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    firstArgument = forFindAllArguments(forStampArguments[0]);
-	    
+
 	    function forFindAllArguments(value) {
 	      var crStringArray = value.split(concreteSourceStrings.key);
 	      if (crStringArray.length > 1) {
@@ -2404,7 +2382,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3);
