@@ -40,8 +40,8 @@ var State = (function StateFunction() {
               state.keep(result);
             }
           } catch (e) {
-            state.break(e);
             throw new Error(e);
+            state.break(e);
           }
         };
       }

@@ -1,5 +1,5 @@
 var utils = require('./helpers/utils'),
-  scopeUtils = require('./helpers/scopeUtils'),
+  seekingForVars = require('./helpers/seekingForVars'),
   whatType = require('./helpers/whatType'),
   entityHelpers = require('./helpers/entityHelpers');
 module.exports = {
@@ -78,7 +78,7 @@ module.exports = {
    * @return {String}
    */
   _processDataTypes: function processDataTypes(unTextData, data) {
-    var textVar = scopeUtils.seekForVars(unTextData, data);
+    var textVar = seekingForVars(unTextData, data);
     return (textVar !== undefined) ? textVar : '';
   },
   /**
@@ -149,4 +149,19 @@ module.exports = {
     }
     return string;
   },
+  // _processNon: function _processNon(ast, data) {
+  //   var stack = [];
+  //   stack.push(ast);
+  //   while (stack.length) {
+  //       for (var j in stack[0]) {
+  //           if (typeof stack[0][j] === 'object') {
+  //               stack.push(stack[0][j]);
+  //               if (stack[0][j].raw !== undefined) {
+  //                 console.log(stack[0][j]);
+  //               }
+  //           }
+  //       }
+  //       stack.shift();
+  //   }
+  // }
 };

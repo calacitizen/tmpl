@@ -1,7 +1,7 @@
 var
   htmlparser = require('htmlparser'),
   utils = require('./helpers/utils'),
-  scopeUtils = require('./helpers/skipVars'),
+  skipVars = require('./helpers/skipVars'),
   State = require('./helpers/State'),
   entityHelpers = require('./helpers/entityHelpers');
 module.exports = {
@@ -73,24 +73,20 @@ module.exports = {
    */
   _replaceAndCreateStatements: function replaceAndCreateStatements(data, arrOfVars) {
     return utils.mapForLoop(data, function searchInScope(value) {
-      ssCheck = scopeUtils.checkStatementForInners(value, arrOfVars);
-      if (ssCheck.isVar) {
-        return this._createDataVar(value, ssCheck.value);
-      }
-      return this._createDataText(value);
+      return skipVars.checkStatementForInners(value, arrOfVars);
     }.bind(this));
   },
   /**
    * Looking for variables in string data object
    * @param  {Object} strObjectData
    * @param  {Array} arrOfVarsClean Array of variables in data object
-   * @return {Object}    
+   * @return {Object}
    */
   _createDataObject: function createDataObject(strObjectData, arrOfVarsClean) {
     if (arrOfVarsClean) {
       strObjectData.data = this._replaceAndCreateStatements(strObjectData.data, arrOfVarsClean);
     } else {
-      strObjectData.data = this._createDataText(strObjectData.data[0]);
+      strObjectData.data = entityHelpers.createDataText(strObjectData.data[0]);
     }
     return strObjectData;
   },
@@ -271,30 +267,6 @@ module.exports = {
       return state.promise;
     }
     return this._lookForStatements(text);
-  },
-  /**
-   * Create data object for variable
-   * @param  {String} name  lexical name of variable
-   * @param  {Undefined} value
-   * @return {Object}       data object
-   */
-  _createDataVar: function createDataVar(name, value) {
-    return {
-      type: 'var',
-      name: name,
-      value: value
-    };
-  },
-  /**
-   * Creating text chuncks
-   * @param  {String} value
-   * @return {Object}       Object
-   */
-  _createDataText: function createDataText(value) {
-    return {
-      type: 'text',
-      value: value
-    };
   },
   /**
    * Creating tag

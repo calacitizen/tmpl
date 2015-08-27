@@ -41,5 +41,49 @@ module.exports = {
    */
   isTagInclude: function isTagInclude(name) {
     return name === 'include';
+  },
+  /**
+   * is expression
+   * @param  {String}  string 
+   * @return {Boolean}
+   */
+  isExpression: function isExpression(string) {
+    return string.split(':').length > 1;
+  },
+  /**
+   * Create data object for variable
+   * @param  {String} name  lexical name of variable
+   * @param  {Undefined} value
+   * @return {Object}       data object
+   */
+  createDataVar: function createDataVar(name, value) {
+    return {
+      type: 'var',
+      name: name,
+      value: value
+    };
+  },
+  /**
+   * Creating text chuncks
+   * @param  {String} value
+   * @return {Object}       Object
+   */
+  createDataText: function createDataText(value) {
+    return {
+      type: 'text',
+      value: value
+    };
+  },
+  /**
+   * Creating expression chuncks
+   * @param  {String} value
+   * @return {Object}       Object
+   */
+  createDataExpression: function createDataExpression(value, expression) {
+    return {
+      type: 'expression',
+      expression: expression,
+      value: value
+    };
   }
 };

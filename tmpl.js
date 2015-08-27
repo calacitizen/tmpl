@@ -78,9 +78,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var
 	  htmlparser = __webpack_require__(2),
 	  utils = __webpack_require__(3),
-	  scopeUtils = __webpack_require__(4),
-	  State = __webpack_require__(5),
-	  entityHelpers = __webpack_require__(8);
+	  skipVars = __webpack_require__(4),
+	  State = __webpack_require__(6),
+	  entityHelpers = __webpack_require__(5);
 	module.exports = {
 	  _modules: {
 	    'include': __webpack_require__(9),
@@ -150,24 +150,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  _replaceAndCreateStatements: function replaceAndCreateStatements(data, arrOfVars) {
 	    return utils.mapForLoop(data, function searchInScope(value) {
-	      ssCheck = scopeUtils.checkStatementForInners(value, arrOfVars);
-	      if (ssCheck.isVar) {
-	        return this._createDataVar(value, ssCheck.value);
-	      }
-	      return this._createDataText(value);
+	      return skipVars.checkStatementForInners(value, arrOfVars);
 	    }.bind(this));
 	  },
 	  /**
 	   * Looking for variables in string data object
 	   * @param  {Object} strObjectData
 	   * @param  {Array} arrOfVarsClean Array of variables in data object
-	   * @return {Object}    
+	   * @return {Object}
 	   */
 	  _createDataObject: function createDataObject(strObjectData, arrOfVarsClean) {
 	    if (arrOfVarsClean) {
 	      strObjectData.data = this._replaceAndCreateStatements(strObjectData.data, arrOfVarsClean);
 	    } else {
-	      strObjectData.data = this._createDataText(strObjectData.data[0]);
+	      strObjectData.data = entityHelpers.createDataText(strObjectData.data[0]);
 	    }
 	    return strObjectData;
 	  },
@@ -348,30 +344,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return state.promise;
 	    }
 	    return this._lookForStatements(text);
-	  },
-	  /**
-	   * Create data object for variable
-	   * @param  {String} name  lexical name of variable
-	   * @param  {Undefined} value
-	   * @return {Object}       data object
-	   */
-	  _createDataVar: function createDataVar(name, value) {
-	    return {
-	      type: 'var',
-	      name: name,
-	      value: value
-	    };
-	  },
-	  /**
-	   * Creating text chuncks
-	   * @param  {String} value
-	   * @return {Object}       Object
-	   */
-	  _createDataText: function createDataText(value) {
-	    return {
-	      type: 'text',
-	      value: value
-	    };
 	  },
 	  /**
 	   * Creating tag
@@ -1311,40 +1283,128 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils = __webpack_require__(3);
+	var utils = __webpack_require__(3),
+	    entityHelpers = __webpack_require__(5);
 	module.exports = {
 	  checkStatementForInners: function checkStatementForInners(value, arrVars) {
 	    var
 	      variableSeparator = '.',
 	      stScope = value.split(variableSeparator),
 	      isVar = utils.inArray(arrVars, value),
+	      expressionArr,
 	      compress;
 
-	    function varOrNot(isVar, value, name) {
-	      if (isVar) {
-	        return {
-	          isVar: isVar,
-	          name: name,
-	          value: value
-	        };
-	      }
-	      return {
-	        isVar: isVar,
-	        value: value
-	      };
+	    if (entityHelpers.isExpression(value)) {
+	      expressionArr = value.split(':');
+	      return entityHelpers.createDataExpression(expressionArr[0], expressionArr[1]);
 	    }
 
 	    if (isVar === true) {
-	      return varOrNot(isVar, undefined, value);
+	      return entityHelpers.createDataVar(value, undefined);
 	    }
 
-	    return varOrNot(isVar, value);
+	    return entityHelpers.createDataText(value);
 	  }
 	}
 
 
 /***/ },
 /* 5 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  /**
+	   * is entity - tag
+	   * @param  {String}  type
+	   * @return {Boolean}
+	   */
+	  isTag: function isTag(type) {
+	    return type === 'tag';
+	  },
+	  /**
+	   * is entity - text
+	   * @param  {String}  type
+	   * @return {Boolean}
+	   */
+	  isText: function isText(type) {
+	    return type === 'text';
+	  },
+	  /**
+	   * Match module by name
+	   * @param  {Object} tag
+	   * @return {Function}
+	   */
+	  moduleMatcher: function moduleMatcher(tag) {
+	    return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].module : false;
+	  },
+	  /**
+	   * Load module and execute function
+	   * @param  {Function} moduleFunction
+	   * @param  {Object} tag
+	   * @param  {Object} data
+	   * @return {Array}
+	   */
+	  loadModuleFunction: function loadModuleFunction(moduleFunction, tag, data) {
+	    var tagModule = moduleFunction(tag, data);
+	    return tagModule.call(this);
+	  },
+	  /**
+	   * is entity tag - include
+	   * @param  {String}  name
+	   * @return {Boolean}
+	   */
+	  isTagInclude: function isTagInclude(name) {
+	    return name === 'include';
+	  },
+	  /**
+	   * is expression
+	   * @param  {String}  string 
+	   * @return {Boolean}
+	   */
+	  isExpression: function isExpression(string) {
+	    return string.split(':').length > 1;
+	  },
+	  /**
+	   * Create data object for variable
+	   * @param  {String} name  lexical name of variable
+	   * @param  {Undefined} value
+	   * @return {Object}       data object
+	   */
+	  createDataVar: function createDataVar(name, value) {
+	    return {
+	      type: 'var',
+	      name: name,
+	      value: value
+	    };
+	  },
+	  /**
+	   * Creating text chuncks
+	   * @param  {String} value
+	   * @return {Object}       Object
+	   */
+	  createDataText: function createDataText(value) {
+	    return {
+	      type: 'text',
+	      value: value
+	    };
+	  },
+	  /**
+	   * Creating expression chuncks
+	   * @param  {String} value
+	   * @return {Object}       Object
+	   */
+	  createDataExpression: function createDataExpression(value, expression) {
+	    return {
+	      type: 'expression',
+	      expression: expression,
+	      value: value
+	    };
+	  }
+	};
+
+
+/***/ },
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(setImmediate) {var State = (function StateFunction() {
@@ -1389,8 +1449,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	              state.keep(result);
 	            }
 	          } catch (e) {
-	            state.break(e);
 	            throw new Error(e);
+	            state.break(e);
 	          }
 	        };
 	      }
@@ -1524,13 +1584,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = State;
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(6).setImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7).setImmediate))
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(7).nextTick;
+	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(8).nextTick;
 	var apply = Function.prototype.apply;
 	var slice = Array.prototype.slice;
 	var immediateIds = {};
@@ -1606,10 +1666,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
 	  delete immediateIds[id];
 	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(6).setImmediate, __webpack_require__(6).clearImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7).setImmediate, __webpack_require__(7).clearImmediate))
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	// shim for using process in browser
@@ -1705,57 +1765,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 8 */
-/***/ function(module, exports) {
-
-	module.exports = {
-	  /**
-	   * is entity - tag
-	   * @param  {String}  type
-	   * @return {Boolean}
-	   */
-	  isTag: function isTag(type) {
-	    return type === 'tag';
-	  },
-	  /**
-	   * is entity - text
-	   * @param  {String}  type
-	   * @return {Boolean}
-	   */
-	  isText: function isText(type) {
-	    return type === 'text';
-	  },
-	  /**
-	   * Match module by name
-	   * @param  {Object} tag
-	   * @return {Function}
-	   */
-	  moduleMatcher: function moduleMatcher(tag) {
-	    return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].module : false;
-	  },
-	  /**
-	   * Load module and execute function
-	   * @param  {Function} moduleFunction
-	   * @param  {Object} tag
-	   * @param  {Object} data
-	   * @return {Array}
-	   */
-	  loadModuleFunction: function loadModuleFunction(moduleFunction, tag, data) {
-	    var tagModule = moduleFunction(tag, data);
-	    return tagModule.call(this);
-	  },
-	  /**
-	   * is entity tag - include
-	   * @param  {String}  name
-	   * @return {Boolean}
-	   */
-	  isTagInclude: function isTagInclude(name) {
-	    return name === 'include';
-	  }
-	};
-
-
-/***/ },
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1786,7 +1795,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;var utils = __webpack_require__(3),
-	    State = __webpack_require__(5);
+	    State = __webpack_require__(6);
 
 	module.exports = function requireFile(url) {
 	  var isNode = utils.isNode();
@@ -1845,7 +1854,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var State = __webpack_require__(5),
+	var State = __webpack_require__(6),
 	  utils = __webpack_require__(3);
 	module.exports = {
 	  module: function partialModule(tag) {
@@ -1894,14 +1903,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3),
-	  scopeUtils = __webpack_require__(13),
-	  whatType = __webpack_require__(14),
-	  entityHelpers = __webpack_require__(8);
+	  seekingForVars = __webpack_require__(13),
+	  whatType = __webpack_require__(17),
+	  entityHelpers = __webpack_require__(5);
 	module.exports = {
 	  _modules: {
-	    'if': __webpack_require__(15),
-	    'for': __webpack_require__(17),
-	    'partial': __webpack_require__(18)
+	    'if': __webpack_require__(18),
+	    'for': __webpack_require__(19),
+	    'partial': __webpack_require__(20)
 	  },
 	  /**
 	   * Getting html string
@@ -1973,7 +1982,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {String}
 	   */
 	  _processDataTypes: function processDataTypes(unTextData, data) {
-	    var textVar = scopeUtils.seekForVars(unTextData, data);
+	    var textVar = seekingForVars(unTextData, data);
 	    return (textVar !== undefined) ? textVar : '';
 	  },
 	  /**
@@ -2044,6 +2053,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return string;
 	  },
+	  // _processNon: function _processNon(ast, data) {
+	  //   var stack = [];
+	  //   stack.push(ast);
+	  //   while (stack.length) {
+	  //       for (var j in stack[0]) {
+	  //           if (typeof stack[0][j] === 'object') {
+	  //               stack.push(stack[0][j]);
+	  //               if (stack[0][j].raw !== undefined) {
+	  //                 console.log(stack[0][j]);
+	  //               }
+	  //           }
+	  //       }
+	  //       stack.shift();
+	  //   }
+	  // }
 	};
 
 
@@ -2051,29 +2075,20 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils = __webpack_require__(3);
-	module.exports = {
-	  checkStatementForInners: function checkStatementForInners(value, scopeData, arrVars) {
-	    var
-	      variableSeparator = '.',
-	      stScope = value.split(variableSeparator),
-	      isVar = utils.inArray(arrVars, value),
-	      compress;
-
-	    function varOrNot(isVar, value, name) {
-	      if (isVar) {
-	        return {
-	          isVar: isVar,
-	          name: name,
-	          value: value
-	        };
-	      }
-	      return {
-	        isVar: isVar,
-	        value: value
-	      };
+	var conditional = __webpack_require__(14);
+	module.exports = function seekForVars(textData, scopeData) {
+	  var
+	    variableSeparator = '.',
+	    stScope,
+	    compress;
+	  if (textData.type === 'expression') {
+	    if (conditional(textData.expression, scopeData)) {
+	      return textData.value;
 	    }
-
+	    return;
+	  }
+	  if (textData.type === 'var') {
+	    stScope = textData.name.split(variableSeparator);
 	    if (stScope.length > 1) {
 	      for (var i = 0; i < stScope.length; i++) {
 	        if (scopeData.hasOwnProperty(stScope[i]) && i === 0) {
@@ -2084,43 +2099,138 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        }
 	      }
-	      return varOrNot(isVar, compress, value);
+	      return compress;
 	    }
-
-	    if (isVar === true) {
-	      return varOrNot(isVar, scopeData[value], value);
-	    }
-
-	    return varOrNot(isVar, value);
-	  },
-	  seekForVars: function seekForVars(textData, scopeData) {
-	    var
-	      variableSeparator = '.',
-	      stScope,
-	      compress;
-	    if (textData.type === 'var') {
-	      stScope = textData.name.split(variableSeparator);
-	      if (stScope.length > 1) {
-	        for (var i = 0; i < stScope.length; i++) {
-	          if (scopeData.hasOwnProperty(stScope[i]) && i === 0) {
-	            compress = scopeData[stScope[i]];
-	          } else {
-	            if (compress && compress.hasOwnProperty(stScope[i])) {
-	              compress = compress[stScope[i]];
-	            }
-	          }
-	        }
-	        return compress;
-	      }
-	      return scopeData[textData.name];
-	    }
-	    return textData.value;
+	    return scopeData[textData.name];
 	  }
-	}
+	  return textData.value;
+	};
 
 
 /***/ },
 /* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var scopeHold = __webpack_require__(15);
+	module.exports = function conditional(source, data) {
+	  var
+	    sourceStrings = {
+	      operators: [{
+	        name: ' lt ',
+	        value: '<'
+	      }, {
+	        name: ' gt ',
+	        value: '>'
+	      }, {
+	        name: ' le ',
+	        value: '<='
+	      }, {
+	        name: ' ge ',
+	        value: '>='
+	      }]
+	    },
+	    source = replaceGreaterLess(source),
+	    arrVars = lookUniqueVariables(source),
+	    condition = readConditionalExpression(source, arrVars);
+
+	    function replaceGreaterLess(source) {
+	      for (var i = 0; i < sourceStrings.operators.length; i++) {
+	        source = source.replace(sourceStrings.operators[i].name, sourceStrings.operators[i].value);
+	      }
+	      return source;
+	    }
+
+	    function lookUniqueVariables(expression) {
+	      var variables = expression.match(/([A-z]+)/g),
+	        length = variables.length,
+	        uniqueVariables = [],
+	        index = 0;
+	      while (index < length) {
+	        var variable = variables[index++];
+	        if (uniqueVariables.indexOf(variable) < 0) {
+	          uniqueVariables.push(variable);
+	        }
+	      }
+	      return uniqueVariables;
+	    }
+
+	    function readConditionalExpression(expression, uniqueVariables) {
+	      return Function.apply(null, uniqueVariables.concat("return " + expression));
+	    }
+
+	    return condition.apply(this, scopeHold(arrVars, data));
+
+	}
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var checkStatements = __webpack_require__(16);
+	module.exports = function scopeHold(arrVars, scope) {
+	  var ms = [],
+	      variableSeparator = '.',
+	      stepVar;
+	  for (var i = 0; i < arrVars.length; i++) {
+	    if (scope.hasOwnProperty(arrVars[i])) {
+	      stepVar = checkStatements(arrVars[i], scope, arrVars);
+	      if (stepVar.isVar === true) {
+	        ms.push(stepVar.value);
+	      }
+	    }
+	  }
+	  return ms;
+	}
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var utils = __webpack_require__(3);
+	module.exports = function checkStatementForInners(value, scopeData, arrVars) {
+	  var
+	    variableSeparator = '.',
+	    stScope = value.split(variableSeparator),
+	    isVar = utils.inArray(arrVars, value),
+	    compress;
+	  function varOrNot(isVar, value, name) {
+	    if (isVar) {
+	      return {
+	        isVar: isVar,
+	        name: name,
+	        value: value
+	      };
+	    }
+	    return {
+	      isVar: isVar,
+	      value: value
+	    };
+	  }
+	  if (stScope.length > 1) {
+	    for (var i = 0; i < stScope.length; i++) {
+	      if (scopeData.hasOwnProperty(stScope[i]) && i === 0) {
+	        compress = scopeData[stScope[i]];
+	      } else {
+	        if (compress && compress.hasOwnProperty(stScope[i])) {
+	          compress = compress[stScope[i]];
+	        }
+	      }
+	    }
+	    return varOrNot(isVar, compress, value);
+	  }
+
+	  if (isVar === true) {
+	    return varOrNot(isVar, scopeData[value], value);
+	  }
+
+	  return varOrNot(isVar, value);
+	};
+
+
+/***/ },
+/* 17 */
 /***/ function(module, exports) {
 
 	module.exports = function checkType(value) {
@@ -2181,67 +2291,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var scopeHold = __webpack_require__(16);
+	var conditional = __webpack_require__(14);
 	module.exports = {
 	  module: function ifModule(tag, data) {
-	    var
-	      concreteSourceStrings = {
-	        operators: [{
-	          name: ' lt ',
-	          value: '<'
-	        }, {
-	          name: ' gt ',
-	          value: '>'
-	        }, {
-	          name: ' le ',
-	          value: '<='
-	        }, {
-	          name: ' ge ',
-	          value: '>='
-	        }]
-	      },
-	      source,
-	      arrVars,
-	      condition;
+	    var source;
 
 	    if (tag.attribs.data.data === undefined) {
 	      throw new Error('There is no data for "if" module to use');
 	    }
 
-	    source = replaceGreaterLess(tag.attribs.data.data.value.trim());
-	    arrVars = lookUniqueVariables(source);
-	    condition = readConditionalExpression(source, arrVars);
+	    source =  tag.attribs.data.data.value.trim();
 
-	    function replaceGreaterLess(source) {
-	      for (var i = 0; i < concreteSourceStrings.operators.length; i++) {
-	        source = source.replace(concreteSourceStrings.operators[i].name, concreteSourceStrings.operators[i].value);
-	      }
-	      return source;
-	    }
-
-	    function lookUniqueVariables(expression) {
-	      var variables = expression.match(/([A-z]+)/g),
-	        length = variables.length,
-	        uniqueVariables = [],
-	        index = 0;
-	      while (index < length) {
-	        var variable = variables[index++];
-	        if (uniqueVariables.indexOf(variable) < 0) {
-	          uniqueVariables.push(variable);
-	        }
-	      }
-	      return uniqueVariables;
-	    }
-
-	    function readConditionalExpression(expression, uniqueVariables) {
-	      return Function.apply(null, uniqueVariables.concat("return " + expression));
-	    }
-
-	    function resolveStatement(condition) {
-	      if (condition) {
+	    function resolveStatement() {
+	      if (conditional(source, data)) {
 	        if (tag.children !== undefined) {
 	          return this._process(tag.children, data);
 	        }
@@ -2251,7 +2316,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return function ifModuleReturnable() {
 	      if (tag.children !== undefined) {
-	        return resolveStatement.call(this, condition.apply(this, scopeHold(arrVars, data)));
+	        return resolveStatement.call(this);
 	      }
 	    }
 	  }
@@ -2259,32 +2324,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var scopeUtils = __webpack_require__(13);
-	module.exports = function scopeHold(arrVars, scope) {
-	  var ms = [],
-	      variableSeparator = '.',
-	      stepVar;
-	  for (var i = 0; i < arrVars.length; i++) {
-	    if (scope.hasOwnProperty(arrVars[i])) {
-	      stepVar = scopeUtils.checkStatementForInners(arrVars[i], scope, arrVars);
-	      if (stepVar.isVar === true) {
-	        ms.push(stepVar.value);
-	      }
-	    }
-	  }
-	  return ms;
-	}
-
-
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var scopeUtils = __webpack_require__(13),
-	  whatType = __webpack_require__(14),
+	var checkStatements = __webpack_require__(16),
+	  whatType = __webpack_require__(17),
 	  utils = __webpack_require__(3);
 	module.exports = {
 	  module: function forModule(tag, data) {
@@ -2312,8 +2356,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (forStampArguments.length < 2) {
 	      throw new Error('Wrong arguments in for statement');
 	    }
-
-	    mainData = scopeUtils.checkStatementForInners(forStampArguments[1], data, [forStampArguments[1]]);
+	    mainData = checkStatements(forStampArguments[1], data, [forStampArguments[1]]);
 
 	    if (!mainData.value) {
 	      throw new Error(mainData.name + ' variable is undefined');
@@ -2382,7 +2425,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3);

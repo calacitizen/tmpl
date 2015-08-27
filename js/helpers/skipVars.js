@@ -1,30 +1,23 @@
-var utils = require('./utils');
+var utils = require('./utils'),
+    entityHelpers = require('./entityHelpers');
 module.exports = {
   checkStatementForInners: function checkStatementForInners(value, arrVars) {
     var
       variableSeparator = '.',
       stScope = value.split(variableSeparator),
       isVar = utils.inArray(arrVars, value),
+      expressionArr,
       compress;
 
-    function varOrNot(isVar, value, name) {
-      if (isVar) {
-        return {
-          isVar: isVar,
-          name: name,
-          value: value
-        };
-      }
-      return {
-        isVar: isVar,
-        value: value
-      };
+    if (entityHelpers.isExpression(value)) {
+      expressionArr = value.split(':');
+      return entityHelpers.createDataExpression(expressionArr[0], expressionArr[1]);
     }
 
     if (isVar === true) {
-      return varOrNot(isVar, undefined, value);
+      return entityHelpers.createDataVar(value, undefined);
     }
 
-    return varOrNot(isVar, value);
+    return entityHelpers.createDataText(value);
   }
 }

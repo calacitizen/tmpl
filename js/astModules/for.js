@@ -1,4 +1,4 @@
-var scopeUtils = require('../helpers/scopeUtils'),
+var checkStatements = require('../helpers/checkStatements'),
   whatType = require('../helpers/whatType'),
   utils = require('../helpers/utils');
 module.exports = {
@@ -27,8 +27,7 @@ module.exports = {
     if (forStampArguments.length < 2) {
       throw new Error('Wrong arguments in for statement');
     }
-
-    mainData = scopeUtils.checkStatementForInners(forStampArguments[1], data, [forStampArguments[1]]);
+    mainData = checkStatements(forStampArguments[1], data, [forStampArguments[1]]);
 
     if (!mainData.value) {
       throw new Error(mainData.name + ' variable is undefined');
