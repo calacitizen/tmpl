@@ -32,4 +32,4 @@ module.exports = [{
     library: ["tmpl"],
     libraryTarget: "umd"
   }
-}]
+}];
