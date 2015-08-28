@@ -44,7 +44,7 @@ module.exports = {
   },
   /**
    * is expression
-   * @param  {String}  string 
+   * @param  {String}  string
    * @return {Boolean}
    */
   isExpression: function isExpression(string) {
@@ -82,7 +82,7 @@ module.exports = {
   createDataExpression: function createDataExpression(value, expression) {
     return {
       type: 'expression',
-      expression: expression,
+      expression: expression.trim(),
       value: value
     };
   }

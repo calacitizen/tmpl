@@ -26,6 +26,9 @@ module.exports = {
   isNode: function isNode() {
     return Object.prototype.toString.call(global.process) === '[object process]';
   },
+  removeAroundQuotes: function removingQuotes(string) {
+    return string.replace(/^['"](.*)['"]$/, '$1');
+  },
   clone: function clone(src) {
     function mixin(dest, source, copyFunc) {
       var name, s, i, empty = {};

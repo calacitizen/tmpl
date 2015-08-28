@@ -5,16 +5,16 @@ module.exports = {
     var
       variableSeparator = '.',
       stScope = value.split(variableSeparator),
-      isVar = utils.inArray(arrVars, value),
+      isUseful = utils.inArray(arrVars, value),
       expressionArr,
       compress;
 
-    if (entityHelpers.isExpression(value)) {
-      expressionArr = value.split(':');
-      return entityHelpers.createDataExpression(expressionArr[0], expressionArr[1]);
+    if (entityHelpers.isExpression(value) && isUseful) {
+        expressionArr = value.split(':');
+        return entityHelpers.createDataExpression(utils.removeAroundQuotes(expressionArr[0]), expressionArr[1]);
     }
 
-    if (isVar === true) {
+    if (isUseful === true) {
       return entityHelpers.createDataVar(value, undefined);
     }
 
