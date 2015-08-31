@@ -8,7 +8,7 @@ module.exports = {
     return newArray;
   },
   eachObject: function eachObject(object, modifier) {
-    for (value in object) {
+    for (var value in object) {
       if (object.hasOwnProperty(value)) {
         object[value] = modifier(object[value]);
       }
