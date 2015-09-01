@@ -1241,7 +1241,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return Object.prototype.toString.call(global.process) === '[object process]';
 	  },
 	  removeAroundQuotes: function removingQuotes(string) {
-	    return string.replace(/^['"](.*)['"]$/, '$1');
+	    return string.trim().replace(/^['"](.*)['"]$/, '$1');
 	  },
 	  removeAllSpaces: function removeAllSpaces(string) {
 	    return string.replace(/\s/g, "");

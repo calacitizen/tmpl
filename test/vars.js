@@ -38,7 +38,7 @@ describe('Variables', function() {
       };
     tmpl.traverse(parsed).handle(function(traversed) {
       setTimeout(function() {
-        expect(tmpl.html(traversed, data)).to.equal('<div id="rr" class="Change-yourself upyours">YEEEAAAHHH</div>');
+        expect(tmpl.html(traversed, data)).to.equal('<div id="rr" class="Change-yourself upyours">YEEEAAAHHH yep</div>');
         done();
       });
     });

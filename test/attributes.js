@@ -16,14 +16,14 @@ describe('Conditional attributes', function() {
     });
   });
   it('Conditions', function(done) {
-    var parsed = tmpl.parse('<div class="{{ \'hidden\': hiddenClass !== false }}" id="{{ \'first\': no === 321 }}">Text</div>'),
+    var parsed = tmpl.parse('<div class="{{no}}{{ \' hidden\': hiddenClass !== false }}" id="{{ \'first\': no === 321 }}">Text</div>'),
       data = {
         hiddenClass: true,
         no: 123
       };
     tmpl.traverse(parsed).handle(function(traversed) {
       setTimeout(function() {
-        expect(tmpl.html(traversed, data)).to.equal('<div class="hidden">Text</div>');
+        expect(tmpl.html(traversed, data)).to.equal('<div class="123 hidden">Text</div>');
         done();
       });
     });
