@@ -79,7 +79,7 @@ module.exports = {
    */
   _processDataTypes: function processDataTypes(unTextData, data) {
     var textVar = seekingForVars(unTextData, data);
-    return (textVar !== undefined) ? textVar : '';
+    return (textVar !== undefined && textVar !== null) ? textVar : '';
   },
   /**
    * Processing entity data objects
