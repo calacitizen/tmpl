@@ -1,32 +1,42 @@
 var tmpl = require('../tmpl'),
-    assert = require("assert"),
-    expect = require('chai').expect;
+  assert = require("assert"),
+  expect = require('chai').expect;
 
-describe('Variables', function () {
-  it('Simple variable', function (done) {
+describe('Variables', function() {
+  it('Simple variable', function(done) {
     var parsed = tmpl.parse('<div>{{ master }} Antonioni</div>'),
-        data = { master: 'Michelangelo' };
-    tmpl.traverse(parsed).handle(function (traversed) {
-      setTimeout(function () {
+      data = {
+        master: 'Michelangelo'
+      };
+    tmpl.traverse(parsed).handle(function(traversed) {
+      setTimeout(function() {
         expect(tmpl.html(traversed, data)).to.equal('<div>Michelangelo Antonioni</div>');
         done();
       });
     });
   });
-  it('Condition variable', function () {
+  it('Condition variable', function() {
     var parsed = tmpl.parse('<div>{{ "Stanley": yes === true }} {{ "Kramer": no === true }}</div>'),
-        data = { yes: true, no: true };
-    tmpl.traverse(parsed).handle(function (traversed) {
-      setTimeout(function () {
+      data = {
+        yes: true,
+        no: true
+      };
+    tmpl.traverse(parsed).handle(function(traversed) {
+      setTimeout(function() {
         expect(tmpl.html(traversed, data)).to.equal('<div>Stanley Kramer</div>');
       });
     });
   });
-  it('Mixed variables', function () {
+  it('Mixed variables', function() {
     var parsed = tmpl.parse('<div id="{{id}}" class="Change-{{me}}{{ " upyours" : he !== 1 }}">{{sumatra}} yep</div>'),
-        data = {id: "rr", me: "yourself", he: 2, sumatra: "YEEEAAAHHH"};
-    tmpl.traverse(parsed).handle(function (traversed) {
-      setTimeout(function () {
+      data = {
+        id: "rr",
+        me: "yourself",
+        he: 2,
+        sumatra: "YEEEAAAHHH"
+      };
+    tmpl.traverse(parsed).handle(function(traversed) {
+      setTimeout(function() {
         expect(tmpl.html(traversed, data)).to.equal('<div id="rr" class="Change-yourself upyours">YEEEAAAHHH</div>');
       });
     });
