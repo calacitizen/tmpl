@@ -2026,7 +2026,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	          if (utils.removeAllSpaces(processed) !== "") {
 	            string += (attrib + '="' + processed + '"');
 	          }
-	          console.log(attrib, attribs[attrib], processed);
 	        }
 	      }
 	    }
