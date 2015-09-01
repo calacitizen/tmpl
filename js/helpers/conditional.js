@@ -46,5 +46,4 @@ module.exports = function conditional(source, data) {
     }
 
     return condition.apply(this, scopeHold(arrVars, data));
-
 }
