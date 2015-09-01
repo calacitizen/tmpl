@@ -1243,6 +1243,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  removeAroundQuotes: function removingQuotes(string) {
 	    return string.replace(/^['"](.*)['"]$/, '$1');
 	  },
+	  removeAllSpaces: function removeAllSpaces(string) {
+	    return string.replace(/\s/g, "");
+	  },
 	  clone: function clone(src) {
 	    function mixin(dest, source, copyFunc) {
 	      var name, s, i, empty = {};
@@ -2013,12 +2016,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {String}
 	   */
 	  _processAttributes: function processAttributes(attribs, data) {
-	    var string = '';
+	    var string = '',
+	        processed;
 	    if (attribs) {
 	      string += ' ';
 	      for (var attrib in attribs) {
 	        if (attribs.hasOwnProperty(attrib)) {
-	          string += (attrib + '="' + this._processData(attribs[attrib].data, data) + '"');
+	          processed = this._processData(attribs[attrib].data, data);
+	          if (utils.removeAllSpaces(processed) !== "") {
+	            string += (attrib + '="' + processed + '"');
+	          }
+	          console.log(attrib, attribs[attrib], processed);
 	        }
 	      }
 	    }

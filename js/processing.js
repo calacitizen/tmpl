@@ -104,12 +104,17 @@ module.exports = {
    * @return {String}
    */
   _processAttributes: function processAttributes(attribs, data) {
-    var string = '';
+    var string = '',
+        processed;
     if (attribs) {
       string += ' ';
       for (var attrib in attribs) {
         if (attribs.hasOwnProperty(attrib)) {
-          string += (attrib + '="' + this._processData(attribs[attrib].data, data) + '"');
+          processed = this._processData(attribs[attrib].data, data);
+          if (utils.removeAllSpaces(processed) !== "") {
+            string += (attrib + '="' + processed + '"');
+          }
+          console.log(attrib, attribs[attrib], processed);
         }
       }
     }

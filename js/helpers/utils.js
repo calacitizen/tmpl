@@ -29,6 +29,9 @@ module.exports = {
   removeAroundQuotes: function removingQuotes(string) {
     return string.replace(/^['"](.*)['"]$/, '$1');
   },
+  removeAllSpaces: function removeAllSpaces(string) {
+    return string.replace(/\s/g, "");
+  },
   clone: function clone(src) {
     function mixin(dest, source, copyFunc) {
       var name, s, i, empty = {};
