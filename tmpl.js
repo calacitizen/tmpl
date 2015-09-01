@@ -2123,7 +2123,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var scopeHold = __webpack_require__(15);
+	var scopeHold = __webpack_require__(15),
+	    utils = __webpack_require__(3);
 	module.exports = function conditional(source, data) {
 	  var
 	    sourceStrings = {
@@ -2141,6 +2142,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: '>='
 	      }]
 	    },
+	    reservedVarStrings = ["false", "true", "undefined", "null"],
 	    source = replaceGreaterLess(source),
 	    arrVars = lookUniqueVariables(source),
 	    condition = readConditionalExpression(source, arrVars);
@@ -2159,7 +2161,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        index = 0;
 	      while (index < length) {
 	        var variable = variables[index++];
-	        if (uniqueVariables.indexOf(variable) < 0) {
+	        if (uniqueVariables.indexOf(variable) < 0 && !utils.inArray(reservedVarStrings, variable)) {
 	          uniqueVariables.push(variable);
 	        }
 	      }
@@ -2169,6 +2171,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function readConditionalExpression(expression, uniqueVariables) {
 	      return Function.apply(null, uniqueVariables.concat("return " + expression));
 	    }
+
 
 	    return condition.apply(this, scopeHold(arrVars, data));
 	}

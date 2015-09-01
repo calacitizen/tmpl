@@ -1,4 +1,5 @@
-var scopeHold = require("./scopeHold");
+var scopeHold = require("./scopeHold"),
+    utils = require("./utils");
 module.exports = function conditional(source, data) {
   var
     sourceStrings = {
@@ -16,6 +17,7 @@ module.exports = function conditional(source, data) {
         value: '>='
       }]
     },
+    reservedVarStrings = ["false", "true", "undefined", "null"],
     source = replaceGreaterLess(source),
     arrVars = lookUniqueVariables(source),
     condition = readConditionalExpression(source, arrVars);
@@ -34,7 +36,7 @@ module.exports = function conditional(source, data) {
         index = 0;
       while (index < length) {
         var variable = variables[index++];
-        if (uniqueVariables.indexOf(variable) < 0) {
+        if (uniqueVariables.indexOf(variable) < 0 && !utils.inArray(reservedVarStrings, variable)) {
           uniqueVariables.push(variable);
         }
       }
@@ -44,6 +46,7 @@ module.exports = function conditional(source, data) {
     function readConditionalExpression(expression, uniqueVariables) {
       return Function.apply(null, uniqueVariables.concat("return " + expression));
     }
+
 
     return condition.apply(this, scopeHold(arrVars, data));
 }
