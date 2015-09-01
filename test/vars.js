@@ -29,7 +29,7 @@ describe('Variables', function() {
     });
   });
   it('Mixed variables', function(done) {
-    var parsed = tmpl.parse('<div id="{{id}}" class="Change-{{me}}{{ " upyours" : he !== 1 }}">{{sumatra}} yep</div>'),
+    var parsed = tmpl.parse('<div id="{{id}}" class="Change-{{me}}{{ \' upyours\' : he !== 1 }}">{{sumatra}} yep</div>'),
       data = {
         id: "rr",
         me: "yourself",
