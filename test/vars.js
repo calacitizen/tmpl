@@ -15,7 +15,7 @@ describe('Variables', function() {
       });
     });
   });
-  it('Condition variable', function() {
+  it('Condition variable', function(done) {
     var parsed = tmpl.parse('<div>{{ "Stanley": yes === true }} {{ "Kramer": no === true }}</div>'),
       data = {
         yes: true,
@@ -24,10 +24,11 @@ describe('Variables', function() {
     tmpl.traverse(parsed).handle(function(traversed) {
       setTimeout(function() {
         expect(tmpl.html(traversed, data)).to.equal('<div>Stanley Kramer</div>');
+        done();
       });
     });
   });
-  it('Mixed variables', function() {
+  it('Mixed variables', function(done) {
     var parsed = tmpl.parse('<div id="{{id}}" class="Change-{{me}}{{ " upyours" : he !== 1 }}">{{sumatra}} yep</div>'),
       data = {
         id: "rr",
@@ -38,6 +39,7 @@ describe('Variables', function() {
     tmpl.traverse(parsed).handle(function(traversed) {
       setTimeout(function() {
         expect(tmpl.html(traversed, data)).to.equal('<div id="rr" class="Change-yourself upyours">YEEEAAAHHH</div>');
+        done();
       });
     });
   });
