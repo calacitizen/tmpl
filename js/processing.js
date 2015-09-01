@@ -114,7 +114,6 @@ module.exports = {
           if (utils.removeAllSpaces(processed) !== "") {
             string += (attrib + '="' + processed + '"');
           }
-          console.log(attrib, attribs[attrib], processed);
         }
       }
     }
