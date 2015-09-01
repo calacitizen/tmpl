@@ -2019,12 +2019,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var string = '',
 	        processed;
 	    if (attribs) {
-	      string += ' ';
 	      for (var attrib in attribs) {
 	        if (attribs.hasOwnProperty(attrib)) {
 	          processed = this._processData(attribs[attrib].data, data);
 	          if (utils.removeAllSpaces(processed) !== "") {
-	            string += (attrib + '="' + processed + '"');
+	            string += ' ' + (attrib + '="' + processed + '"');
 	          }
 	        }
 	      }

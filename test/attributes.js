@@ -28,4 +28,19 @@ describe('Conditional attributes', function() {
       });
     });
   });
+  it('Mixed', function(done) {
+    var parsed = tmpl.parse('<div class="{{ \'hidden\': hiddenClass !== false }}" id="{{ mars }}" custom="{{pp}}">Text</div>'),
+      data = {
+        hiddenClass: true,
+        no: 123,
+        mars: "pluto",
+        pp: undefined
+      };
+    tmpl.traverse(parsed).handle(function(traversed) {
+      setTimeout(function() {
+        expect(tmpl.html(traversed, data)).to.equal('<div class="hidden" id="pluto">Text</div>');
+        done();
+      });
+    });
+  });
 });
