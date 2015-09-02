@@ -80,7 +80,7 @@ You can use variables in any place except data attributes in directives:
 <header class="maybe {{ activeClass }}">{{bambam}} I'm the biggest header in the world</header>
 ```
 ###Expressions
-If expression on the right handside is true, that value on the left handside will be returned.
+If expression on the right handside is true, then value on the left handside will be returned.
 ```html
 <div class="some-{{class}}{{ ' hiddenClass' : value !== 12 }}">{{'Text': otherValue !== false }} Text</div>
 ```
