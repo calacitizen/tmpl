@@ -57,6 +57,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	var traversing = __webpack_require__(1),
 	    processing = __webpack_require__(12);
 	module.exports = {
+	  template: function template(html) {
+	    var parsed = traversing.parse(html);
+	    return {
+	      handle: function handleTraverse(success, broke) {
+	        traversing.traverse(parsed).when(success, broke);
+	      }
+	    };
+	  },
 	  parse: traversing.parse,
 	  html: function html(ast, data) {
 	    return processing.getHTMLString(ast, data);
