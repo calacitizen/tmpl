@@ -1240,12 +1240,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  isNode: function isNode() {
 	    return Object.prototype.toString.call(global.process) === '[object process]';
 	  },
-	  isFunction: function isFunction (string) {
+	  isFunction: function isFunction(string) {
 	    var f = string.split(/\(([^\(]*)\)/);
 	    if (f.length === 1) {
 	      return false;
 	    }
 	    return f;
+	  },
+	  isVar: function isVar(string) {
+	    return !/['"].*?['"]/.test(string) && isNaN(parseInt(string));
 	  },
 	  removeAroundQuotes: function removingQuotes(string) {
 	    return string.trim().replace(/^['"](.*)['"]$/, '$1');
@@ -1919,13 +1922,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var utils = __webpack_require__(3),
 	  seekingForVars = __webpack_require__(13),
-	  whatType = __webpack_require__(17),
+	  whatType = __webpack_require__(18),
 	  entityHelpers = __webpack_require__(5);
 	module.exports = {
 	  _modules: {
-	    'if': __webpack_require__(18),
-	    'for': __webpack_require__(19),
-	    'partial': __webpack_require__(20)
+	    'if': __webpack_require__(19),
+	    'for': __webpack_require__(20),
+	    'partial': __webpack_require__(21)
 	  },
 	  /**
 	   * Getting html string
@@ -2094,12 +2097,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var conditional = __webpack_require__(14),
-	  utils = __webpack_require__(3);
+	  resolveVariables = __webpack_require__(17);
 	module.exports = function seekForVars(textData, scopeData) {
-	  var
-	    variableSeparator = '.',
-	    stScope,
-	    compress;
 
 	  function expression(textData) {
 	    if (conditional(textData.expression, scopeData)) {
@@ -2108,16 +2107,150 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return;
 	  }
 
-	  function checkIfArgumentIsVar(string) {
-	    return !/['||"]/.test(string) && isNaN(parseInt(string));
+	  if (textData.type === 'expression') {
+	    return expression(textData);
 	  }
 
+	  if (textData.type === 'var') {
+	    return resolveVariables(textData, scopeData);
+	  }
+	  return textData.value;
+	};
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var scopeHold = __webpack_require__(15),
+	    utils = __webpack_require__(3);
+	module.exports = function conditional(source, data) {
+	  var
+	    sourceStrings = {
+	      operators: [{
+	        name: ' lt ',
+	        value: '<'
+	      }, {
+	        name: ' gt ',
+	        value: '>'
+	      }, {
+	        name: ' le ',
+	        value: '<='
+	      }, {
+	        name: ' ge ',
+	        value: '>='
+	      }]
+	    },
+	    reservedVarStrings = ["false", "true", "undefined", "null"],
+	    source = replaceGreaterLess(source),
+	    arrVars = lookUniqueVariables(source),
+	    condition = readConditionalExpression(source, arrVars);
+
+	    function replaceGreaterLess(source) {
+	      for (var i = 0; i < sourceStrings.operators.length; i++) {
+	        source = source.replace(sourceStrings.operators[i].name, sourceStrings.operators[i].value);
+	      }
+	      return source;
+	    }
+
+	    function lookUniqueVariables(expression) {
+	      var variables = expression.match(/([A-z0-9]+)/g),
+	        length = variables.length,
+	        uniqueVariables = [],
+	        index = 0;
+	      while (index < length) {
+	        var variable = variables[index++];
+	        if (uniqueVariables.indexOf(variable) < 0 && !utils.inArray(reservedVarStrings, variable)) {
+	          if (utils.isVar(variable)) {
+	            uniqueVariables.push(variable);
+	          }
+	        }
+	      }
+	      return uniqueVariables;
+	    }
+
+	    function readConditionalExpression(expression, uniqueVariables) {
+	      return Function.apply(null, uniqueVariables.concat("return " + expression));
+	    }
+
+	    return condition.apply(this, scopeHold(arrVars, data));
+	}
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var checkStatements = __webpack_require__(16);
+	module.exports = function scopeHold(arrVars, scope) {
+	  var ms = [],
+	      stepVar;
+	  for (var i = 0; i < arrVars.length; i++) {
+	    if (scope.hasOwnProperty(arrVars[i])) {
+	      stepVar = checkStatements(arrVars[i], scope, arrVars);
+	      if (stepVar.isVar === true) {
+	        ms.push(stepVar.value);
+	      }
+	    }
+	  }
+	  return ms;
+	}
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var utils = __webpack_require__(3),
+	    resolveVariables = __webpack_require__(17);
+	module.exports = function checkStatementForInners(value, scopeData, arrVars) {
+	  var
+	    variableSeparator = '.',
+	    stScope = value.split(variableSeparator),
+	    isVar = utils.inArray(arrVars, value),
+	    compress;
+
+	  function restrictType(isVar) {
+	    if (isVar) {
+	      return "var";
+	    }
+	    return "text";
+	  }
+
+	  function varOrNot(isVar, value, name) {
+	    if (isVar) {
+	      return {
+	        isVar: isVar,
+	        name: name,
+	        value: value
+	      };
+	    }
+	    return {
+	      isVar: isVar,
+	      value: value
+	    };
+	  }
+
+	  if (isVar === true) {
+	    return varOrNot(isVar, resolveVariables({ type: restrictType(isVar), name: value, value: undefined }, scopeData), value);
+	  }
+
+	  return varOrNot(isVar, value);
+	};
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var utils = __webpack_require__(3);
+	module.exports = function resolveVariables(textData, scopeData) {
 	  function prepareFargs(args) {
 	    var argsArr = args.split(',');
 	    if (argsArr.length > 0 ) {
 	      argsArr = utils.mapForLoop(argsArr, function trimming(val) {
-	        if (checkIfArgumentIsVar(val)) {
-	          return variable({name: val})
+	        if (utils.isVar(val)) {
+	          return variable({name: val});
 	        }
 	        return utils.removeAroundQuotes(val).trim();
 	      });
@@ -2171,143 +2304,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return scopeData[textData.name];
 	  }
 
-	  if (textData.type === 'expression') {
-	    return expression(textData);
-	  }
-
-	  if (textData.type === 'var') {
-	    return variable(textData);
-	  }
-	  return textData.value;
-	};
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var scopeHold = __webpack_require__(15),
-	    utils = __webpack_require__(3);
-	module.exports = function conditional(source, data) {
-	  var
-	    sourceStrings = {
-	      operators: [{
-	        name: ' lt ',
-	        value: '<'
-	      }, {
-	        name: ' gt ',
-	        value: '>'
-	      }, {
-	        name: ' le ',
-	        value: '<='
-	      }, {
-	        name: ' ge ',
-	        value: '>='
-	      }]
-	    },
-	    reservedVarStrings = ["false", "true", "undefined", "null"],
-	    source = replaceGreaterLess(source),
-	    arrVars = lookUniqueVariables(source),
-	    condition = readConditionalExpression(source, arrVars);
-
-	    function replaceGreaterLess(source) {
-	      for (var i = 0; i < sourceStrings.operators.length; i++) {
-	        source = source.replace(sourceStrings.operators[i].name, sourceStrings.operators[i].value);
-	      }
-	      return source;
-	    }
-
-	    function lookUniqueVariables(expression) {
-	      var variables = expression.match(/([A-z]+)/g),
-	        length = variables.length,
-	        uniqueVariables = [],
-	        index = 0;
-	      while (index < length) {
-	        var variable = variables[index++];
-	        if (uniqueVariables.indexOf(variable) < 0 && !utils.inArray(reservedVarStrings, variable)) {
-	          uniqueVariables.push(variable);
-	        }
-	      }
-	      return uniqueVariables;
-	    }
-
-	    function readConditionalExpression(expression, uniqueVariables) {
-	      return Function.apply(null, uniqueVariables.concat("return " + expression));
-	    }
-
-
-	    return condition.apply(this, scopeHold(arrVars, data));
+	  return variable(textData);
 	}
 
 
 /***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var checkStatements = __webpack_require__(16);
-	module.exports = function scopeHold(arrVars, scope) {
-	  var ms = [],
-	      variableSeparator = '.',
-	      stepVar;
-	  for (var i = 0; i < arrVars.length; i++) {
-	    if (scope.hasOwnProperty(arrVars[i])) {
-	      stepVar = checkStatements(arrVars[i], scope, arrVars);
-	      if (stepVar.isVar === true) {
-	        ms.push(stepVar.value);
-	      }
-	    }
-	  }
-	  return ms;
-	}
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var utils = __webpack_require__(3);
-	module.exports = function checkStatementForInners(value, scopeData, arrVars) {
-	  var
-	    variableSeparator = '.',
-	    stScope = value.split(variableSeparator),
-	    isVar = utils.inArray(arrVars, value),
-	    compress;
-	  function varOrNot(isVar, value, name) {
-	    if (isVar) {
-	      return {
-	        isVar: isVar,
-	        name: name,
-	        value: value
-	      };
-	    }
-	    return {
-	      isVar: isVar,
-	      value: value
-	    };
-	  }
-	  if (stScope.length > 1) {
-	    for (var i = 0; i < stScope.length; i++) {
-	      if (scopeData.hasOwnProperty(stScope[i]) && i === 0) {
-	        compress = scopeData[stScope[i]];
-	      } else {
-	        if (compress && compress.hasOwnProperty(stScope[i])) {
-	          compress = compress[stScope[i]];
-	        }
-	      }
-	    }
-	    return varOrNot(isVar, compress, value);
-	  }
-
-	  if (isVar === true) {
-	    return varOrNot(isVar, scopeData[value], value);
-	  }
-
-	  return varOrNot(isVar, value);
-	};
-
-
-/***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports) {
 
 	module.exports = function checkType(value) {
@@ -2368,7 +2370,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var conditional = __webpack_require__(14);
@@ -2401,11 +2403,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var checkStatements = __webpack_require__(16),
-	  whatType = __webpack_require__(17),
+	  whatType = __webpack_require__(18),
 	  utils = __webpack_require__(3);
 	module.exports = {
 	  module: function forModule(tag, data) {
@@ -2502,7 +2504,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3);

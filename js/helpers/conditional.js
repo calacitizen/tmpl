@@ -30,14 +30,16 @@ module.exports = function conditional(source, data) {
     }
 
     function lookUniqueVariables(expression) {
-      var variables = expression.match(/([A-z]+)/g),
+      var variables = expression.match(/([A-z0-9]+)/g),
         length = variables.length,
         uniqueVariables = [],
         index = 0;
       while (index < length) {
         var variable = variables[index++];
         if (uniqueVariables.indexOf(variable) < 0 && !utils.inArray(reservedVarStrings, variable)) {
-          uniqueVariables.push(variable);
+          if (utils.isVar(variable)) {
+            uniqueVariables.push(variable);
+          }
         }
       }
       return uniqueVariables;
@@ -46,7 +48,6 @@ module.exports = function conditional(source, data) {
     function readConditionalExpression(expression, uniqueVariables) {
       return Function.apply(null, uniqueVariables.concat("return " + expression));
     }
-
 
     return condition.apply(this, scopeHold(arrVars, data));
 }

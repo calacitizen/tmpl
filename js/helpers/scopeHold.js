@@ -1,7 +1,6 @@
 var checkStatements = require('./checkStatements');
 module.exports = function scopeHold(arrVars, scope) {
   var ms = [],
-      variableSeparator = '.',
       stepVar;
   for (var i = 0; i < arrVars.length; i++) {
     if (scope.hasOwnProperty(arrVars[i])) {

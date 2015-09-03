@@ -26,12 +26,15 @@ module.exports = {
   isNode: function isNode() {
     return Object.prototype.toString.call(global.process) === '[object process]';
   },
-  isFunction: function isFunction (string) {
+  isFunction: function isFunction(string) {
     var f = string.split(/\(([^\(]*)\)/);
     if (f.length === 1) {
       return false;
     }
     return f;
+  },
+  isVar: function isVar(string) {
+    return !/['"].*?['"]/.test(string) && isNaN(parseInt(string));
   },
   removeAroundQuotes: function removingQuotes(string) {
     return string.trim().replace(/^['"](.*)['"]$/, '$1');
