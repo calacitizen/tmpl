@@ -1240,6 +1240,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  isNode: function isNode() {
 	    return Object.prototype.toString.call(global.process) === '[object process]';
 	  },
+	  isFunction: function isFunction (string) {
+	    var f = string.split(/\(([^\(]*)\)/);
+	    if (f.length === 1) {
+	      return false;
+	    }
+	    return f;
+	  },
 	  removeAroundQuotes: function removingQuotes(string) {
 	    return string.trim().replace(/^['"](.*)['"]$/, '$1');
 	  },
@@ -2086,33 +2093,90 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var conditional = __webpack_require__(14);
+	var conditional = __webpack_require__(14),
+	  utils = __webpack_require__(3);
 	module.exports = function seekForVars(textData, scopeData) {
 	  var
 	    variableSeparator = '.',
 	    stScope,
 	    compress;
-	  if (textData.type === 'expression') {
+
+	  function expression(textData) {
 	    if (conditional(textData.expression, scopeData)) {
 	      return textData.value;
 	    }
 	    return;
 	  }
-	  if (textData.type === 'var') {
-	    stScope = textData.name.split(variableSeparator);
-	    if (stScope.length > 1) {
-	      for (var i = 0; i < stScope.length; i++) {
-	        if (scopeData.hasOwnProperty(stScope[i]) && i === 0) {
-	          compress = scopeData[stScope[i]];
-	        } else {
-	          if (compress && compress.hasOwnProperty(stScope[i])) {
-	            compress = compress[stScope[i]];
-	          }
+
+	  function checkIfArgumentIsVar(string) {
+	    return !/['||"]/.test(string) && isNaN(parseInt(string));
+	  }
+
+	  function prepareFargs(args) {
+	    var argsArr = args.split(',');
+	    if (argsArr.length > 0 ) {
+	      argsArr = utils.mapForLoop(argsArr, function trimming(val) {
+	        if (checkIfArgumentIsVar(val)) {
+	          return variable({name: val})
+	        }
+	        return utils.removeAroundQuotes(val).trim();
+	      });
+	    }
+	    return argsArr;
+	  }
+
+	  function fLookUp(f, compress, scopeData, variable, i) {
+	    var fName = f[0],
+	        args = prepareFargs(f[1]);
+	    if (scopeData.hasOwnProperty(fName) && i === 0) {
+	      compress = scopeData[fName].apply(undefined, args);
+	    } else {
+	      if (compress && compress.hasOwnProperty(fName)) {
+	        compress = compress[fName].apply(undefined, args);
+	      }
+	    }
+	    return compress;
+	  }
+
+	  function compressLookUp(compress, scopeData, stScope, i) {
+	    var f = utils.isFunction(stScope[i]);
+	    if (f) {
+	      compress = fLookUp(f, compress, scopeData, stScope[i], i);
+	    } else {
+	      if (scopeData.hasOwnProperty(stScope[i]) && i === 0) {
+	        compress = scopeData[stScope[i]];
+	      } else {
+	        if (compress && compress.hasOwnProperty(stScope[i])) {
+	          compress = compress[stScope[i]];
 	        }
 	      }
-	      return compress;
+	    }
+	    return compress
+	  }
+
+	  function searching(scopeData, stScope) {
+	    var compress;
+	    for (var i = 0; i < stScope.length; i++) {
+	      compress = compressLookUp(compress, scopeData, stScope, i);
+	    }
+	    return compress;
+	  }
+
+	  function variable(textData) {
+	    var variableSeparator = '.',
+	      stScope = textData.name.split(variableSeparator);
+	    if (stScope.length > 1) {
+	      return searching(scopeData, stScope);
 	    }
 	    return scopeData[textData.name];
+	  }
+
+	  if (textData.type === 'expression') {
+	    return expression(textData);
+	  }
+
+	  if (textData.type === 'var') {
+	    return variable(textData);
 	  }
 	  return textData.value;
 	};
