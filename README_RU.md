@@ -1,6 +1,6 @@
 # TMPL ![Travis](https://travis-ci.org/calacitizen/tmpl.svg?branch=divided)
 ## Javascript API
-Шаблонизатор с валдиными html-директивами управления. TMPl использует 2 этапа генерации html.
+Шаблонизатор с валидными html-директивами управления. TMPl использует 2 этапа генерации html.
 Templating engine with valid html directives. TMPL uses three step to generate form you need to get html.
 ```javascript
 tmpl.template(source).handle(
