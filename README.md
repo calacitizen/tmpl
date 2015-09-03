@@ -79,6 +79,26 @@ You can use variables in any place except data attributes in directives:
 ```html
 <header class="maybe {{ activeClass }}">{{bambam}} I'm the biggest header in the world</header>
 ```
+###Expressions
+If expression on the right handside is true, then value on the left handside will be returned.
+```html
+<div class="some-{{class}}{{ ' hiddenClass' : value !== 12 }}">{{'Text': otherValue !== false }} Text</div>
+```
+###Attributes
+If any attribute will be set to empty string === ''. Then it will be never shown. For example:
+```javascript
+{
+  value: undefined,
+  otherValue: null
+}
+```
+```html
+<div class="{{value}}" id="{{'first': otherValue !== null }}">Text</div>
+```
+Something like this will be processed to:
+```html
+<div>Text</div>
+```
 ### If
 If directive is using simple if logic.
 
