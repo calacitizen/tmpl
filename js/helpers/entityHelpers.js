@@ -40,7 +40,7 @@ module.exports = {
    * @return {Boolean}
    */
   isTagInclude: function isTagInclude(name) {
-    return name === 'include';
+    return name === 'ws-include';
   },
   /**
    * is expression

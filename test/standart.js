@@ -1,7 +1,7 @@
 var tmpl = require('../tmpl'),
   assert = require("assert"),
   expect = require('chai').expect;
-  
+
 describe('Objects and children', function() {
   it('Testing children vars', function(done) {
     var parsed = tmpl.parse('<div>123 {{ master }}</div>');
@@ -18,7 +18,7 @@ describe('Objects and children', function() {
     });
   });
   it('Testing For module', function(done) {
-    var parsed = tmpl.parse('<for data="dog in dogs"><span class="{{ dog.type }}">{{dog.name}}</span></for>');
+    var parsed = tmpl.parse('<ws-for data="dog in dogs"><span class="{{ dog.type }}">{{dog.name}}</span></ws-for>');
     data = {
       dogs: [{
         type: 'big',
@@ -39,7 +39,7 @@ describe('Objects and children', function() {
     });
   });
   it('Testing If module', function(done) {
-    var parsed = tmpl.parse('<if data="number === 124"><div class="{{bam}}">{{tt}}</div></if>');
+    var parsed = tmpl.parse('<ws-if data="number === 124"><div class="{{bam}}">{{tt}}</div></ws-if>');
     data = {
       number: 124,
       bam: 'hidden'

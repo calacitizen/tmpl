@@ -4,9 +4,9 @@ var utils = require('./helpers/utils'),
   entityHelpers = require('./helpers/entityHelpers');
 module.exports = {
   _modules: {
-    'if': require('./astModules/if'),
-    'for': require('./astModules/for'),
-    'partial': require('./astModules/partialParse')
+    'ws-if': require('./astModules/if'),
+    'ws-for': require('./astModules/for'),
+    'ws-partial': require('./astModules/partialParse')
   },
   /**
    * Getting html string

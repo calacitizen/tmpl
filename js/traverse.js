@@ -6,8 +6,8 @@ var
   entityHelpers = require('./helpers/entityHelpers');
 module.exports = {
   _modules: {
-    'include': require('./astModules/include'),
-    'partial': require('./astModules/partial')
+    'ws-include': require('./astModules/include'),
+    'ws-partial': require('./astModules/partial')
   },
   _regex: {
     forVariables: /\{\{ ?(.*?) ?\}\}/g

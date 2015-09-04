@@ -91,8 +91,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  entityHelpers = __webpack_require__(5);
 	module.exports = {
 	  _modules: {
-	    'include': __webpack_require__(9),
-	    'partial': __webpack_require__(11)
+	    'ws-include': __webpack_require__(9),
+	    'ws-partial': __webpack_require__(11)
 	  },
 	  _regex: {
 	    forVariables: /\{\{ ?(.*?) ?\}\}/g
@@ -1380,7 +1380,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {Boolean}
 	   */
 	  isTagInclude: function isTagInclude(name) {
-	    return name === 'include';
+	    return name === 'ws-include';
 	  },
 	  /**
 	   * is expression
@@ -1934,9 +1934,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  entityHelpers = __webpack_require__(5);
 	module.exports = {
 	  _modules: {
-	    'if': __webpack_require__(19),
-	    'for': __webpack_require__(20),
-	    'partial': __webpack_require__(21)
+	    'ws-if': __webpack_require__(19),
+	    'ws-for': __webpack_require__(20),
+	    'ws-partial': __webpack_require__(21)
 	  },
 	  /**
 	   * Getting html string
