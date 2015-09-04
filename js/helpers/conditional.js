@@ -47,7 +47,7 @@ module.exports = function conditional(source, data) {
       while (index < length) {
         var variable = variables[index++];
         if (uniqueVariables.indexOf(variable) < 0 && !utils.inArray(reservedVarStrings, variable)) {
-          if (utils.isVar(variable)) {
+          if (utils.isVarFromScope.call(utils, utils.splitVarString(variable), data)) {
             uniqueVariables.push(variable);
           }
         }

@@ -1258,6 +1258,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  isVar: function isVar(string) {
 	    return !/['"].*?['"]/.test(string) && isNaN(parseInt(string));
 	  },
+	  isVarFromScope: function isVarFromScope(varArray, scope) {
+	    var f;
+	    if (varArray.length > 0) {
+	      f = this.isFunction(varArray[0]);
+	      if (f) {
+	        return scope.hasOwnProperty(f[0]);
+	      }
+	      return scope.hasOwnProperty(varArray[0]);
+	    }
+	    return false;
+	  },
+	  splitVarString: function splitVarString(string) {
+	    return string.split('.');
+	  },
 	  removeAroundQuotes: function removingQuotes(string) {
 	    return string.trim().replace(/^['"](.*)['"]$/, '$1');
 	  },
@@ -2197,7 +2211,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      while (index < length) {
 	        var variable = variables[index++];
 	        if (uniqueVariables.indexOf(variable) < 0 && !utils.inArray(reservedVarStrings, variable)) {
-	          if (utils.isVar(variable)) {
+	          if (utils.isVarFromScope.call(utils, utils.splitVarString(variable), data)) {
 	            uniqueVariables.push(variable);
 	          }
 	        }
