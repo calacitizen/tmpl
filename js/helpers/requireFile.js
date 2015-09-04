@@ -3,13 +3,21 @@ var utils = require('../helpers/utils'),
 
 module.exports = function requireFile(url) {
   var isNode = utils.isNode();
-
+  /**
+   * If not node environment -> create empty requirejs module
+   *
+   */
   if (isNode === false) {
     define('fs', function restrainFs() {
       return {};
     });
   }
 
+  /**
+   * Create XMLHttpRequest
+   * @param  {String} url
+   * @return {Object}     XMLHttpRequest
+   */
   function createRequest(url) {
     var request = new XMLHttpRequest();
     request.open('GET', url);
@@ -17,6 +25,11 @@ module.exports = function requireFile(url) {
     return request;
   }
 
+  /**
+   * Read file with help of FileSystemApi
+   * @param  {String} url
+   * @return {Object}     State promise
+   */
   function readFileFs(url) {
     var fs,
         state = State.make();
@@ -35,6 +48,11 @@ module.exports = function requireFile(url) {
     return state.promise;
   }
 
+  /**
+   * Read file with XMLHttpRequest
+   * @param  {String} url
+   * @return {Object}     State Promise
+   */
   function readFileXMLHttpRequest(url) {
     var state = State.make(),
         req = createRequest(url);

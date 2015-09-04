@@ -1,5 +1,10 @@
 var utils = require('./utils');
 module.exports = function resolveVariables(textData, scopeData) {
+  /**
+   * If function call, prepare arguments
+   * @param  {String} args
+   * @return {Array}        Array witj function arguments
+   */
   function prepareFargs(args) {
     var argsArr = args.split(',');
     if (argsArr.length > 0 ) {
@@ -13,6 +18,15 @@ module.exports = function resolveVariables(textData, scopeData) {
     return argsArr;
   }
 
+  /**
+   * Function lookup in variableSeparator
+   * @param  {String} f         Function string
+   * @param  {Array} compress  Scope data
+   * @param  {Array} scopeData Original Scope data
+   * @param  {String} variable  Variable nam,e
+   * @param  {number} i         Iterator
+   * @return {Array}           Array with data
+   */
   function fLookUp(f, compress, scopeData, variable, i) {
     var fName = f[0],
         args = prepareFargs(f[1]);
@@ -26,6 +40,14 @@ module.exports = function resolveVariables(textData, scopeData) {
     return compress;
   }
 
+  /**
+   * First variable lookup
+   * @param  {Array} compress  new generated Scope data
+   * @param  {Array} scopeData Scope data
+   * @param  {Array} stScope   Array from variable string
+   * @param  {number} i         Iterator
+   * @return {Array}
+   */
   function compressLookUp(compress, scopeData, stScope, i) {
     var f = utils.isFunction(stScope[i]);
     if (f) {
@@ -42,6 +64,12 @@ module.exports = function resolveVariables(textData, scopeData) {
     return compress
   }
 
+  /**
+   * Searching for variables in stScope
+   * @param  {Array} scopeData Scope data
+   * @param  {Array} stScope   Array from variable string
+   * @return {Array}
+   */
   function searching(scopeData, stScope) {
     var compress;
     for (var i = 0; i < stScope.length; i++) {
@@ -50,6 +78,11 @@ module.exports = function resolveVariables(textData, scopeData) {
     return compress;
   }
 
+  /**
+   * Resolve variable value
+   * @param  {Object} textData Object with AST-data
+   * @return {Object|String|Array|number}          variable value
+   */
   function variable(textData) {
     var variableSeparator = '.',
       stScope = textData.name.split(variableSeparator);

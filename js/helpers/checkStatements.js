@@ -7,6 +7,11 @@ module.exports = function checkStatementForInners(value, scopeData, arrVars) {
     isVar = utils.inArray(arrVars, value),
     compress;
 
+  /**
+   * Crate type for empty data tag
+   * @param  {Boolean} isVar
+   * @return {String}
+   */
   function restrictType(isVar) {
     if (isVar) {
       return "var";
@@ -14,6 +19,13 @@ module.exports = function checkStatementForInners(value, scopeData, arrVars) {
     return "text";
   }
 
+  /**
+   * Variable or node
+   * @param  {Boolean} isVar
+   * @param  {[type]}  value
+   * @param  {String}  name
+   * @return {Object}
+   */
   function varOrNot(isVar, value, name) {
     if (isVar) {
       return {

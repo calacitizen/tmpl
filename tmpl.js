@@ -1825,13 +1825,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = function requireFile(url) {
 	  var isNode = utils.isNode();
-
+	  /**
+	   * If not node environment -> create empty requirejs module
+	   *
+	   */
 	  if (isNode === false) {
 	    !(__WEBPACK_AMD_DEFINE_RESULT__ = function restrainFs() {
 	      return {};
 	    }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  }
 
+	  /**
+	   * Create XMLHttpRequest
+	   * @param  {String} url
+	   * @return {Object}     XMLHttpRequest
+	   */
 	  function createRequest(url) {
 	    var request = new XMLHttpRequest();
 	    request.open('GET', url);
@@ -1839,6 +1847,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return request;
 	  }
 
+	  /**
+	   * Read file with help of FileSystemApi
+	   * @param  {String} url
+	   * @return {Object}     State promise
+	   */
 	  function readFileFs(url) {
 	    var fs,
 	        state = State.make();
@@ -1857,6 +1870,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return state.promise;
 	  }
 
+	  /**
+	   * Read file with XMLHttpRequest
+	   * @param  {String} url
+	   * @return {Object}     State Promise
+	   */
 	  function readFileXMLHttpRequest(url) {
 	    var state = State.make(),
 	        req = createRequest(url);
@@ -2154,6 +2172,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    arrVars = lookUniqueVariables(source),
 	    condition = readConditionalExpression(source, arrVars);
 
+	    /**
+	     * Replace greater and less for real directives
+	     * @param  {String} source String with expression
+	     * @return {String}        String with replaced directives
+	     */
 	    function replaceGreaterLess(source) {
 	      for (var i = 0; i < sourceStrings.operators.length; i++) {
 	        source = source.replace(sourceStrings.operators[i].name, sourceStrings.operators[i].value);
@@ -2161,6 +2184,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return source;
 	    }
 
+	    /**
+	     * Looking up for unqiue variables in expression
+	     * @param  {String} expression String with expression
+	     * @return {Array}            Array with unqiue variables
+	     */
 	    function lookUniqueVariables(expression) {
 	      var variables = expression.match(/([A-z0-9]+)/g),
 	        length = variables.length,
@@ -2177,6 +2205,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return uniqueVariables;
 	    }
 
+	    /**
+	     * Reading conditional expression
+	     * @param  {String} expression      String with expression
+	     * @param  {Array} uniqueVariables  Array with unqiue variables
+	     * @return {Function}                 Function with resulting expression
+	     */
 	    function readConditionalExpression(expression, uniqueVariables) {
 	      return Function.apply(null, uniqueVariables.concat("return " + expression));
 	    }
@@ -2218,6 +2252,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    isVar = utils.inArray(arrVars, value),
 	    compress;
 
+	  /**
+	   * Crate type for empty data tag
+	   * @param  {Boolean} isVar
+	   * @return {String}
+	   */
 	  function restrictType(isVar) {
 	    if (isVar) {
 	      return "var";
@@ -2225,6 +2264,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return "text";
 	  }
 
+	  /**
+	   * Variable or node
+	   * @param  {Boolean} isVar
+	   * @param  {[type]}  value
+	   * @param  {String}  name
+	   * @return {Object}
+	   */
 	  function varOrNot(isVar, value, name) {
 	    if (isVar) {
 	      return {
@@ -2253,6 +2299,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var utils = __webpack_require__(3);
 	module.exports = function resolveVariables(textData, scopeData) {
+	  /**
+	   * If function call, prepare arguments
+	   * @param  {String} args
+	   * @return {Array}        Array witj function arguments
+	   */
 	  function prepareFargs(args) {
 	    var argsArr = args.split(',');
 	    if (argsArr.length > 0 ) {
@@ -2266,6 +2317,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return argsArr;
 	  }
 
+	  /**
+	   * Function lookup in variableSeparator
+	   * @param  {String} f         Function string
+	   * @param  {Array} compress  Scope data
+	   * @param  {Array} scopeData Original Scope data
+	   * @param  {String} variable  Variable nam,e
+	   * @param  {number} i         Iterator
+	   * @return {Array}           Array with data
+	   */
 	  function fLookUp(f, compress, scopeData, variable, i) {
 	    var fName = f[0],
 	        args = prepareFargs(f[1]);
@@ -2279,6 +2339,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return compress;
 	  }
 
+	  /**
+	   * First variable lookup
+	   * @param  {Array} compress  new generated Scope data
+	   * @param  {Array} scopeData Scope data
+	   * @param  {Array} stScope   Array from variable string
+	   * @param  {number} i         Iterator
+	   * @return {Array}
+	   */
 	  function compressLookUp(compress, scopeData, stScope, i) {
 	    var f = utils.isFunction(stScope[i]);
 	    if (f) {
@@ -2295,6 +2363,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return compress
 	  }
 
+	  /**
+	   * Searching for variables in stScope
+	   * @param  {Array} scopeData Scope data
+	   * @param  {Array} stScope   Array from variable string
+	   * @return {Array}
+	   */
 	  function searching(scopeData, stScope) {
 	    var compress;
 	    for (var i = 0; i < stScope.length; i++) {
@@ -2303,6 +2377,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return compress;
 	  }
 
+	  /**
+	   * Resolve variable value
+	   * @param  {Object} textData Object with AST-data
+	   * @return {Object|String|Array|number}          variable value
+	   */
 	  function variable(textData) {
 	    var variableSeparator = '.',
 	      stScope = textData.name.split(variableSeparator);
