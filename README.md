@@ -116,37 +116,37 @@ JavaScript Operator | TMPL Equivalent
 `>=`                | `ge`
 
 ```html
-<if data="number === 123">
+<ws-if data="number === 123">
   <div class="sample">Sample</div>
-</if>
+</ws-if>
 ```
 ###For
 For directive can be used for arrays and objects.
 ```html
-<for data="rabbit in rabbits.names">
+<ws-for data="rabbit in rabbits.names">
   <div class="rabbit {{ rabbit.type }}">{{ rabbit.name }}</div>
     <div class="runs">
-      <for data="run in rabbit.runs">
+      <ws-for data="run in rabbit.runs">
         {{ run.num }} ll{{pumb}}
-      </for>
+      </ws-for>
     </div>
   </div>
-</for>
+</ws-for>
 ```
 ###Include && Partials
 Include directive can be used at this time only with requirejs. In order to use it you need to at first include template:
 ```html
-<include template="tmpl/button" name="button" />
+<ws-include template="tmpl/button" name="button" />
 ```
 and then use partial:
 ```html
-<partial template="button" data="rabbit" />
+<ws-partial template="button" data="rabbit" />
 ```
 or in loop:
 ```html
-<for data="rabbit in rabbits.names">
-  <partial template="button" data="rabbit" />
-</for>
+<ws-for data="rabbit in rabbits.names">
+  <ws-partial template="button" data="rabbit" />
+</ws-for>
 ```
 In the partial template you can grab main data object with var name of "root".
 
