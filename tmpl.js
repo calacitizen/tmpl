@@ -2204,14 +2204,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @return {Array}            Array with unqiue variables
 	     */
 	    function lookUniqueVariables(expression) {
-	      var variables = expression.match(/([A-z0-9]+)/g),
+	      var variables = expression.match(/([A-z0-9'"]+)/g),
 	        length = variables.length,
 	        uniqueVariables = [],
 	        index = 0;
 	      while (index < length) {
 	        var variable = variables[index++];
 	        if (uniqueVariables.indexOf(variable) < 0 && !utils.inArray(reservedVarStrings, variable)) {
-	          if (utils.isVarFromScope.call(utils, utils.splitVarString(variable), data)) {
+	          if (utils.isVar(variable)) {
 	            uniqueVariables.push(variable);
 	          }
 	        }
@@ -2222,7 +2222,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    /**
 	     * Reading conditional expression
 	     * @param  {String} expression      String with expression
-	     * @param  {Array} uniqueVariables  Array with unqiue variables
+	     * @param  {Array} uniqueVariables  Array with unique variables
 	     * @return {Function}                 Function with resulting expression
 	     */
 	    function readConditionalExpression(expression, uniqueVariables) {
