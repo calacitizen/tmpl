@@ -1336,7 +1336,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (entityHelpers.isExpression(value) && isUseful) {
 	        expressionArr = value.split(':');
-	        return entityHelpers.createDataExpression(utils.removeAroundQuotes(expressionArr[0]), expressionArr[1]);
+	        return entityHelpers.createDataExpression(expressionArr[0], expressionArr[1]);
 	    }
 
 	    if (isUseful === true) {
@@ -2137,12 +2137,18 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var conditional = __webpack_require__(14),
+	  utils = __webpack_require__(3),
+	  entityHelpers = __webpack_require__(5),
 	  resolveVariables = __webpack_require__(17);
 	module.exports = function seekForVars(textData, scopeData) {
 
 	  function expression(textData) {
+	    console.log(textData);
 	    if (conditional(textData.expression, scopeData)) {
-	      return textData.value;
+	        if (utils.isVar(textData.value)) {
+	            return resolveVariables(entityHelpers.createDataVar(textData.value, undefined), scopeData);
+	        }
+	      return utils.removeAroundQuotes(textData.value);
 	    }
 	    return;
 	  }

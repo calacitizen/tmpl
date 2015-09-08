@@ -1,10 +1,15 @@
 var conditional = require('./conditional'),
+  utils = require('./utils'),
+  entityHelpers = require('./entityHelpers'),
   resolveVariables = require('./resolveVariables');
 module.exports = function seekForVars(textData, scopeData) {
 
   function expression(textData) {
     if (conditional(textData.expression, scopeData)) {
-      return textData.value;
+        if (utils.isVar(textData.value)) {
+            return resolveVariables(entityHelpers.createDataVar(textData.value, undefined), scopeData);
+        }
+      return utils.removeAroundQuotes(textData.value);
     }
     return;
   }

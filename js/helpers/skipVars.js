@@ -11,7 +11,7 @@ module.exports = {
 
     if (entityHelpers.isExpression(value) && isUseful) {
         expressionArr = value.split(':');
-        return entityHelpers.createDataExpression(utils.removeAroundQuotes(expressionArr[0]), expressionArr[1]);
+        return entityHelpers.createDataExpression(expressionArr[0], expressionArr[1]);
     }
 
     if (isUseful === true) {
