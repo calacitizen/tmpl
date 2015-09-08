@@ -86,10 +86,7 @@ module.exports = function resolveVariables(textData, scopeData) {
   function variable(textData) {
     var variableSeparator = '.',
       stScope = textData.name.split(variableSeparator);
-    if (stScope.length > 1) {
-      return searching(scopeData, stScope);
-    }
-    return scopeData[textData.name];
+    return searching(scopeData, stScope);
   }
 
   return variable(textData);

@@ -2143,7 +2143,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function seekForVars(textData, scopeData) {
 
 	  function expression(textData) {
-	    console.log(textData);
 	    if (conditional(textData.expression, scopeData)) {
 	        if (utils.isVar(textData.value)) {
 	            return resolveVariables(entityHelpers.createDataVar(textData.value, undefined), scopeData);
@@ -2405,10 +2404,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function variable(textData) {
 	    var variableSeparator = '.',
 	      stScope = textData.name.split(variableSeparator);
-	    if (stScope.length > 1) {
-	      return searching(scopeData, stScope);
-	    }
-	    return scopeData[textData.name];
+	    return searching(scopeData, stScope);
 	  }
 
 	  return variable(textData);
