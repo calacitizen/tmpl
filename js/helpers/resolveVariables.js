@@ -34,8 +34,8 @@ module.exports = function resolveVariables(textData, scopeData) {
     if (scopeData.hasOwnProperty(fName) && i === 0) {
       compress = scopeData[fName].apply(undefined, args);
     } else {
-      if (compress && compress.hasOwnProperty(fName)) {
-        compress = compress[fName].apply(undefined, args);
+      if (compress) {
+        compress = compress[fName].apply(compress, args);
       }
     }
     return compress;
@@ -54,10 +54,10 @@ module.exports = function resolveVariables(textData, scopeData) {
     if (f) {
       compress = fLookUp(f, compress, scopeData, stScope[i], i);
     } else {
-      if (scopeData.hasOwnProperty(stScope[i]) && i === 0) {
+      if (i === 0) {
         compress = scopeData[stScope[i]];
       } else {
-        if (compress && compress.hasOwnProperty(stScope[i])) {
+        if (compress) {
           compress = compress[stScope[i]];
         }
       }
@@ -85,8 +85,7 @@ module.exports = function resolveVariables(textData, scopeData) {
    * @return {Object|String|Array|number}          variable value
    */
   function variable(textData) {
-    var variableSeparator = '.',
-      stScope = textData.name.split(variableSeparator);
+    var stScope = utils.splitVarsAndFunctions(textData.name);
     return searching(scopeData, stScope);
   }
 

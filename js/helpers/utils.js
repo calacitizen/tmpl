@@ -36,6 +36,21 @@ module.exports = {
   isVar: function isVar(string) {
     return !/['"].*?['"]/.test(string) && isNaN(parseInt(string));
   },
+  splitVarsAndFunctions: function splitVarsAndFunctions(s) {
+      var depth = 0, seg = 0, rv = [];
+      s.replace(/[^().]*([)]*)([(]*)(.)?/g,
+          function (m, cls, opn, com, off, s) {
+              depth += opn.length - cls.length;
+              var newseg = off + m.length;
+              if (!depth && com) {
+                  rv.push(s.substring(seg, newseg - 1));
+                  seg = newseg;
+              }
+              return m;
+          });
+      rv.push(s.substring(seg));
+      return rv;
+  },
   isVarFromScope: function isVarFromScope(varArray, scope) {
     var f;
     if (varArray.length > 0) {
