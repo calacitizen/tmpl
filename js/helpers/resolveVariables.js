@@ -9,6 +9,7 @@ module.exports = function resolveVariables(textData, scopeData) {
     var argsArr = args.split(',');
     if (argsArr.length > 0 ) {
       argsArr = utils.mapForLoop(argsArr, function trimming(val) {
+          val = val.trim();
         if (utils.isVar(val)) {
           return variable({name: val});
         }

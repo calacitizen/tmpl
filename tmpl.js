@@ -2327,6 +2327,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var argsArr = args.split(',');
 	    if (argsArr.length > 0 ) {
 	      argsArr = utils.mapForLoop(argsArr, function trimming(val) {
+	          val = val.trim();
 	        if (utils.isVar(val)) {
 	          return variable({name: val});
 	        }
@@ -2588,7 +2589,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    function resolveStatement(dataToIterate) {
 	      var scopeArray = dataToIterate.value,
-	        scopeData = utils.clone(data),
+	        scopeData = data,
 	        typeFunction = types[whatType(scopeArray)],
 	        ps;
 	      if (typeFunction === undefined) {

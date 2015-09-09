@@ -77,7 +77,7 @@ module.exports = {
 
     function resolveStatement(dataToIterate) {
       var scopeArray = dataToIterate.value,
-        scopeData = utils.clone(data),
+        scopeData = data,
         typeFunction = types[whatType(scopeArray)],
         ps;
       if (typeFunction === undefined) {
