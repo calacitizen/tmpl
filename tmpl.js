@@ -1848,11 +1848,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = function requireFile(url) {
 	    var isNode = utils.isNode(),
-	        resolver = function resolver(templatePath) {
-	            return templatePath + '.tmpl';
+	        resolver = function resolver(templatePath, ext) {
+	            return templatePath + '.' + ext;
 	        },
 	        pathResolver = (this.resolver !== undefined) ? this.resolver : resolver,
-	        path = pathResolver(url);
+	        path = pathResolver(url, 'tmpl');
 
 	    /**
 	     * If not node environment -> create empty requirejs module
