@@ -158,8 +158,8 @@ module.exports = {
      * @param  {Object} value          Tag, text or module
      * @return {Object}                State promise
      */
-    _collect: function collect(traverseMethod, value) {
-        var ps = traverseMethod.call(this, value);
+    _collect: function collect(traverseMethod, value, prev, next) {
+        var ps = traverseMethod.call(this, value, prev, next);
         if (entityHelpers.isTagInclude(value.name)) {
             this._includeStack[value.attribs.name] = ps;
         } else {
@@ -179,7 +179,7 @@ module.exports = {
         for (var i = 0; i < ast.length; i++) {
             traverseMethod = this._whatMethodShouldYouUse(ast[i]);
             if (traverseMethod) {
-                collect = this._collect(traverseMethod, ast[i]);
+                collect = this._collect(traverseMethod, ast[i], ast[i-1], ast[i+1]);
                 if (collect !== undefined) {
                     psArray.push(collect);
                 }
@@ -235,10 +235,10 @@ module.exports = {
      * @param  {Object} tag
      * @return {Object}     State promise
      */
-    _traverseTag: function traverseTag(tag) {
+    _traverseTag: function traverseTag(tag, prev, next) {
         var state,
             attribs = this._traverseTagAttributes(tag.attribs),
-            takeTag = this._createTag(tag.name, tag.data, tag.raw, attribs, tag.children);
+            takeTag = this._createTag(tag.name, tag.data, tag.raw, attribs, tag.children, prev, next);
         if (takeTag.children && takeTag.children.length > 0) {
             return this.traverseTagWithChildren(takeTag);
         } else {
@@ -280,14 +280,16 @@ module.exports = {
      * @param  {Array} children
      * @return {Object}
      */
-    _createTag: function createTag(name, data, raw, attribs, children) {
+    _createTag: function createTag(name, data, raw, attribs, children, prev, next) {
         return {
             name: name,
             data: data,
             raw: raw,
             attribs: attribs,
             children: children,
-            type: "tag"
+            type: "tag",
+            prev: prev,
+            next: next
         };
     },
     /**

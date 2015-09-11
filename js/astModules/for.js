@@ -90,6 +90,6 @@ module.exports = {
             if (tag.children !== undefined) {
                 return resolveStatement.call(this, mainData);
             }
-        }
+        };
     }
-}
+};

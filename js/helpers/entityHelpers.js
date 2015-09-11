@@ -48,7 +48,7 @@ module.exports = {
      * @return {Boolean}
      */
     isExpression: function isExpression(string) {
-        return string.split(':').length > 1;
+        return string.split('?').length > 1;
     },
     /**
      * Create data object for variable

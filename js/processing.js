@@ -6,8 +6,10 @@ module.exports = {
     _modules: {
         'ws-if': require('./astModules/if'),
         'ws-for': require('./astModules/for'),
+        'ws-else': require('./astModules/else'),
         'ws-partial': require('./astModules/partialParse')
     },
+    _ifStack: {},
     /**
      * Getting html string
      * @param  {Array} ast  AST array of entities
@@ -48,7 +50,7 @@ module.exports = {
      * @param  {Object} entity Tag, text
      * @return {String}
      */
-    _stopArrs: function _stopArrs(entity) {
+    _stopArrs: function stopArrs(entity) {
         var string = '';
         if (whatType(entity) === 'array') {
             for (var i = 0; i < entity.length; i++) {

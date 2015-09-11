@@ -235,8 +235,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @param  {Object} value          Tag, text or module
 	     * @return {Object}                State promise
 	     */
-	    _collect: function collect(traverseMethod, value) {
-	        var ps = traverseMethod.call(this, value);
+	    _collect: function collect(traverseMethod, value, prev, next) {
+	        var ps = traverseMethod.call(this, value, prev, next);
 	        if (entityHelpers.isTagInclude(value.name)) {
 	            this._includeStack[value.attribs.name] = ps;
 	        } else {
@@ -256,7 +256,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        for (var i = 0; i < ast.length; i++) {
 	            traverseMethod = this._whatMethodShouldYouUse(ast[i]);
 	            if (traverseMethod) {
-	                collect = this._collect(traverseMethod, ast[i]);
+	                collect = this._collect(traverseMethod, ast[i], ast[i-1], ast[i+1]);
 	                if (collect !== undefined) {
 	                    psArray.push(collect);
 	                }
@@ -312,10 +312,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @param  {Object} tag
 	     * @return {Object}     State promise
 	     */
-	    _traverseTag: function traverseTag(tag) {
+	    _traverseTag: function traverseTag(tag, prev, next) {
 	        var state,
 	            attribs = this._traverseTagAttributes(tag.attribs),
-	            takeTag = this._createTag(tag.name, tag.data, tag.raw, attribs, tag.children);
+	            takeTag = this._createTag(tag.name, tag.data, tag.raw, attribs, tag.children, prev, next);
 	        if (takeTag.children && takeTag.children.length > 0) {
 	            return this.traverseTagWithChildren(takeTag);
 	        } else {
@@ -357,14 +357,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @param  {Array} children
 	     * @return {Object}
 	     */
-	    _createTag: function createTag(name, data, raw, attribs, children) {
+	    _createTag: function createTag(name, data, raw, attribs, children, prev, next) {
 	        return {
 	            name: name,
 	            data: data,
 	            raw: raw,
 	            attribs: attribs,
 	            children: children,
-	            type: "tag"
+	            type: "tag",
+	            prev: prev,
+	            next: next
 	        };
 	    },
 	    /**
@@ -1336,26 +1338,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	var utils = __webpack_require__(3),
 	    entityHelpers = __webpack_require__(5);
 	module.exports = {
-	  checkStatementForInners: function checkStatementForInners(value, arrVars) {
-	    var
-	      variableSeparator = '.',
-	      stScope = value.split(variableSeparator),
-	      isUseful = utils.inArray(arrVars, value),
-	      expressionArr,
-	      compress;
+	    checkStatementForInners: function checkStatementForInners(value, arrVars) {
+	        var
+	            variableSeparator = '.',
+	            stScope = value.split(variableSeparator),
+	            isUseful = utils.inArray(arrVars, value),
+	            expressionArr,
+	            compress;
 
-	    if (entityHelpers.isExpression(value) && isUseful) {
-	        expressionArr = value.split(':');
-	        return entityHelpers.createDataExpression(expressionArr[0], expressionArr[1]);
+	        if (entityHelpers.isExpression(value) && isUseful) {
+	            expressionArr = value.split(':');
+	            return entityHelpers.createDataExpression(expressionArr[0], expressionArr[1]);
+	        }
+
+	        if (isUseful === true) {
+	            return entityHelpers.createDataVar(value, undefined);
+	        }
+
+	        return entityHelpers.createDataText(value);
 	    }
-
-	    if (isUseful === true) {
-	      return entityHelpers.createDataVar(value, undefined);
-	    }
-
-	    return entityHelpers.createDataText(value);
-	  }
-	}
+	};
 
 
 /***/ },
@@ -1412,7 +1414,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @return {Boolean}
 	     */
 	    isExpression: function isExpression(string) {
-	        return string.split(':').length > 1;
+	        return string.split('?').length > 1;
 	    },
 	    /**
 	     * Create data object for variable
@@ -1458,178 +1460,178 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(setImmediate) {var State = (function StateFunction() {
-	  'use strict';
+	    'use strict';
 
-	  if (typeof setImmediate !== 'function') {
-	    setImmediate = function setImmediate(func, fate) {
-	      'use strict';
-	      return setTimeout(function setTimeoutHandle() {
-	        func(fate);
-	      }, 0);
-	    };
-	  }
-
-	  function enlighten(queue, fate) {
-	    queue.forEach(function queueForEach(func) {
-	      setImmediate(func, fate);
-	    });
-	  }
-
-	  return {
-	    make: function make() {
-	      var breakers = [], // .when's broken queue
-	        fate, // The promise's ultimate value
-	        keepers = [], // .when's kept queue
-	        status = 'pending'; // 'broken', 'kept', or 'pending'
-
-	      function enqueue(
-	        resolution, // 'keep' or 'break'
-	        func, // A function that was registered with .when
-	        state // A state that provides the resolution functions
-	      ) {
-	        var queue = resolution === 'keep' ? keepers : breakers;
-	        queue[queue.length] = typeof func !== 'function'
-
-	        ? state[resolution]: function enqueueResolution(value) {
-	          try {
-	            var result = func(value);
-	            if (result && result.is_promise === true) {
-	              result.when(state.keep, state.break);
-	            } else {
-	              state.keep(result);
-	            }
-	          } catch (e) {
-	            throw new Error(e);
-	            state.break(e);
-	          }
+	    if (typeof setImmediate !== 'function') {
+	        setImmediate = function setImmediate(func, fate) {
+	            'use strict';
+	            return setTimeout(function setTimeoutHandle() {
+	                func(fate);
+	            }, 0);
 	        };
-	      }
+	    }
 
-	      function herald(state, value, queue) {
-	        if (status !== 'pending') {
-	          throw "overpromise";
-	        }
-	        fate = value;
-	        status = state;
-	        enlighten(queue, fate);
-	        keepers.length = 0;
-	        breakers.length = 0;
-	      }
-	      return {
-	        'break': function breakPromise(value) {
-	          herald('broken', value, breakers);
+	    function enlighten(queue, fate) {
+	        queue.forEach(function queueForEach(func) {
+	            setImmediate(func, fate);
+	        });
+	    }
+
+	    return {
+	        make: function make() {
+	            var breakers = [], // .when's broken queue
+	                fate, // The promise's ultimate value
+	                keepers = [], // .when's kept queue
+	                status = 'pending'; // 'broken', 'kept', or 'pending'
+
+	            function enqueue(
+	                resolution, // 'keep' or 'break'
+	                func, // A function that was registered with .when
+	                state // A state that provides the resolution functions
+	            ) {
+	                var queue = resolution === 'keep' ? keepers : breakers;
+	                queue[queue.length] = typeof func !== 'function'
+
+	                    ? state[resolution]: function enqueueResolution(value) {
+	                    try {
+	                        var result = func(value);
+	                        if (result && result.is_promise === true) {
+	                            result.when(state.keep, state.break);
+	                        } else {
+	                            state.keep(result);
+	                        }
+	                    } catch (e) {
+	                        throw new Error(e);
+	                        state.break(e);
+	                    }
+	                };
+	            }
+
+	            function herald(state, value, queue) {
+	                if (status !== 'pending') {
+	                    throw "overpromise";
+	                }
+	                fate = value;
+	                status = state;
+	                enlighten(queue, fate);
+	                keepers.length = 0;
+	                breakers.length = 0;
+	            }
+	            return {
+	                'break': function breakPromise(value) {
+	                    herald('broken', value, breakers);
+	                },
+	                keep: function keep(value) {
+	                    herald('kept', value, keepers);
+	                },
+	                promise: {
+	                    is_promise: true,
+	                    when: function when(kept, broken) {
+	                        var state = make();
+	                        switch (status) {
+	                            case 'pending':
+	                                enqueue('keep', kept, state);
+	                                enqueue('break', broken, state);
+	                                break;
+	                            case 'kept':
+	                                enqueue('keep', kept, state);
+	                                enlighten(keepers, fate);
+	                                break;
+	                            case 'broken':
+	                                enqueue('break', broken, state);
+	                                enlighten(breakers, fate);
+	                                break;
+	                        }
+	                        return state.promise;
+	                    }
+	                }
+	            };
 	        },
-	        keep: function keep(value) {
-	          herald('kept', value, keepers);
-	        },
-	        promise: {
-	          is_promise: true,
-	          when: function when(kept, broken) {
-	            var state = make();
-	            switch (status) {
-	              case 'pending':
-	                enqueue('keep', kept, state);
-	                enqueue('break', broken, state);
-	                break;
-	              case 'kept':
-	                enqueue('keep', kept, state);
-	                enlighten(keepers, fate);
-	                break;
-	              case 'broken':
-	                enqueue('break', broken, state);
-	                enlighten(breakers, fate);
-	                break;
+	        every: function every(array) {
+	            var remaining = array.length,
+	                results = [],
+	                state = State.make();
+
+	            if (!remaining) {
+	                state.break(array);
+	            } else {
+	                array.forEach(function everyPromiseEach(promise, i) {
+	                    promise.when(function everyProiseWhen(value) {
+	                        results[i] = value;
+	                        remaining -= 1;
+	                        if (remaining === 0) {
+	                            state.keep(results);
+	                        }
+	                    }, function everyProiseWhenBroke(reason) {
+	                        remaining = NaN;
+	                        state.break(reason);
+	                    });
+	                });
 	            }
 	            return state.promise;
-	          }
-	        }
-	      };
-	    },
-	    every: function every(array) {
-	      var remaining = array.length,
-	        results = [],
-	        state = State.make();
+	        },
+	        first: function first(array) {
+	            var found = false,
+	                remaining = array.length,
+	                state = State.make();
 
-	      if (!remaining) {
-	        state.break(array);
-	      } else {
-	        array.forEach(function everyPromiseEach(promise, i) {
-	          promise.when(function everyProiseWhen(value) {
-	            results[i] = value;
-	            remaining -= 1;
+	            function check() {
+	                remaining -= 1;
+	                if (remaining === 0 && !found) {
+	                    state.break();
+	                }
+	            }
+
 	            if (remaining === 0) {
-	              state.keep(results);
+	                state.break(array);
+	            } else {
+	                array.forEach(function firstPromiseEach(promise) {
+	                    promise.when(function firstProiseWhen(value) {
+	                        if (!found) {
+	                            found = true;
+	                            state.keep(value);
+	                        }
+	                        check();
+	                    }, check);
+	                });
 	            }
-	          }, function everyProiseWhenBroke(reason) {
-	            remaining = NaN;
+	            return state.promise;
+	        },
+	        any: function any(array) {
+	            var remaining = array.length,
+	                results = [],
+	                state = State.make();
+
+	            function check() {
+	                remaining -= 1;
+	                if (remaining === 0) {
+	                    state.keep(results);
+	                }
+	            }
+
+	            if (!remaining) {
+	                state.keep(results);
+	            } else {
+	                array.forEach(function anyPromiseEach(promise, i) {
+	                    promise.when(function anyProiseWhen(value) {
+	                        results[i] = value;
+	                        check();
+	                    }, check);
+	                });
+	            }
+	            return state.promise;
+	        },
+	        kept: function kept(value) {
+	            var state = State.make();
+	            state.keep(value);
+	            return state.promise;
+	        },
+	        broken: function broken(reason) {
+	            var state = State.make();
 	            state.break(reason);
-	          });
-	        });
-	      }
-	      return state.promise;
-	    },
-	    first: function first(array) {
-	      var found = false,
-	        remaining = array.length,
-	        state = State.make();
-
-	      function check() {
-	        remaining -= 1;
-	        if (remaining === 0 && !found) {
-	          state.break();
+	            return state.promise;
 	        }
-	      }
-
-	      if (remaining === 0) {
-	        state.break(array);
-	      } else {
-	        array.forEach(function firstPromiseEach(promise) {
-	          promise.when(function firstProiseWhen(value) {
-	            if (!found) {
-	              found = true;
-	              state.keep(value);
-	            }
-	            check();
-	          }, check);
-	        });
-	      }
-	      return state.promise;
-	    },
-	    any: function any(array) {
-	      var remaining = array.length,
-	        results = [],
-	        state = State.make();
-
-	      function check() {
-	        remaining -= 1;
-	        if (remaining === 0) {
-	          state.keep(results);
-	        }
-	      }
-
-	      if (!remaining) {
-	        state.keep(results);
-	      } else {
-	        array.forEach(function anyPromiseEach(promise, i) {
-	          promise.when(function anyProiseWhen(value) {
-	            results[i] = value;
-	            check();
-	          }, check);
-	        });
-	      }
-	      return state.promise;
-	    },
-	    kept: function kept(value) {
-	      var state = State.make();
-	      state.keep(value);
-	      return state.promise;
-	    },
-	    broken: function broken(reason) {
-	      var state = State.make();
-	      state.break(reason);
-	      return state.promise;
-	    }
-	  };
+	    };
 	}());
 
 	module.exports = State;
@@ -1834,9 +1836,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        return function includeResolve() {
 	            return resolveStatement.call(this);
-	        }
+	        };
 	    }
-	}
+	};
 
 
 /***/ },
@@ -1928,47 +1930,47 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var State = __webpack_require__(6),
-	  utils = __webpack_require__(3);
+	    utils = __webpack_require__(3);
 	module.exports = {
-	  module: function partialModule(tag) {
-	    var assignModuleVar = tag.attribs.data.trim(),
-	      template = tag.attribs.template.trim();
+	    module: function partialModule(tag) {
+	        var assignModuleVar = tag.attribs.data.trim(),
+	            template = tag.attribs.template.trim();
 
-	    function resolveStatement() {
-	      var state = State.make();
+	        function resolveStatement() {
+	            var state = State.make();
 
-	      if (this._includeStack[template] === undefined) {
-	        throw new Error('Include tag for "' + template + '" is not found!');
-	      }
+	            if (this._includeStack[template] === undefined) {
+	                throw new Error('Include tag for "' + template + '" is not found!');
+	            }
 
-	      this._includeStack[template].when(
-	        function partialInclude(templateData) {
-	          if (templateData) {
-	            this.traversingAST(templateData).when(
-	              function partialTraversing(modAST) {
-	                tag.children = modAST;
-	                state.keep(tag);
-	              },
-	              function brokenTraverse(reason) {
-	                throw new Error(reason);
-	              }
+	            this._includeStack[template].when(
+	                function partialInclude(templateData) {
+	                    if (templateData) {
+	                        this.traversingAST(templateData).when(
+	                            function partialTraversing(modAST) {
+	                                tag.children = modAST;
+	                                state.keep(tag);
+	                            },
+	                            function brokenTraverse(reason) {
+	                                throw new Error(reason);
+	                            }
+	                        );
+	                    } else {
+	                        state.break('Include tag for "' + template + '" is not found!');
+	                    }
+	                }.bind(this),
+	                function brokenPartial(reason) {
+	                    throw new Error(reason);
+	                }
 	            );
-	          } else {
-	            state.break('Include tag for "' + template + '" is not found!');
-	          }
-	        }.bind(this),
-	        function brokenPartial(reason) {
-	          throw new Error(reason);
+	            return state.promise;
 	        }
-	      );
-	      return state.promise;
-	    }
 
-	    return function partialResolve() {
-	      return resolveStatement.call(this);
+	        return function partialResolve() {
+	            return resolveStatement.call(this);
+	        };
 	    }
-	  }
-	}
+	};
 
 
 /***/ },
@@ -1983,8 +1985,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _modules: {
 	        'ws-if': __webpack_require__(19),
 	        'ws-for': __webpack_require__(20),
-	        'ws-partial': __webpack_require__(21)
+	        'ws-else': __webpack_require__(21),
+	        'ws-partial': __webpack_require__(22)
 	    },
+	    _ifStack: {},
 	    /**
 	     * Getting html string
 	     * @param  {Array} ast  AST array of entities
@@ -2025,7 +2029,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @param  {Object} entity Tag, text
 	     * @return {String}
 	     */
-	    _stopArrs: function _stopArrs(entity) {
+	    _stopArrs: function stopArrs(entity) {
 	        var string = '';
 	        if (whatType(entity) === 'array') {
 	            for (var i = 0; i < entity.length; i++) {
@@ -2152,29 +2156,29 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var conditional = __webpack_require__(14),
-	  utils = __webpack_require__(3),
-	  entityHelpers = __webpack_require__(5),
-	  resolveVariables = __webpack_require__(17);
+	    utils = __webpack_require__(3),
+	    entityHelpers = __webpack_require__(5),
+	    resolveVariables = __webpack_require__(17);
 	module.exports = function seekForVars(textData, scopeData) {
 
-	  function expression(textData) {
-	    if (conditional(textData.expression, scopeData)) {
-	        if (utils.isVar(textData.value)) {
-	            return resolveVariables(entityHelpers.createDataVar(textData.value, undefined), scopeData);
+	    function expression(textData) {
+	        if (conditional(textData.expression, scopeData)) {
+	            if (utils.isVar(textData.value)) {
+	                return resolveVariables(entityHelpers.createDataVar(textData.value, undefined), scopeData);
+	            }
+	            return utils.removeAroundQuotes(textData.value);
 	        }
-	      return utils.removeAroundQuotes(textData.value);
+	        return;
 	    }
-	    return;
-	  }
 
-	  if (textData.type === 'expression') {
-	    return expression(textData);
-	  }
+	    if (textData.type === 'expression') {
+	        return expression(textData);
+	    }
 
-	  if (textData.type === 'var') {
-	    return resolveVariables(textData, scopeData);
-	  }
-	  return textData.value;
+	    if (textData.type === 'var') {
+	        return resolveVariables(textData, scopeData);
+	    }
+	    return textData.value;
 	};
 
 
@@ -2493,31 +2497,31 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var conditional = __webpack_require__(14);
 	module.exports = {
-	  module: function ifModule(tag, data) {
-	    var source;
+	    module: function ifModule(tag, data) {
+	        var source;
 
-	    if (tag.attribs.data.data === undefined) {
-	      throw new Error('There is no data for "if" module to use');
-	    }
-
-	    source =  tag.attribs.data.data.value.trim();
-
-	    function resolveStatement() {
-	      if (conditional(source, data)) {
-	        if (tag.children !== undefined) {
-	          return this._process(tag.children, data);
+	        if (tag.attribs.data.data === undefined) {
+	            throw new Error('There is no data for "if" module to use');
 	        }
-	      }
-	      return;
-	    }
 
-	    return function ifModuleReturnable() {
-	      if (tag.children !== undefined) {
-	        return resolveStatement.call(this);
-	      }
+	        source =  tag.attribs.data.data.value.trim();
+
+	        function resolveStatement() {
+	            if (conditional(source, data)) {
+	                if (tag.children !== undefined) {
+	                    return this._process(tag.children, data);
+	                }
+	            }
+	            return;
+	        }
+
+	        return function ifModuleReturnable() {
+	            if (tag.children !== undefined) {
+	                return resolveStatement.call(this);
+	            }
+	        };
 	    }
-	  }
-	}
+	};
 
 
 /***/ },
@@ -2616,13 +2620,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (tag.children !== undefined) {
 	                return resolveStatement.call(this, mainData);
 	            }
-	        }
+	        };
 	    }
-	}
+	};
 
 
 /***/ },
 /* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var conditional = __webpack_require__(14);
+	module.exports = {
+	    module: function elseModule(tag, data) {
+	        var source;
+	        if (tag.prev === undefined || tag.prev.name !== 'ws-if') {
+	            throw new Error('There is no "if" for "else" module to use');
+	        }
+
+	        source =  tag.prev.attribs.data.trim();
+
+	        function resolveStatement() {
+	            if (!conditional(source, data)) {
+	                if (tag.children !== undefined) {
+	                    return this._process(tag.children, data);
+	                }
+	            }
+	            return;
+	        }
+
+	        return function elseModuleReturnable() {
+	            if (tag.children !== undefined) {
+	                return resolveStatement.call(this);
+	            }
+	        };
+	    }
+	};
+
+
+/***/ },
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3);

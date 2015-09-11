@@ -14,6 +14,6 @@ module.exports = {
 
         return function includeResolve() {
             return resolveStatement.call(this);
-        }
+        };
     }
-}
+};

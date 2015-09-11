@@ -1,16 +1,15 @@
 var conditional = require('../helpers/conditional');
 module.exports = {
-    module: function ifModule(tag, data) {
+    module: function elseModule(tag, data) {
         var source;
-
-        if (tag.attribs.data.data === undefined) {
-            throw new Error('There is no data for "if" module to use');
+        if (tag.prev === undefined || tag.prev.name !== 'ws-if') {
+            throw new Error('There is no "if" for "else" module to use');
         }
 
-        source =  tag.attribs.data.data.value.trim();
+        source =  tag.prev.attribs.data.trim();
 
         function resolveStatement() {
-            if (conditional(source, data)) {
+            if (!conditional(source, data)) {
                 if (tag.children !== undefined) {
                     return this._process(tag.children, data);
                 }
@@ -18,7 +17,7 @@ module.exports = {
             return;
         }
 
-        return function ifModuleReturnable() {
+        return function elseModuleReturnable() {
             if (tag.children !== undefined) {
                 return resolveStatement.call(this);
             }
