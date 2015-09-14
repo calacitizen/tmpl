@@ -4,14 +4,21 @@ var conditional = require('./conditional'),
     resolveVariables = require('./resolveVariables');
 module.exports = function seekForVars(textData, scopeData) {
 
-    function expression(textData) {
-        if (conditional(textData.expression, scopeData)) {
-            if (utils.isVar(textData.value)) {
-                return resolveVariables(entityHelpers.createDataVar(textData.value, undefined), scopeData);
+    function expressionResolve(value, scopeData) {
+        if (value !== undefined) {
+            if (utils.isVar(value)) {
+                return resolveVariables(entityHelpers.createDataVar(value, undefined), scopeData);
             }
-            return utils.removeAroundQuotes(textData.value);
+            return utils.removeAroundQuotes(value);
         }
         return;
+    }
+
+    function expression(textData) {
+        if (conditional(textData.expression, scopeData)) {
+            return expressionResolve(textData.valueOne, scopeData);
+        }
+        return expressionResolve(textData.valueTwo, scopeData);
     }
 
     if (textData.type === 'expression') {
