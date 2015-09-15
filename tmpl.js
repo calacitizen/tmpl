@@ -55,7 +55,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var traversing = __webpack_require__(1),
-	    processing = __webpack_require__(12);
+	    processing = __webpack_require__(13);
 	module.exports = {
 	    template: function template(html, resolver) {
 	        var parsed = traversing.parse(html);
@@ -79,12 +79,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    htmlparser = __webpack_require__(2),
 	    utils = __webpack_require__(3),
 	    skipVars = __webpack_require__(4),
-	    State = __webpack_require__(6),
-	    entityHelpers = __webpack_require__(5);
+	    State = __webpack_require__(7),
+	    entityHelpers = __webpack_require__(6);
 	module.exports = {
 	    _modules: {
-	        'ws-include': __webpack_require__(9),
-	        'ws-partial': __webpack_require__(11)
+	        'ws-include': __webpack_require__(10),
+	        'ws-partial': __webpack_require__(12)
 	    },
 	    _regex: {
 	        forVariables: /\{\{ ?(.*?) ?\}\}/g
@@ -327,7 +327,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    /**
 	     * Main function for finding traverse method for module
 	     * @param  {Object} tag
-	     * @return {Function}     Module function
+	     * @return {Array}     Module function
 	     */
 	    _traverseModule: function traverseModule(tag) {
 	        var tagModule = entityHelpers.moduleMatcher.call(this, tag);
@@ -1336,19 +1336,17 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3),
-	    entityHelpers = __webpack_require__(5);
+	    conditionalResolver = __webpack_require__(5),
+	    entityHelpers = __webpack_require__(6);
 	module.exports = {
 	    checkStatementForInners: function checkStatementForInners(value, arrVars) {
 	        var
-	            variableSeparator = '.',
-	            stScope = value.split(variableSeparator),
 	            isUseful = utils.inArray(arrVars, value),
-	            expressionArr,
-	            compress;
+	            expressionObj;
 
 	        if (entityHelpers.isExpression(value) && isUseful) {
-	            expressionArr = value.split(':');
-	            return entityHelpers.createDataExpression(expressionArr[0], expressionArr[1]);
+	            expressionObj = conditionalResolver(value);
+	            return entityHelpers.createDataExpression(expressionObj.condition, expressionObj.valOne, expressionObj.valTwo);
 	        }
 
 	        if (isUseful === true) {
@@ -1362,6 +1360,80 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 5 */
+/***/ function(module, exports) {
+
+	module.exports = function conditionResolver(string) {
+	    var stArr = string.split(''),
+	        singleQuote = "'",
+	        quote = '"',
+	        colon = ":",
+	        questionMark = '?',
+	        boolArr = [],
+	        everyObj = {},
+	        qWas = false,
+	        quoteWas = false,
+	        length = stArr.length;
+
+	    function joinArray(array) {
+	        return array.splice(0, array.length).join('').trim();
+	    }
+
+	    function isQuote(string) {
+	        return string === singleQuote || string === quote;
+	    }
+
+	    function isQuestionMark(string) {
+	        return string === questionMark;
+	    }
+
+	    function isColon(string) {
+	        return string === colon;
+	    }
+
+	    function isCondition(string) {
+	        return isQuestionMark(string) && qWas === false && quoteWas === false;
+	    }
+
+	    function isFirstPartOfDeal(string) {
+	        return isColon(string) && qWas === true;
+	    }
+
+	    function isLast(iterator, length) {
+	        return (iterator + 1) === length && qWas === true;
+	    }
+
+	    function resolveValueOfConditional(object, array) {
+	        if (object.valOne === undefined) {
+	            object.valOne = joinArray(array);
+	        } else {
+	            object.valTwo = joinArray(array);
+	        }
+	        return object;
+	    }
+
+	    for (var i = 0; i < length; i++) {
+	        if (isQuote(stArr[i])) {
+	            quoteWas = true;
+	        }
+	        if (isCondition(stArr[i])) {
+	            everyObj.condition = joinArray(boolArr);
+	            qWas = true;
+	        }
+	        else if (isFirstPartOfDeal(stArr[i])) {
+	            everyObj.valOne = joinArray(boolArr);
+	        }
+	        else {
+	            boolArr.push(stArr[i]);
+	        }
+	        if (isLast(i, length)) {
+	            everyObj = resolveValueOfConditional(everyObj, boolArr);
+	        }
+	    }
+	    return everyObj;
+	};
+
+/***/ },
+/* 6 */
 /***/ function(module, exports) {
 
 	module.exports = {
@@ -1445,18 +1517,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @param  {String} value
 	     * @return {Object}       Object
 	     */
-	    createDataExpression: function createDataExpression(value, expression) {
+	    createDataExpression: function createDataExpression(expression, valueOne, valueTwo) {
 	        return {
 	            type: 'expression',
 	            expression: expression.trim(),
-	            value: value
+	            valueOne: valueOne,
+	            valueTwo: valueTwo
 	        };
 	    }
 	};
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(setImmediate) {var State = (function StateFunction() {
@@ -1493,17 +1566,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                queue[queue.length] = typeof func !== 'function'
 
 	                    ? state[resolution]: function enqueueResolution(value) {
-	                    try {
+	                    //try {
 	                        var result = func(value);
 	                        if (result && result.is_promise === true) {
 	                            result.when(state.keep, state.break);
 	                        } else {
 	                            state.keep(result);
 	                        }
-	                    } catch (e) {
-	                        throw new Error(e);
-	                        state.break(e);
-	                    }
+	                    ////} catch (e) {
+	                    //    throw new Error(e);
+	                    //    state.break(e);
+	                    //}
 	                };
 	            }
 
@@ -1636,13 +1709,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = State;
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7).setImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8).setImmediate))
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(8).nextTick;
+	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(9).nextTick;
 	var apply = Function.prototype.apply;
 	var slice = Array.prototype.slice;
 	var immediateIds = {};
@@ -1718,10 +1791,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
 	  delete immediateIds[id];
 	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7).setImmediate, __webpack_require__(7).clearImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8).setImmediate, __webpack_require__(8).clearImmediate))
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports) {
 
 	// shim for using process in browser
@@ -1817,10 +1890,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var requireFile = __webpack_require__(10);
+	var requireFile = __webpack_require__(11);
 	module.exports = {
 	    module: function requireOrRetire(tag) {
 	        var assignModuleVar = tag.attribs.name.trim(),
@@ -1842,11 +1915,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;var utils = __webpack_require__(3),
-	    State = __webpack_require__(6);
+	    State = __webpack_require__(7);
 
 	module.exports = function requireFile(url) {
 	    var isNode = utils.isNode(),
@@ -1926,10 +1999,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var State = __webpack_require__(6),
+	var State = __webpack_require__(7),
 	    utils = __webpack_require__(3);
 	module.exports = {
 	    module: function partialModule(tag) {
@@ -1974,19 +2047,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3),
-	    seekingForVars = __webpack_require__(13),
-	    whatType = __webpack_require__(18),
-	    entityHelpers = __webpack_require__(5);
+	    seekingForVars = __webpack_require__(14),
+	    whatType = __webpack_require__(19),
+	    entityHelpers = __webpack_require__(6);
 	module.exports = {
 	    _modules: {
-	        'ws-if': __webpack_require__(19),
-	        'ws-for': __webpack_require__(20),
-	        'ws-else': __webpack_require__(21),
-	        'ws-partial': __webpack_require__(22)
+	        'ws-if': __webpack_require__(20),
+	        'ws-for': __webpack_require__(21),
+	        'ws-else': __webpack_require__(22),
+	        'ws-partial': __webpack_require__(23)
 	    },
 	    _ifStack: {},
 	    /**
@@ -2152,23 +2225,30 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var conditional = __webpack_require__(14),
+	var conditional = __webpack_require__(15),
 	    utils = __webpack_require__(3),
-	    entityHelpers = __webpack_require__(5),
-	    resolveVariables = __webpack_require__(17);
+	    entityHelpers = __webpack_require__(6),
+	    resolveVariables = __webpack_require__(18);
 	module.exports = function seekForVars(textData, scopeData) {
+
+	    function expressionResolve(value, scopeData) {
+	        if (value !== undefined) {
+	            if (utils.isVar(value)) {
+	                return resolveVariables(entityHelpers.createDataVar(value, undefined), scopeData);
+	            }
+	            return utils.removeAroundQuotes(value);
+	        }
+	        return;
+	    }
 
 	    function expression(textData) {
 	        if (conditional(textData.expression, scopeData)) {
-	            if (utils.isVar(textData.value)) {
-	                return resolveVariables(entityHelpers.createDataVar(textData.value, undefined), scopeData);
-	            }
-	            return utils.removeAroundQuotes(textData.value);
+	            return expressionResolve(textData.valueOne, scopeData);
 	        }
-	        return;
+	        return expressionResolve(textData.valueTwo, scopeData);
 	    }
 
 	    if (textData.type === 'expression') {
@@ -2183,10 +2263,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var scopeHold = __webpack_require__(15),
+	var scopeHold = __webpack_require__(16),
 	    utils = __webpack_require__(3);
 	module.exports = function conditional(source, data) {
 	    var
@@ -2258,10 +2338,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var checkStatements = __webpack_require__(16);
+	var checkStatements = __webpack_require__(17);
 	module.exports = function scopeHold(arrVars, scope) {
 	  var ms = [],
 	      stepVar;
@@ -2278,61 +2358,61 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3),
-	    resolveVariables = __webpack_require__(17);
+	    resolveVariables = __webpack_require__(18);
 	module.exports = function checkStatementForInners(value, scopeData, arrVars) {
-	  var
-	    variableSeparator = '.',
-	    stScope = value.split(variableSeparator),
-	    isVar = utils.inArray(arrVars, value),
-	    compress;
+	    var
+	        variableSeparator = '.',
+	        stScope = value.split(variableSeparator),
+	        isVar = utils.inArray(arrVars, value),
+	        compress;
 
-	  /**
-	   * Crate type for empty data tag
-	   * @param  {Boolean} isVar
-	   * @return {String}
-	   */
-	  function restrictType(isVar) {
-	    if (isVar) {
-	      return "var";
+	    /**
+	     * Crate type for empty data tag
+	     * @param  {Boolean} isVar
+	     * @return {String}
+	     */
+	    function restrictType(isVar) {
+	        if (isVar) {
+	            return "var";
+	        }
+	        return "text";
 	    }
-	    return "text";
-	  }
 
-	  /**
-	   * Variable or node
-	   * @param  {Boolean} isVar
-	   * @param  {[type]}  value
-	   * @param  {String}  name
-	   * @return {Object}
-	   */
-	  function varOrNot(isVar, value, name) {
-	    if (isVar) {
-	      return {
-	        isVar: isVar,
-	        name: name,
-	        value: value
-	      };
+	    /**
+	     * Variable or node
+	     * @param  {Boolean} isVar
+	     * @param  {[type]}  value
+	     * @param  {String}  name
+	     * @return {Object}
+	     */
+	    function varOrNot(isVar, value, name) {
+	        if (isVar) {
+	            return {
+	                isVar: isVar,
+	                name: name,
+	                value: value
+	            };
+	        }
+	        return {
+	            isVar: isVar,
+	            value: value
+	        };
 	    }
-	    return {
-	      isVar: isVar,
-	      value: value
-	    };
-	  }
 
-	  if (isVar === true) {
-	    return varOrNot(isVar, resolveVariables({ type: restrictType(isVar), name: value, value: undefined }, scopeData), value);
-	  }
+	    if (isVar === true) {
+	        return varOrNot(isVar, resolveVariables({ type: restrictType(isVar), name: value, value: undefined }, scopeData), value);
+	    }
 
-	  return varOrNot(isVar, value);
+	    return varOrNot(isVar, value);
 	};
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3);
@@ -2431,71 +2511,71 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports) {
 
 	module.exports = function checkType(value) {
 
-	  var type = function checkTypeInside(o) {
+	    var type = function checkTypeInside(o) {
 
-	    if (o === null) {
-	      return 'null';
-	    }
+	        if (o === null) {
+	            return 'null';
+	        }
 
-	    if (o && (o.nodeType === 1 || o.nodeType === 9)) {
-	      return 'element';
-	    }
+	        if (o && (o.nodeType === 1 || o.nodeType === 9)) {
+	            return 'element';
+	        }
 
-	    var s = Object.prototype.toString.call(o);
-	    var type = s.match(/\[object (.*?)\]/)[1].toLowerCase();
+	        var s = Object.prototype.toString.call(o);
+	        var type = s.match(/\[object (.*?)\]/)[1].toLowerCase();
 
-	    if (type === 'number') {
-	      if (isNaN(o)) {
-	        return 'nan';
-	      }
-	      if (!isFinite(o)) {
-	        return 'infinity';
-	      }
-	    }
+	        if (type === 'number') {
+	            if (isNaN(o)) {
+	                return 'nan';
+	            }
+	            if (!isFinite(o)) {
+	                return 'infinity';
+	            }
+	        }
 
-	    return type;
-	  };
-
-	  var types = [
-	    'Null',
-	    'Undefined',
-	    'Object',
-	    'Array',
-	    'String',
-	    'Number',
-	    'Boolean',
-	    'Function',
-	    'RegExp',
-	    'Element',
-	    'NaN',
-	    'Infinite'
-	  ];
-
-	  var generateMethod = function(t) {
-	    type['is' + t] = function(o) {
-	      return type(o) === t.toLowerCase();
+	        return type;
 	    };
-	  };
 
-	  for (var i = 0; i < types.length; i++) {
-	    generateMethod(types[i]);
-	  }
+	    var types = [
+	        'Null',
+	        'Undefined',
+	        'Object',
+	        'Array',
+	        'String',
+	        'Number',
+	        'Boolean',
+	        'Function',
+	        'RegExp',
+	        'Element',
+	        'NaN',
+	        'Infinite'
+	    ];
 
-	  return type(value);
+	    var generateMethod = function(t) {
+	        type['is' + t] = function(o) {
+	            return type(o) === t.toLowerCase();
+	        };
+	    };
+
+	    for (var i = 0; i < types.length; i++) {
+	        generateMethod(types[i]);
+	    }
+
+	    return type(value);
 
 	};
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var conditional = __webpack_require__(14);
+	var conditional = __webpack_require__(15);
 	module.exports = {
 	    module: function ifModule(tag, data) {
 	        var source;
@@ -2525,11 +2605,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var checkStatements = __webpack_require__(16),
-	    whatType = __webpack_require__(18),
+	var checkStatements = __webpack_require__(17),
+	    whatType = __webpack_require__(19),
 	    utils = __webpack_require__(3);
 	module.exports = {
 	    module: function forModule(tag, data) {
@@ -2626,13 +2706,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var conditional = __webpack_require__(14);
+	var conditional = __webpack_require__(15);
 	module.exports = {
 	    module: function elseModule(tag, data) {
 	        var source;
+
 	        if (tag.prev === undefined || tag.prev.name !== 'ws-if') {
 	            throw new Error('There is no "if" for "else" module to use');
 	        }
@@ -2658,7 +2739,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3);

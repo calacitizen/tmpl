@@ -79,11 +79,12 @@ module.exports = {
      * @param  {String} value
      * @return {Object}       Object
      */
-    createDataExpression: function createDataExpression(value, expression) {
+    createDataExpression: function createDataExpression(expression, valueOne, valueTwo) {
         return {
             type: 'expression',
             expression: expression.trim(),
-            value: value
+            valueOne: valueOne,
+            valueTwo: valueTwo
         };
     }
 };

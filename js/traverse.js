@@ -250,7 +250,7 @@ module.exports = {
     /**
      * Main function for finding traverse method for module
      * @param  {Object} tag
-     * @return {Function}     Module function
+     * @return {Array}     Module function
      */
     _traverseModule: function traverseModule(tag) {
         var tagModule = entityHelpers.moduleMatcher.call(this, tag);

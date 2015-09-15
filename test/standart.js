@@ -4,8 +4,7 @@ var tmpl = require('../tmpl'),
 
 describe('Objects and children', function() {
   it('Testing children vars', function(done) {
-    var parsed = tmpl.parse('<div>123 {{ master }}</div>');
-    tmpl.traverse(parsed).handle(function(traversed) {
+    tmpl.template('<div>123 {{ master }}</div>').handle(function(traversed) {
       setTimeout(function() {
         var child = traversed[0].children[0];
         for (var i = 0; i < child.data.length; i++) {
@@ -18,8 +17,7 @@ describe('Objects and children', function() {
     });
   });
   it('Testing For module', function(done) {
-    var parsed = tmpl.parse('<ws-for data="dog in dogs"><span class="{{ dog.type }}">{{dog.name}}</span></ws-for>');
-    data = {
+    var data = {
       dogs: [{
         type: 'big',
         name: 'Lacy'
@@ -31,7 +29,7 @@ describe('Objects and children', function() {
         name: 'Mike'
       }]
     };
-    tmpl.traverse(parsed).handle(function(traversed) {
+    tmpl.template('<ws-for data="dog in dogs"><span class="{{ dog.type }}">{{dog.name}}</span></ws-for>').handle(function(traversed) {
       setTimeout(function() {
         expect(tmpl.html(traversed, data)).to.equal('<span class="big">Lacy</span><span class="small">Kev</span><span class="stupid">Mike</span>');
         done();
@@ -39,12 +37,11 @@ describe('Objects and children', function() {
     });
   });
   it('Testing If module', function(done) {
-    var parsed = tmpl.parse('<ws-if data="number === 124"><div class="{{bam}}">{{tt}}</div></ws-if>');
-    data = {
+    var data = {
       number: 124,
       bam: 'hidden'
     };
-    tmpl.traverse(parsed).handle(function(traversed) {
+    tmpl.template('<ws-if data="number === 124"><div class="{{bam}}">{{tt}}</div></ws-if>').handle(function(traversed) {
       setTimeout(function() {
         expect(tmpl.html(traversed, data)).to.equal('<div class="hidden"></div>')
         done();

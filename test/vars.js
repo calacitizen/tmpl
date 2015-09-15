@@ -4,11 +4,10 @@ var tmpl = require('../tmpl'),
 
 describe('Variables', function() {
   it('Simple variable', function(done) {
-    var parsed = tmpl.parse('<div>{{ master }} Antonioni</div>'),
-      data = {
+    var data = {
         master: 'Michelangelo'
       };
-    tmpl.traverse(parsed).handle(function(traversed) {
+    tmpl.template('<div>{{ master }} Antonioni</div>').handle(function(traversed) {
       setTimeout(function() {
         expect(tmpl.html(traversed, data)).to.equal('<div>Michelangelo Antonioni</div>');
         done();
@@ -16,12 +15,11 @@ describe('Variables', function() {
     });
   });
   it('Condition variable', function(done) {
-    var parsed = tmpl.parse('<div>{{ "Stanley": yes === true }} {{ "Kramer": no === true }}</div>'),
-      data = {
+    var data = {
         yes: true,
         no: true
       };
-    tmpl.traverse(parsed).handle(function(traversed) {
+    tmpl.template('<div>{{ yes === true ? "Stanley" }} {{ no === true ? "Kramer" }}</div>').handle(function(traversed) {
       setTimeout(function() {
         expect(tmpl.html(traversed, data)).to.equal('<div>Stanley Kramer</div>');
         done();
@@ -29,14 +27,13 @@ describe('Variables', function() {
     });
   });
   it('Mixed variables', function(done) {
-    var parsed = tmpl.parse('<div id="{{id}}" class="Change-{{me}}{{ \' upyours\' : he !== 1 }}">{{sumatra}} yep</div>'),
-      data = {
+    var data = {
         id: "rr",
         me: "yourself",
         he: 2,
         sumatra: "YEEEAAAHHH"
       };
-    tmpl.traverse(parsed).handle(function(traversed) {
+    tmpl.template('<div id="{{id}}" class="Change-{{me}}{{ he !== 1 ? \' upyours\' }}">{{sumatra}} yep</div>').handle(function(traversed) {
       setTimeout(function() {
         expect(tmpl.html(traversed, data)).to.equal('<div id="rr" class="Change-yourself upyours">YEEEAAAHHH yep</div>');
         done();
