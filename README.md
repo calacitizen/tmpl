@@ -64,9 +64,9 @@ You can use variables in any place except data attributes in directives:
 <header class="maybe {{ activeClass }}">{{bambam}} I'm the biggest header in the world</header>
 ```
 ###Expressions
-If expression on the right handside is true, then value on the left handside will be returned.
+They look like a ternary operators, but the aren't. You can skip the second part with ":". So if conditional expression on the left is true first value will be returned and if not the second, or undefined.
 ```html
-<div class="some-{{class}}{{ ' hiddenClass' : value !== 12 }}">{{'Text': otherValue !== false }} Text</div>
+<div class="some-{{class}}{{ value !== 12 ? ' hiddenClass' }}">{{ otherValue !== false ? 'Text' : 'No text' }} Text</div>
 ```
 ###Attributes
 If any attribute will be set to empty string === ''. Then it will be never shown. For example:
@@ -77,7 +77,7 @@ If any attribute will be set to empty string === ''. Then it will be never shown
 }
 ```
 ```html
-<div class="{{value}}" id="{{'first': otherValue !== null }}">Text</div>
+<div class="{{value}}" id="{{ otherValue !== null ? 'first' }}">Text</div>
 ```
 Something like this will be processed to:
 ```html
