@@ -65,9 +65,9 @@ tmpl.html(traversed, data);
 <header class="maybe {{ activeClass }}">{{bambam}} I'm the biggest header in the world</header>
 ```
 ###Выражения
-Если выражения с правой стороны === true или является не falsy (https://developer.mozilla.org/ru/docs/Glossary/Falsy) значение слева будет выведено в этом месте.
+Они выглядят как тернарные операторы. Можно опустить второе значение, разделяемое ":". Если выражения с левой стороны === true или является не falsy (https://developer.mozilla.org/ru/docs/Glossary/Falsy) первое значение справа будет выведено в этом месте, если нет, то второе или undefined.
 ```html
-<div class="some-{{class}}{{ ' hiddenClass' : value !== 12 }}">{{'Text': otherValue !== false }} Text</div>
+<div class="some-{{class}}{{ value !== 12 ? ' hiddenClass'  }}">{{ otherValue !== false ? 'Text': 'No text' }} Text</div>
 ```
 ###Attributes
 Если значение любого из атрибутов будет пустым или === ''. В таком случае атрибут не будет показан совсем. 
@@ -78,7 +78,7 @@ tmpl.html(traversed, data);
 }
 ```
 ```html
-<div class="{{value}}" id="{{'first': otherValue !== null }}">Text</div>
+<div class="{{value}}" id="{{otherValue !== null ? 'first'}}">Text</div>
 ```
 Пример:
 ```html
