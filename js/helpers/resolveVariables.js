@@ -62,7 +62,7 @@ module.exports = function resolveVariables(textData, scopeData) {
                 }
             }
         }
-        return compress
+        return compress;
     }
 
     /**

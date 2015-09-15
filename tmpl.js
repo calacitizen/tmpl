@@ -2482,7 +2482,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 	        }
-	        return compress
+	        return compress;
 	    }
 
 	    /**
