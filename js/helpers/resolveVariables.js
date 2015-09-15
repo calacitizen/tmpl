@@ -32,7 +32,7 @@ module.exports = function resolveVariables(textData, scopeData) {
         var fName = f[0],
             args = prepareFargs(f[1]);
         if (scopeData.hasOwnProperty(fName) && i === 0) {
-            compress = scopeData[fName].apply(null, args);
+            compress = scopeData[fName].apply(scopeData, args);
         } else {
             if (compress) {
                 compress = compress[fName].apply(compress, args);
