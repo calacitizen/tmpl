@@ -7,15 +7,10 @@ module.exports = function conditionResolver(string) {
         boolArr = [],
         everyObj = {},
         qWas = false,
-        quoteWas = false,
         length = stArr.length;
 
     function joinArray(array) {
         return array.splice(0, array.length).join('').trim();
-    }
-
-    function isQuote(string) {
-        return string === singleQuote || string === quote;
     }
 
     function isQuestionMark(string) {
@@ -27,7 +22,7 @@ module.exports = function conditionResolver(string) {
     }
 
     function isCondition(string) {
-        return isQuestionMark(string) && qWas === false && quoteWas === false;
+        return isQuestionMark(string) && qWas === false;
     }
 
     function isFirstPartOfDeal(string) {
@@ -48,9 +43,6 @@ module.exports = function conditionResolver(string) {
     }
 
     for (var i = 0; i < length; i++) {
-        if (isQuote(stArr[i])) {
-            quoteWas = true;
-        }
         if (isCondition(stArr[i])) {
             everyObj.condition = joinArray(boolArr);
             qWas = true;
