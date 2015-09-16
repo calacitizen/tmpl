@@ -2747,22 +2747,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var utils = __webpack_require__(3);
 	module.exports = {
-	  module: function partialModule(tag, data) {
-	    var assignModuleVar = tag.attribs.data.trim(),
-	        template = tag.attribs.template.trim(),
-	        rootVar = 'root',
-	        scopeData = {};
-	        
-	    function resolveStatement() {
-	      var clonedData = utils.clone(data);
-	      scopeData[rootVar] = clonedData[assignModuleVar];
-	      return this._process(tag.children, scopeData);
-	    }
+	    module: function partialModule(tag, data) {
+	        var assignModuleVar = tag.attribs.data.trim(),
+	            template = tag.attribs.template.trim(),
+	            rootVar = 'root',
+	            scopeData = {};
 
-	    return function partialResolve() {
-	      return resolveStatement.call(this);
+	        function resolveStatement() {
+	            var clonedData = data;
+	            scopeData[rootVar] = clonedData[assignModuleVar];
+	            return this._process(tag.children, scopeData);
+	        }
+
+	        return function partialResolve() {
+	            return resolveStatement.call(this);
+	        }
 	    }
-	  }
 	}
 
 
