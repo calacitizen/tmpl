@@ -1374,10 +1374,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        boolArr = [],
 	        everyObj = {},
 	        qWas = false,
+	        quoteWas = false,
 	        length = stArr.length;
 
 	    function joinArray(array) {
 	        return array.splice(0, array.length).join('').trim();
+	    }
+
+	    function isQuote(string) {
+	        return string === singleQuote || string === quote;
 	    }
 
 	    function isQuestionMark(string) {
@@ -1389,7 +1394,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    function isCondition(string) {
-	        return isQuestionMark(string) && qWas === false;
+	        return isQuestionMark(string) && qWas === false && quoteWas === false;
 	    }
 
 	    function isFirstPartOfDeal(string) {
@@ -1409,7 +1414,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return object;
 	    }
 
+	    function switchTheQuote(quote) {
+	        if (quote === false) {
+	            return true;
+	        }
+	        return false;
+	    }
+
 	    for (var i = 0; i < length; i++) {
+	        if (isQuote(stArr[i])) {
+	            quoteWas = switchTheQuote(quoteWas);
+	        }
 	        if (isCondition(stArr[i])) {
 	            everyObj.condition = joinArray(boolArr);
 	            qWas = true;
