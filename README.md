@@ -13,7 +13,7 @@ tmpl.template(source).handle(
 ```
 
 ###Template 
-Function gets prepared AST-html like objects data with resolved variables and directives.
+Function prepares AST-html like objects data with resolved variables and directives.
 ```javascript
 tmpl.traverse(source, data).handle(function handle(traversed) {});
 ```
