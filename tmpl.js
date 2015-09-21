@@ -130,7 +130,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @return {String}         clean data string
 	     */
 	    _replaceAllUncertainStuff: function replaceAllUncertainStuff(string) {
-	        return string.trim().replace(this.safeReplaceSingleQuotesReg, this.safeReplaceSingleQuotesPlace).replace(this.safeReplaceCaseReg, this.safeReplaceCasePlace);
+	        return string.trim().replace(this.safeReplaceCaseReg, this.safeReplaceCasePlace);
 	    },
 	    /**
 	     * Searching for vars in string
@@ -269,7 +269,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @param  {Array} ast    [description]
 	     * @return {Object}       State promise
 	     */
-	    traverse: function (ast, resolver) {
+	    traverse: function traverse(ast, resolver) {
 	        if (resolver) {
 	            this.resolver = resolver;
 	        }
