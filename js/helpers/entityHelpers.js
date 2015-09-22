@@ -59,6 +59,17 @@ module.exports = {
         return string.split('?').length > 1;
     },
     /**
+     * Create data request
+     * @param name
+     * @returns {{type: string, name: *}}
+     */
+    createDataRequest: function createDataRequest(name) {
+        return {
+            type: 'request',
+            name: name
+        };
+    },
+    /**
      * Create data object for variable
      * @param  {String} name  lexical name of variable
      * @param  {Undefined} value

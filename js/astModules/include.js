@@ -1,7 +1,9 @@
-var requireFile = require('../helpers/requireFile');
+var requireFile = require('../helpers/requireFile'),
+    entityHelpers = require('../helpers/entityHelpers'),
+    State = require('../helpers/State');
 module.exports = {
     parse: function requireOrRetire(tag) {
-        var assignModuleVar = tag.attribs.name.trim(),
+        var name = tag.attribs.name.trim(),
             template = tag.attribs.template.trim();
 
         function resolveInclude(object) {
@@ -9,7 +11,10 @@ module.exports = {
         }
 
         function resolveStatement() {
-            return requireFile.call(this, template).when(resolveInclude);
+            var unState = State.make();
+            this._includeStack[name] = requireFile.call(this, template).when(resolveInclude);
+            unState.keep(entityHelpers.createDataRequest(name));
+            return unState.promise;
         }
 
         return function includeResolve() {

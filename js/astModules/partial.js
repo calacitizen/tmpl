@@ -45,8 +45,7 @@ module.exports = {
             rootVar = 'root',
             scopeData = {};
         function resolveStatement() {
-            var clonedData = data;
-            scopeData[rootVar] = clonedData[assignModuleVar];
+            scopeData[rootVar] = data[assignModuleVar];
             return this._process(tag.children, scopeData);
         }
         return function partialResolve() {

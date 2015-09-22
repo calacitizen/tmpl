@@ -57,6 +57,14 @@ module.exports = {
             return data;
         }
 
+        function cleanData(firstArgument) {
+            data[firstArgument.value] = undefined;
+            if (firstArgument.key) {
+                data[firstArgument.key] = undefined;
+            }
+            return data;
+        }
+
         function fArray(array, data) {
             var children = [];
             for (var i = 0; i < array.length; i++) {
@@ -77,13 +85,14 @@ module.exports = {
 
         function resolveStatement(dataToIterate) {
             var scopeArray = dataToIterate.value,
-                scopeData = data,
                 typeFunction = types[whatType(scopeArray)],
-                ps;
+                result;
             if (typeFunction === undefined) {
                 throw new Error('Wrong type in for statement arguments');
             }
-            return types[whatType(scopeArray)].call(this, scopeArray, scopeData);
+            result = typeFunction.call(this, scopeArray, data);
+            data = cleanData(firstArgument);
+            return result;
         }
 
         return function forModuleReturnable() {

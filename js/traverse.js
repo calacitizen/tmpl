@@ -7,6 +7,8 @@ var
 module.exports = {
     _modules: {
         'ws-include': require('./astModules/include'),
+        'ws-template': require('./astModules/template'),
+        'ws-applytemplate': require('./astModules/applytemplate'),
         'ws-partial': require('./astModules/partial')
     },
     _regex: {
@@ -19,6 +21,11 @@ module.exports = {
      * @type {Object}
      */
     _includeStack: {},
+    /**
+     * Include template stack
+     * @type {Object}
+     */
+    templateStack: {},
     /**
      * Parsing html string to the directive state
      * @param  {String} tmpl     string html template
@@ -160,11 +167,7 @@ module.exports = {
      */
     _collect: function collect(traverseMethod, value, prev, next) {
         var ps = traverseMethod.call(this, value, prev, next);
-        if (entityHelpers.isTagInclude(value.name)) {
-            this._includeStack[value.attribs.name] = ps;
-        } else {
-            return ps;
-        }
+        return ps;
     },
 
     /**

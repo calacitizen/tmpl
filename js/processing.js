@@ -7,7 +7,8 @@ module.exports = {
         'ws-if': require('./astModules/if'),
         'ws-for': require('./astModules/for'),
         'ws-else': require('./astModules/else'),
-        'ws-partial': require('./astModules/partial')
+        'ws-partial': require('./astModules/partial'),
+        'ws-applytemplate': require('./astModules/applytemplate')
     },
     _ifStack: {},
     /**
