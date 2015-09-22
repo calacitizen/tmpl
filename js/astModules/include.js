@@ -1,6 +1,6 @@
 var requireFile = require('../helpers/requireFile');
 module.exports = {
-    module: function requireOrRetire(tag) {
+    parse: function requireOrRetire(tag) {
         var assignModuleVar = tag.attribs.name.trim(),
             template = tag.attribs.template.trim();
 

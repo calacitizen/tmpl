@@ -20,6 +20,14 @@ module.exports = {
      * @param  {Object} tag
      * @return {Function}
      */
+    parserMatcher: function parserMatcher(tag) {
+        return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].parse : false;
+    },
+    /**
+     * Match parse by name
+     * @param  {Object} tag
+     * @return {Function}
+     */
     moduleMatcher: function moduleMatcher(tag) {
         return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].module : false;
     },

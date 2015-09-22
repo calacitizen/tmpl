@@ -253,7 +253,7 @@ module.exports = {
      * @return {Array}     Module function
      */
     _traverseModule: function traverseModule(tag) {
-        var tagModule = entityHelpers.moduleMatcher.call(this, tag);
+        var tagModule = entityHelpers.parserMatcher.call(this, tag);
         return entityHelpers.loadModuleFunction.call(this, tagModule, tag);
     },
     /**

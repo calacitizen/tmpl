@@ -330,7 +330,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @return {Array}     Module function
 	     */
 	    _traverseModule: function traverseModule(tag) {
-	        var tagModule = entityHelpers.moduleMatcher.call(this, tag);
+	        var tagModule = entityHelpers.parserMatcher.call(this, tag);
 	        return entityHelpers.loadModuleFunction.call(this, tagModule, tag);
 	    },
 	    /**
@@ -1468,6 +1468,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @param  {Object} tag
 	     * @return {Function}
 	     */
+	    parserMatcher: function parserMatcher(tag) {
+	        return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].parse : false;
+	    },
+	    /**
+	     * Match parse by name
+	     * @param  {Object} tag
+	     * @return {Function}
+	     */
 	    moduleMatcher: function moduleMatcher(tag) {
 	        return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].module : false;
 	    },
@@ -1577,12 +1585,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                    ? state[resolution]: function enqueueResolution(value) {
 	                    //try {
-	                        var result = func(value);
-	                        if (result && result.is_promise === true) {
-	                            result.when(state.keep, state.break);
-	                        } else {
-	                            state.keep(result);
-	                        }
+	                    var result = func(value);
+	                    if (result && result.is_promise === true) {
+	                        result.when(state.keep, state.break);
+	                    } else {
+	                        state.keep(result);
+	                    }
 	                    ////} catch (e) {
 	                    //    throw new Error(e);
 	                    //    state.break(e);
@@ -1905,7 +1913,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var requireFile = __webpack_require__(11);
 	module.exports = {
-	    module: function requireOrRetire(tag) {
+	    parse: function requireOrRetire(tag) {
 	        var assignModuleVar = tag.attribs.name.trim(),
 	            template = tag.attribs.template.trim();
 
@@ -2015,7 +2023,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var State = __webpack_require__(7),
 	    utils = __webpack_require__(3);
 	module.exports = {
-	    module: function partialModule(tag) {
+	    parse: function partialModule(tag) {
 	        var assignModuleVar = tag.attribs.data.trim(),
 	            template = tag.attribs.template.trim();
 
@@ -2052,6 +2060,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return function partialResolve() {
 	            return resolveStatement.call(this);
 	        };
+	    },
+	    module: function partialModule(tag, data) {
+	        var assignModuleVar = tag.attribs.data.trim(),
+	            template = tag.attribs.template.trim(),
+	            rootVar = 'root',
+	            scopeData = {};
+	        function resolveStatement() {
+	            var clonedData = data;
+	            scopeData[rootVar] = clonedData[assignModuleVar];
+	            return this._process(tag.children, scopeData);
+	        }
+	        return function partialResolve() {
+	            return resolveStatement.call(this);
+	        };
 	    }
 	};
 
@@ -2069,7 +2091,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        'ws-if': __webpack_require__(20),
 	        'ws-for': __webpack_require__(21),
 	        'ws-else': __webpack_require__(22),
-	        'ws-partial': __webpack_require__(23)
+	        'ws-partial': __webpack_require__(12)
 	    },
 	    _ifStack: {},
 	    /**
@@ -2746,31 +2768,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    }
 	};
-
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var utils = __webpack_require__(3);
-	module.exports = {
-	    module: function partialModule(tag, data) {
-	        var assignModuleVar = tag.attribs.data.trim(),
-	            template = tag.attribs.template.trim(),
-	            rootVar = 'root',
-	            scopeData = {};
-
-	        function resolveStatement() {
-	            var clonedData = data;
-	            scopeData[rootVar] = clonedData[assignModuleVar];
-	            return this._process(tag.children, scopeData);
-	        }
-
-	        return function partialResolve() {
-	            return resolveStatement.call(this);
-	        }
-	    }
-	}
 
 
 /***/ }

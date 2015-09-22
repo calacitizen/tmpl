@@ -33,12 +33,12 @@ var State = (function StateFunction() {
 
                     ? state[resolution]: function enqueueResolution(value) {
                     //try {
-                        var result = func(value);
-                        if (result && result.is_promise === true) {
-                            result.when(state.keep, state.break);
-                        } else {
-                            state.keep(result);
-                        }
+                    var result = func(value);
+                    if (result && result.is_promise === true) {
+                        result.when(state.keep, state.break);
+                    } else {
+                        state.keep(result);
+                    }
                     ////} catch (e) {
                     //    throw new Error(e);
                     //    state.break(e);
