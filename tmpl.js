@@ -97,7 +97,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * Include promises stack
 	     * @type {Object}
 	     */
-	    _includeStack: {},
+	    includeStack: {},
 	    /**
 	     * Include template stack
 	     * @type {Object}
@@ -1939,7 +1939,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        function resolveStatement() {
 	            var unState = State.make();
-	            this._includeStack[name] = requireFile.call(this, template).when(resolveInclude);
+	            this.includeStack[name] = requireFile.call(this, template).when(resolveInclude);
 	            unState.keep(entityHelpers.createDataRequest(name));
 	            return unState.promise;
 	        }
@@ -2125,11 +2125,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        function resolveStatement() {
 	            var state = State.make();
 
-	            if (this._includeStack[template] === undefined) {
+	            if (this.includeStack[template] === undefined) {
 	                throw new Error('Include tag for "' + template + '" is not found!');
 	            }
 
-	            this._includeStack[template].when(
+	            this.includeStack[template].when(
 	                function partialInclude(templateData) {
 	                    if (templateData) {
 	                        this.traversingAST(templateData).when(

@@ -20,7 +20,7 @@ module.exports = {
      * Include promises stack
      * @type {Object}
      */
-    _includeStack: {},
+    includeStack: {},
     /**
      * Include template stack
      * @type {Object}

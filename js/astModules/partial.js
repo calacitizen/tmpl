@@ -8,11 +8,11 @@ module.exports = {
         function resolveStatement() {
             var state = State.make();
 
-            if (this._includeStack[template] === undefined) {
+            if (this.includeStack[template] === undefined) {
                 throw new Error('Include tag for "' + template + '" is not found!');
             }
 
-            this._includeStack[template].when(
+            this.includeStack[template].when(
                 function partialInclude(templateData) {
                     if (templateData) {
                         this.traversingAST(templateData).when(

@@ -12,7 +12,7 @@ module.exports = {
 
         function resolveStatement() {
             var unState = State.make();
-            this._includeStack[name] = requireFile.call(this, template).when(resolveInclude);
+            this.includeStack[name] = requireFile.call(this, template).when(resolveInclude);
             unState.keep(entityHelpers.createDataRequest(name));
             return unState.promise;
         }
