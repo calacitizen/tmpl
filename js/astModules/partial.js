@@ -41,7 +41,6 @@ module.exports = {
     },
     module: function partialModule(tag, data) {
         var assignModuleVar = tag.attribs.data.trim(),
-            template = tag.attribs.template.trim(),
             rootVar = 'root',
             scopeData = {};
         function resolveStatement() {

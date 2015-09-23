@@ -187,6 +187,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (arrOfVars) {
 	            arrOfVarsClean = this._searchForVars(arrOfVars);
 	        }
+
 	        strObjectData.data = resString.split(this._regex.forVariables);
 	        return this._createDataObject(strObjectData, arrOfVarsClean);
 	    },
@@ -2158,7 +2159,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    module: function partialModule(tag, data) {
 	        var assignModuleVar = tag.attribs.data.trim(),
-	            template = tag.attribs.template.trim(),
 	            rootVar = 'root',
 	            scopeData = {};
 	        function resolveStatement() {
