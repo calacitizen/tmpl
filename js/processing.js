@@ -10,7 +10,6 @@ module.exports = {
         'ws-partial': require('./astModules/partial'),
         'ws-applytemplate': require('./astModules/applytemplate')
     },
-    _ifStack: {},
     /**
      * Getting html string
      * @param  {Array} ast  AST array of entities
