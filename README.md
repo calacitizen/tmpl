@@ -1,4 +1,4 @@
-# TMPL ![Travis](https://travis-ci.org/calacitizen/tmpl.svg?branch=divided)
+# TMPL [![Travis](https://travis-ci.org/calacitizen/tmpl.svg?branch=master)](https://travis-ci.org/calacitizen/tmpl)
 ## Javascript API
 Templating engine with valid html directives. TMPL uses two step to generate form you need to get html.
 ```javascript
