@@ -1,4 +1,4 @@
-# TMPL ![Travis](https://travis-ci.org/calacitizen/tmpl.svg?branch=divided)
+# TMPL [![Travis](https://travis-ci.org/calacitizen/tmpl.svg?branch=master)](https://travis-ci.org/calacitizen/tmpl)
 ## Javascript API
 Шаблонизатор с валидными html-директивами управления. TMPl использует 2 этапа генерации html.
 ```javascript
