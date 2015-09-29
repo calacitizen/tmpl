@@ -50,7 +50,8 @@ module.exports = {
                     seg = newseg;
                 }
                 return m;
-            });
+            }
+        );
         rv.push(s.substring(seg));
         return rv;
     },
