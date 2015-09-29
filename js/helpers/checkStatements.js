@@ -1,11 +1,7 @@
 var utils = require('./utils'),
     resolveVariables = require('./resolveVariables');
 module.exports = function checkStatementForInners(value, scopeData, arrVars) {
-    var
-        variableSeparator = '.',
-        stScope = value.split(variableSeparator),
-        isVar = utils.inArray(arrVars, value),
-        compress;
+    var isVar = utils.inArray(arrVars, value);
 
     /**
      * Crate type for empty data tag

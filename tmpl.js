@@ -1273,7 +1273,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    seg = newseg;
 	                }
 	                return m;
-	            });
+	            }
+	        );
 	        rv.push(s.substring(seg));
 	        return rv;
 	    },
@@ -2188,7 +2189,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        'ws-partial': __webpack_require__(14),
 	        'ws-applytemplate': __webpack_require__(13)
 	    },
-	    _ifStack: {},
 	    /**
 	     * Getting html string
 	     * @param  {Array} ast  AST array of entities
@@ -2491,11 +2491,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var utils = __webpack_require__(3),
 	    resolveVariables = __webpack_require__(20);
 	module.exports = function checkStatementForInners(value, scopeData, arrVars) {
-	    var
-	        variableSeparator = '.',
-	        stScope = value.split(variableSeparator),
-	        isVar = utils.inArray(arrVars, value),
-	        compress;
+	    var isVar = utils.inArray(arrVars, value);
 
 	    /**
 	     * Crate type for empty data tag
