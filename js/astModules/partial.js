@@ -1,9 +1,10 @@
 var State = require('../helpers/State'),
-    utils = require('../helpers/utils');
+    utils = require('../helpers/utils'),
+    injectedDataForce = require('../helpers/injectedDataForce');
 module.exports = {
     parse: function partialModule(tag) {
-        var assignModuleVar = tag.attribs.data.trim(),
-            template = tag.attribs.template.trim();
+        var template = tag.attribs.template.trim(),
+            tagData = tag.children;
 
         function resolveStatement() {
             var state = State.make();
@@ -17,6 +18,9 @@ module.exports = {
                     if (templateData) {
                         this.traversingAST(templateData).when(
                             function partialTraversing(modAST) {
+                                if (tagData) {
+                                    tag.injectedData = tagData;
+                                }
                                 tag.children = modAST;
                                 state.keep(tag);
                             },
@@ -43,6 +47,11 @@ module.exports = {
         var assignModuleVar = tag.attribs.data.trim(),
             rootVar = 'root',
             scopeData = {};
+
+        if (tag.injectedData) {
+            injectedDataForce(tag.injectedData);
+        }
+
         function resolveStatement() {
             scopeData[rootVar] = data[assignModuleVar];
             return this._process(tag.children, scopeData);

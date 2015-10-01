@@ -50,6 +50,12 @@ var State = (function StateFunction() {
                 if (status !== 'pending') {
                     throw "overpromise";
                 }
+            }
+
+            function herald(state, value, queue) {
+                if (status !== 'pending') {
+                    throw "overpromise";
+                }
                 fate = value;
                 status = state;
                 enlighten(queue, fate);

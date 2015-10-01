@@ -22,6 +22,7 @@ module.exports = {
      */
     parserMatcher: function parserMatcher(tag) {
         return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].parse : false;
+        return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].parse : false;
     },
     /**
      * Match parse by name

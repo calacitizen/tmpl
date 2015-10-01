@@ -4,11 +4,11 @@ var utils = require('./helpers/utils'),
     entityHelpers = require('./helpers/entityHelpers');
 module.exports = {
     _modules: {
-        'ws-if': require('./astModules/if'),
-        'ws-for': require('./astModules/for'),
-        'ws-else': require('./astModules/else'),
-        'ws-partial': require('./astModules/partial'),
-        'ws-applytemplate': require('./astModules/applytemplate')
+        'ws:if': require('./astModules/if'),
+        'ws:for': require('./astModules/for'),
+        'ws:else': require('./astModules/else'),
+        'ws:partial': require('./astModules/partial'),
+        'ws:applytemplate': require('./astModules/applytemplate')
     },
     /**
      * Getting html string

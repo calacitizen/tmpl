@@ -55,7 +55,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var traversing = __webpack_require__(1),
-	    processing = __webpack_require__(15);
+	    processing = __webpack_require__(17);
 	module.exports = {
 	    template: function template(html, resolver) {
 	        var parsed = traversing.parse(html);
@@ -83,10 +83,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    entityHelpers = __webpack_require__(6);
 	module.exports = {
 	    _modules: {
-	        'ws-include': __webpack_require__(10),
-	        'ws-template': __webpack_require__(12),
-	        'ws-applytemplate': __webpack_require__(13),
-	        'ws-partial': __webpack_require__(14)
+	        'ws:include': __webpack_require__(10),
+	        'ws:template': __webpack_require__(12),
+	        'ws:applytemplate': __webpack_require__(13),
+	        'ws:partial': __webpack_require__(14)
 	    },
 	    _regex: {
 	        forVariables: /\{\{ ?(.*?) ?\}\}/g
@@ -1475,6 +1475,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    parserMatcher: function parserMatcher(tag) {
 	        return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].parse : false;
+	        return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].parse : false;
 	    },
 	    /**
 	     * Match parse by name
@@ -1612,6 +1613,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    //    state.break(e);
 	                    //}
 	                };
+	            }
+
+	            function herald(state, value, queue) {
+	                if (status !== 'pending') {
+	                    throw "overpromise";
+	                }
 	            }
 
 	            function herald(state, value, queue) {
@@ -2118,11 +2125,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var State = __webpack_require__(7),
-	    utils = __webpack_require__(3);
+	    utils = __webpack_require__(3),
+	    injectedDataForce = __webpack_require__(15);
 	module.exports = {
 	    parse: function partialModule(tag) {
-	        var assignModuleVar = tag.attribs.data.trim(),
-	            template = tag.attribs.template.trim();
+	        var template = tag.attribs.template.trim(),
+	            tagData = tag.children;
 
 	        function resolveStatement() {
 	            var state = State.make();
@@ -2136,6 +2144,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (templateData) {
 	                        this.traversingAST(templateData).when(
 	                            function partialTraversing(modAST) {
+	                                if (tagData) {
+	                                    tag.injectedData = tagData;
+	                                }
 	                                tag.children = modAST;
 	                                state.keep(tag);
 	                            },
@@ -2162,6 +2173,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var assignModuleVar = tag.attribs.data.trim(),
 	            rootVar = 'root',
 	            scopeData = {};
+
+	        if (tag.injectedData) {
+	            injectedDataForce(tag.injectedData);
+	        }
+
 	        function resolveStatement() {
 	            scopeData[rootVar] = data[assignModuleVar];
 	            return this._process(tag.children, scopeData);
@@ -2177,17 +2193,60 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = function injectedDataForce(data) {
+	    var preparedObject = {},
+	        types = {
+	            string: __webpack_require__(16)
+	        };
+
+	    function splitWs(string) {
+	        var ws = string.split('ws:');
+	        return ws[1];
+	    }
+
+	    function traverseInjectedData(injected) {
+	        for (var i=0; i<injected.length; i++) {
+	            if (injected[i].children) {
+	                console.log(splitWs(injected[i].name));
+	                traverseInjectedData(injected[i].children);
+	            }
+
+	        }
+	    }
+	    traverseInjectedData(data);
+	    return preparedObject;
+	};
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	module.exports = function stringTag(tag, data) {
+
+	    function resolveStatement() {
+	        console.log(tag, data);
+	    }
+
+	    return function stringReturnable() {
+	        return resolveStatement.call(this);
+	    };
+	}
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var utils = __webpack_require__(3),
-	    seekingForVars = __webpack_require__(16),
-	    whatType = __webpack_require__(21),
+	    seekingForVars = __webpack_require__(18),
+	    whatType = __webpack_require__(23),
 	    entityHelpers = __webpack_require__(6);
 	module.exports = {
 	    _modules: {
-	        'ws-if': __webpack_require__(22),
-	        'ws-for': __webpack_require__(23),
-	        'ws-else': __webpack_require__(24),
-	        'ws-partial': __webpack_require__(14),
-	        'ws-applytemplate': __webpack_require__(13)
+	        'ws:if': __webpack_require__(24),
+	        'ws:for': __webpack_require__(25),
+	        'ws:else': __webpack_require__(26),
+	        'ws:partial': __webpack_require__(14),
+	        'ws:applytemplate': __webpack_require__(13)
 	    },
 	    /**
 	     * Getting html string
@@ -2352,13 +2411,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var conditional = __webpack_require__(17),
+	var conditional = __webpack_require__(19),
 	    utils = __webpack_require__(3),
 	    entityHelpers = __webpack_require__(6),
-	    resolveVariables = __webpack_require__(20);
+	    resolveVariables = __webpack_require__(22);
 	module.exports = function seekForVars(textData, scopeData) {
 
 	    function expressionResolve(value, scopeData) {
@@ -2390,10 +2449,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 17 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var scopeHold = __webpack_require__(18),
+	var scopeHold = __webpack_require__(20),
 	    utils = __webpack_require__(3);
 	module.exports = function conditional(source, data) {
 	    var
@@ -2465,10 +2524,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var checkStatements = __webpack_require__(19);
+	var checkStatements = __webpack_require__(21);
 	module.exports = function scopeHold(arrVars, scope) {
 	  var ms = [],
 	      stepVar;
@@ -2485,11 +2544,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3),
-	    resolveVariables = __webpack_require__(20);
+	    resolveVariables = __webpack_require__(22);
 	module.exports = function checkStatementForInners(value, scopeData, arrVars) {
 	    var isVar = utils.inArray(arrVars, value);
 
@@ -2535,7 +2594,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3);
@@ -2634,7 +2693,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports) {
 
 	module.exports = function checkType(value) {
@@ -2695,10 +2754,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var conditional = __webpack_require__(17);
+	var conditional = __webpack_require__(19);
 	module.exports = {
 	    module: function ifModule(tag, data) {
 	        var source;
@@ -2728,11 +2787,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var checkStatements = __webpack_require__(19),
-	    whatType = __webpack_require__(21),
+	var checkStatements = __webpack_require__(21),
+	    whatType = __webpack_require__(23),
 	    utils = __webpack_require__(3);
 	module.exports = {
 	    module: function forModule(tag, data) {
@@ -2838,15 +2897,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var conditional = __webpack_require__(17);
+	var conditional = __webpack_require__(19);
 	module.exports = {
 	    module: function elseModule(tag, data) {
 	        var source;
 
-	        if (tag.prev === undefined || tag.prev.name !== 'ws-if') {
+	        if (tag.prev === undefined || tag.prev.name !== 'ws:if') {
 	            throw new Error('There is no "if" for "else" module to use');
 	        }
 
