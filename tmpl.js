@@ -319,7 +319,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _traverseTag: function traverseTag(tag, prev, next) {
 	        var state,
 	            attribs = this._traverseTagAttributes(tag.attribs),
-	            takeTag = this._createTag(tag.name, tag.data, tag.raw, attribs, tag.children, prev, next);
+	            takeTag = this._createTag({ name: tag.name, data: tag.data, raw: tag.raw, attribs: attribs, children: tag.children, prev: prev, next: next });
 	        if (takeTag.children && takeTag.children.length > 0) {
 	            return this.traverseTagWithChildren(takeTag);
 	        } else {
@@ -361,16 +361,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @param  {Array} children
 	     * @return {Object}
 	     */
-	    _createTag: function createTag(name, data, raw, attribs, children, prev, next) {
+	    _createTag: function createTag(tag) {
 	        return {
-	            name: name,
-	            data: data,
-	            raw: raw,
-	            attribs: attribs,
-	            children: children,
+	            name: tag.name,
+	            data: tag.data,
+	            raw: tag.raw,
+	            attribs: tag.attribs,
+	            children: tag.children,
 	            type: "tag",
-	            prev: prev,
-	            next: next
+	            prev: tag.prev,
+	            next: tag.next
 	        };
 	    },
 	    /**
@@ -2200,18 +2200,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 
 	    function splitWs(string) {
-	        var ws = string.split('ws:');
-	        return ws[1];
+	        var ws;
+	        if (string !== undefined) {
+	            ws = string.split('ws:');
+	            return ws[1];
+	        }
+	        return undefined;
 	    }
 
 	    function traverseInjectedData(injected) {
+	        var mFunction, propName, tValue, tObject;
 	        for (var i=0; i<injected.length; i++) {
-	            if (injected[i].children) {
-	                console.log(splitWs(injected[i].name));
-	                traverseInjectedData(injected[i].children);
+	            if (splitWs(injected[i].name)) {
+	                if (injected[i].children) {
+	                    if (types[splitWs(injected[i].name)]) {
+	                        mFunction = types[splitWs(injected[i].name)](injected[i]);
+	                        tValue = mFunction();
+	                    } else {
+	                        propName = splitWs(injected[i].name);
+	                        tObject[propName] = tValue;
+	                    }
+	                    traverseInjectedData(injected[i].children);
+	                }
 	            }
-
 	        }
+	        return tObject;
 	    }
 	    traverseInjectedData(data);
 	    return preparedObject;
@@ -2221,10 +2234,20 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */
 /***/ function(module, exports) {
 
-	module.exports = function stringTag(tag, data) {
+	module.exports = function stringTag(tag) {
 
 	    function resolveStatement() {
-	        console.log(tag, data);
+	        var children,
+	            string = '';
+	        if (tag.children) {
+	            children = tag.children;
+	            for (var i=0; i < children.length; i++) {
+	                if (children[i].type === "text") {
+	                    string += children[i].data;
+	                }
+	            }
+	        }
+	        return string;
 	    }
 
 	    return function stringReturnable() {

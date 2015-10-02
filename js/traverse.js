@@ -242,7 +242,7 @@ module.exports = {
     _traverseTag: function traverseTag(tag, prev, next) {
         var state,
             attribs = this._traverseTagAttributes(tag.attribs),
-            takeTag = this._createTag(tag.name, tag.data, tag.raw, attribs, tag.children, prev, next);
+            takeTag = this._createTag({ name: tag.name, data: tag.data, raw: tag.raw, attribs: attribs, children: tag.children, prev: prev, next: next });
         if (takeTag.children && takeTag.children.length > 0) {
             return this.traverseTagWithChildren(takeTag);
         } else {
@@ -284,16 +284,16 @@ module.exports = {
      * @param  {Array} children
      * @return {Object}
      */
-    _createTag: function createTag(name, data, raw, attribs, children, prev, next) {
+    _createTag: function createTag(tag) {
         return {
-            name: name,
-            data: data,
-            raw: raw,
-            attribs: attribs,
-            children: children,
+            name: tag.name,
+            data: tag.data,
+            raw: tag.raw,
+            attribs: tag.attribs,
+            children: tag.children,
             type: "tag",
-            prev: prev,
-            next: next
+            prev: tag.prev,
+            next: tag.next
         };
     },
     /**

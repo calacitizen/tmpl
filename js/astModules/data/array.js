@@ -1,3 +1,10 @@
-/**
- * Created by nr.izygin on 30.09.2015.
- */
+module.exports = function arrayTag(tag) {
+
+    function resolveStatement() {
+        
+    }
+
+    return function arrayReturnable() {
+        return resolveStatement.call(this);
+    };
+}

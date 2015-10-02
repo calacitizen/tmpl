@@ -46,14 +46,15 @@ module.exports = {
     module: function partialModule(tag, data) {
         var assignModuleVar = tag.attribs.data.trim(),
             rootVar = 'root',
-            scopeData = {};
+            scopeData = {},
+            injected;
 
         if (tag.injectedData) {
-            injectedDataForce(tag.injectedData);
+            injected = scopeData = injectedDataForce(tag.injectedData);
         }
 
         function resolveStatement() {
-            scopeData[rootVar] = data[assignModuleVar];
+            scopeData[rootVar] = (injected ? injected : data[assignModuleVar]);
             return this._process(tag.children, scopeData);
         }
         return function partialResolve() {
