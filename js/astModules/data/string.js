@@ -1,4 +1,4 @@
-module.exports = function stringTag(tag) {
+module.exports = function stringTag(types, tag) {
 
     function resolveStatement() {
         var children,
