@@ -1,20 +1,14 @@
 module.exports = function stringTag(types, tag) {
-
-    function resolveStatement() {
-        var children,
-            string = '';
-        if (tag.children) {
-            children = tag.children;
-            for (var i=0; i < children.length; i++) {
-                if (children[i].type === "text") {
-                    string += children[i].data;
-                }
+    var children,
+        string = '',
+        i;
+    if (tag.children) {
+        children = tag.children;
+        for (i = 0; i < children.length; i++) {
+            if (children[i].type === "text") {
+                string += children[i].data;
             }
         }
-        return string;
     }
-
-    return function stringReturnable() {
-        return resolveStatement.call(this);
-    };
+    return string;
 }

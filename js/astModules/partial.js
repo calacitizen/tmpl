@@ -50,11 +50,12 @@ module.exports = {
             injected;
 
         if (tag.injectedData) {
-            injected = scopeData = injectedDataForce(tag.injectedData);
+            injected = injectedDataForce(tag.injectedData);
         }
 
         function resolveStatement() {
             scopeData[rootVar] = (injected ? injected : data[assignModuleVar]);
+            console.log(scopeData);
             return this._process(tag.children, scopeData);
         }
         return function partialResolve() {

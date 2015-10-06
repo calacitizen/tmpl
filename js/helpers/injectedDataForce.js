@@ -1,10 +1,10 @@
-var traverseInjectedData = require('../helpers/traverseInjectedData');
 module.exports = function injectedDataForce(data) {
     var types = {
             string: require('../astModules/data/string'),
-            array: require('../astModules/data/array')
+            array: require('../astModules/data/array'),
+            object: require('../astModules/data/object')
         };
-    var q = traverseInjectedData(types, data);
+    var q = types.object(types, data);
     console.log(q);
     return q;
 };

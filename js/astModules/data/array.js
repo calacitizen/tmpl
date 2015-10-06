@@ -1,23 +1,32 @@
-var traverseInjectedData = require('../../helpers/traverseInjectedData');
-module.exports = function arrayTag(types, tag) {
-
-    function resolveStatement() {
-        var children,
-            array = [];
-        if (tag.children) {
-            children = tag.children;
-            console.log(children);
-            console.log(traverseInjectedData(types, children));
-            //for (var i=0; i < children.length; i++) {
-            //    console.log(traverseInjectedData(types, children[i]));
-            //    array.push();
-            //}
-
-        }
-        return array;
+function splitWs(string) {
+    var ws;
+    if (string !== undefined) {
+        ws = string.split('ws:');
+        return ws[1];
     }
-
-    return function arrayReturnable() {
-        return resolveStatement.call(this);
-    };
+    return undefined;
+}
+module.exports = function arrayTag(types, tag) {
+    var children,
+        array = [],
+        nameExists,
+        typeFunction,
+        i;
+    if (tag.children) {
+        children = tag.children;
+        for (i = 0; i < children.length; i++) {
+            nameExists = splitWs(children[i].name);
+            if (nameExists) {
+                if (children[i].children) {
+                    typeFunction = types[nameExists];
+                    if (typeFunction) {
+                        array.push(typeFunction(types, children[i]));
+                    } else {
+                        throw new Error(children[i].name + ' property can\'t be in the root of ws:array tag');
+                    }
+                }
+            }
+        }
+    }
+    return array;
 }
