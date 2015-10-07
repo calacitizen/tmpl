@@ -35,7 +35,7 @@ module.exports = function conditional(source, data) {
     }
 
     /**
-     * Looking up for unqiue variables in expression
+     * Looking up for unique variables in expression
      * @param  {String} expression String with expression
      * @return {Array}            Array with unqiue variables
      */

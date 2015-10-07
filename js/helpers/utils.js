@@ -75,6 +75,14 @@ module.exports = {
     removeAllSpaces: function removeAllSpaces(string) {
         return string.replace(/\s/g, "");
     },
+    splitWs: function splitWs(string) {
+        var ws;
+        if (string !== undefined) {
+            ws = string.split('ws:');
+            return ws[1];
+        }
+        return undefined;
+    },
     clone: function clone(src) {
         function mixin(dest, source, copyFunc) {
             var name, s, i, empty = {};

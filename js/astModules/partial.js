@@ -2,7 +2,7 @@ var State = require('../helpers/State'),
     utils = require('../helpers/utils'),
     injectedDataForce = require('../helpers/injectedDataForce');
 module.exports = {
-    parse: function partialModule(tag) {
+    parse: function partialParse(tag) {
         var template = tag.attribs.template.trim(),
             tagData = tag.children;
 
@@ -18,12 +18,16 @@ module.exports = {
                     if (templateData) {
                         this.traversingAST(templateData).when(
                             function partialTraversing(modAST) {
-                                if (tagData) {
-                                    tag.injectedData = tagData;
-                                }
                                 tag.children = modAST;
-                                state.keep(tag);
-                            },
+                                if (tagData) {
+                                    this.traversingAST(tagData).when(function dataTraversing(tagDataAst) {
+                                        tag.injectedData = tagDataAst;
+                                        state.keep(tag);
+                                    }.bind(this));
+                                } else {
+                                    state.keep(tag);
+                                }
+                            }.bind(this),
                             function brokenTraverse(reason) {
                                 throw new Error(reason);
                             }
@@ -49,13 +53,11 @@ module.exports = {
             scopeData = {},
             injected;
 
-        if (tag.injectedData) {
-            injected = injectedDataForce(tag.injectedData);
-        }
-
         function resolveStatement() {
+            if (tag.injectedData) {
+                injected = injectedDataForce.call(this, tag.injectedData, data);
+            }
             scopeData[rootVar] = (injected ? injected : data[assignModuleVar]);
-            console.log(scopeData);
             return this._process(tag.children, scopeData);
         }
         return function partialResolve() {
