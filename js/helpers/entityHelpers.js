@@ -22,7 +22,6 @@ module.exports = {
      */
     parserMatcher: function parserMatcher(tag) {
         return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].parse : false;
-        return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].parse : false;
     },
     /**
      * Match parse by name
@@ -106,5 +105,29 @@ module.exports = {
             valueOne: valueOne,
             valueTwo: valueTwo
         };
+    },
+    parseAttributesForData: function parseAttributesForData(attrs, data) {
+        var attr, obj = {};
+        function processDataSequence(attributesData, data) {
+            var string = '', attrData = attributesData.data, i;
+            if (attrData.length) {
+                if (attrData.length === 1) {
+                    return this._processDataTypes(attrData[0], data);
+                }
+                for (i = 0; i < attrData.length; i++) {
+                    string += this._processDataTypes(attrData[i], data);
+                }
+                return string;
+            }
+            return this._processDataTypes(attrData, data);
+        }
+        if (attrs !== undefined) {
+            for (attr in attrs) {
+                if (attrs.hasOwnProperty(attr)) {
+                    obj[attr] = processDataSequence.call(this, attrs[attr], data);
+                }
+            }
+        }
+        return obj;
     }
 };

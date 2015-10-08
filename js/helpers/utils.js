@@ -119,5 +119,24 @@ module.exports = {
             r = src.constructor ? new src.constructor() : {};
         }
         return mixin(r, src, clone);
+    },
+    merge: function merge(target, source) {
+        if ( typeof target !== 'object' ) {
+            target = {};
+        }
+        for (var property in source) {
+            if ( source.hasOwnProperty(property) ) {
+                var sourceProperty = source[ property ];
+                if ( typeof sourceProperty === 'object' ) {
+                    target[ property ] = merge( target[ property ], sourceProperty );
+                    continue;
+                }
+                target[ property ] = sourceProperty;
+            }
+        }
+        for (var a = 2, l = arguments.length; a < l; a++) {
+            this.merge(target, arguments[a]);
+        }
+        return target;
     }
 }

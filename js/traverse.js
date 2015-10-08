@@ -79,9 +79,13 @@ module.exports = {
      * @return {Array}              array with objects
      */
     _replaceAndCreateStatements: function replaceAndCreateStatements(data, arrOfVars) {
-        return utils.mapForLoop(data, function searchInScope(value) {
-            return skipVars.checkStatementForInners(value, arrOfVars);
-        }.bind(this));
+        var array = [], i, emptyString = "";
+        for (i = 0; i < data.length; i++) {
+            if (data[i] !== emptyString) {
+                array.push(skipVars.checkStatementForInners(data[i], arrOfVars));
+            }
+        }
+        return array;
     },
     /**
      * Looking for variables in string data object
