@@ -2,8 +2,8 @@ var tmpl = require('../tmpl'),
     assert = require("assert"),
     expect = require('chai').expect;
 
-describe('Variables', function() {
-    it('Simple variable', function(done) {
+describe('Variables', function varTest() {
+    it('Simple variable', function simpleVarTest(done) {
         var data = {
             master: 'Michelangelo'
         };
@@ -14,7 +14,7 @@ describe('Variables', function() {
             });
         });
     });
-    it('Condition variable', function(done) {
+    it('Condition variable', function conditionVarTest(done) {
         var data = {
             yes: true,
             no: true
@@ -26,7 +26,7 @@ describe('Variables', function() {
             });
         });
     });
-    it('Mixed variables', function(done) {
+    it('Mixed variables', function mixedVarTest(done) {
         var data = {
             id: "rr",
             me: "yourself",

@@ -2,8 +2,8 @@ var tmpl = require('../tmpl'),
     assert = require("assert"),
     expect = require('chai').expect;
 
-describe('Objects and children', function() {
-    it('Testing children vars', function(done) {
+describe('Objects and children', function objectsAndChildrenTest() {
+    it('Testing children vars', function childrenTest(done) {
         tmpl.template('<div>123 {{ master }}</div>').handle(function(traversed) {
             setTimeout(function() {
                 var child = traversed[0].children[0];
@@ -16,7 +16,7 @@ describe('Objects and children', function() {
             });
         });
     });
-    it('Testing For module', function(done) {
+    it('Testing For module', function forTest(done) {
         var data = {
             dogs: [{
                 type: 'big',
@@ -36,7 +36,7 @@ describe('Objects and children', function() {
             });
         });
     });
-    it('Testing If module', function(done) {
+    it('Testing If module', function ifTest(done) {
         var data = {
             number: 124,
             bam: 'hidden'
