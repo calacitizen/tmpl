@@ -1,7 +1,7 @@
 var utils = require('../../helpers/utils'),
     entityHelpers = require('../../helpers/entityHelpers');
 module.exports = function objectTag(types, injected, scopeData) {
-    var tObject = {}, typeFunction, nameExists, i, objectForMerge;
+    var tObject = {}, typeFunction, nameExists, i, objectForMerge, htmlArray = [];
 
     if (injected.children) {
         objectForMerge = entityHelpers.parseAttributesForData.call(this, injected.attribs, scopeData);
@@ -19,12 +19,16 @@ module.exports = function objectTag(types, injected, scopeData) {
                 tObject[nameExists] = objectTag.call(this, types, injected[i].children, scopeData);
             }
         } else {
-            return injected[i];
+            htmlArray.push(injected[i]);
         }
     }
 
     if (objectForMerge !== undefined) {
         tObject = utils.merge(tObject, objectForMerge);
+    }
+
+    if (htmlArray.length > 0) {
+        return htmlArray;
     }
 
     return tObject;

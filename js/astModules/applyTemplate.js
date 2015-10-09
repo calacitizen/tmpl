@@ -12,7 +12,7 @@ module.exports = {
             if (this.templateStack[name] === undefined) {
                 throw new Error('There is no ws-template tag with "' + name + '" name');
             }
-            this.traversingAST(this.templateStack[name]).when(
+            this.templateStack[name].when(
                 function partialTraversing(modAST) {
                     tag.children = modAST;
                     stateTemplate.keep(tag);

@@ -5,33 +5,24 @@ module.exports = {
     parse: function partialParse(tag) {
         var template = tag.attribs.template.trim(),
             tagData = tag.children;
-
         function resolveStatement() {
             var state = State.make();
-
             if (this.includeStack[template] === undefined) {
                 throw new Error('Include tag for "' + template + '" is not found!');
             }
-
             this.includeStack[template].when(
-                function partialInclude(templateData) {
-                    if (templateData) {
-                        this.traversingAST(templateData).when(
-                            function partialTraversing(modAST) {
-                                tag.children = modAST;
-                                if (tagData) {
-                                    this.traversingAST(tagData).when(function dataTraversing(tagDataAst) {
-                                        tag.injectedData = tagDataAst;
-                                        state.keep(tag);
-                                    }.bind(this));
-                                } else {
+                function partialInclude(modAST) {
+                    if (modAST) {
+                        tag.children = modAST;
+                        if (tagData) {
+                            this.traversingAST(tagData).when(
+                                function dataTraversing(tagDataAst) {
+                                    tag.injectedData = tagDataAst;
                                     state.keep(tag);
-                                }
-                            }.bind(this),
-                            function brokenTraverse(reason) {
-                                throw new Error(reason);
-                            }
-                        );
+                                }.bind(this));
+                        } else {
+                            state.keep(tag);
+                        }
                     } else {
                         state.break('Include tag for "' + template + '" is not found!');
                     }
