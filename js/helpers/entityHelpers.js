@@ -106,6 +106,9 @@ module.exports = {
             valueTwo: valueTwo
         };
     },
+    createNumberFromString: function createNumberFromString(value) {
+        return Number(value);
+    },
     parseAttributesForData: function parseAttributesForData(attrs, data) {
         var attr, obj = {};
         function processDataSequence(attributesData, data) {

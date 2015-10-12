@@ -4,7 +4,7 @@ var tmpl = require('../tmpl'),
 
 describe('Objects and children', function objectsAndChildrenTest() {
     it('Testing children vars', function childrenTest(done) {
-        tmpl.template('<div>123 {{ master }}</div>').handle(function childrenVarTest(traversed) {
+        tmpl.template('<div>123 {{ master }}</div>').handle(function childrenVarTest(traversed) {-
             setTimeout(function() {
                 var child = traversed[0].children[0];
                 for (var i = 0; i < child.data.length; i++) {

@@ -114,7 +114,6 @@ module.exports = {
         if (arrOfVars) {
             arrOfVarsClean = this._searchForVars(arrOfVars);
         }
-
         strObjectData.data = resString.split(this._regex.forVariables);
         return this._createDataObject(strObjectData, arrOfVarsClean);
     },

@@ -36,6 +36,9 @@ module.exports = {
         }
         return f;
     },
+    isNumber: function isNumber(string) {
+        return /^((?=\.\d|\d)(?:\d+)?(?:\.?\d*)(?:[eE][+-]?\d+)?)$/.test(string.trim());
+    },
     isVar: function isVar(string) {
         return !/['"].*?['"]/.test(string) && isNaN(parseInt(string));
     },

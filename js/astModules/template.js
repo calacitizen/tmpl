@@ -26,7 +26,7 @@ module.exports = {
 
         function resolveStatement() {
             var requestState = State.make();
-            this.templateStack[name] = templateAST.call(this);
+            this.includeStack[name] = templateAST.call(this);
             requestState.keep(entityHelpers.createDataRequest(name));
             return requestState.promise;
         }

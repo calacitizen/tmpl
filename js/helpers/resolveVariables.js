@@ -7,7 +7,7 @@ module.exports = function resolveVariables(textData, scopeData) {
      */
     function prepareFargs(args) {
         var argsArr = args.split(',');
-        if (argsArr.length > 0 ) {
+        if (argsArr.length > 0) {
             argsArr = utils.mapForLoop(argsArr, function trimming(val) {
                 val = val.trim();
                 if (utils.isVar(val)) {
@@ -28,7 +28,7 @@ module.exports = function resolveVariables(textData, scopeData) {
      * @param  {number} i         Iterator
      * @return {Array}           Array with data
      */
-    function fLookUp(f, compress, scopeData, variable, i) {
+    function fLookUp(f, compress, scopeData, i) {
         var fName = f[0],
             args = prepareFargs(f[1]);
         if (scopeData.hasOwnProperty(fName) && i === 0) {
@@ -52,7 +52,7 @@ module.exports = function resolveVariables(textData, scopeData) {
     function compressLookUp(compress, scopeData, stScope, i) {
         var f = utils.isFunction(stScope[i]);
         if (f) {
-            compress = fLookUp(f, compress, scopeData, stScope[i], i);
+            compress = fLookUp(f, compress, scopeData, i);
         } else {
             if (i === 0) {
                 compress = scopeData[stScope[i]];
@@ -72,8 +72,8 @@ module.exports = function resolveVariables(textData, scopeData) {
      * @return {Array}
      */
     function searching(scopeData, stScope) {
-        var compress;
-        for (var i = 0; i < stScope.length; i++) {
+        var compress, i;
+        for (i = 0; i < stScope.length; i++) {
             compress = compressLookUp(compress, scopeData, stScope, i);
         }
         return compress;
