@@ -3,7 +3,7 @@ module.exports = function resolveVariables(textData, scopeData) {
     /**
      * If function call, prepare arguments
      * @param  {String} args
-     * @return {Array}        Array witj function arguments
+     * @return {Array}        Array with function arguments
      */
     function prepareFargs(args) {
         var argsArr = args.split(',');
