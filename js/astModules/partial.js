@@ -48,10 +48,10 @@ module.exports = {
     },
     module: function partialModule(tag, data) {
 
-        var assignModuleVar = tag.attribs.template,
+        var assignModuleVar = tag.attribs.data,
             rootVar = '__root',
             scopeData = {},
-            injected;
+            injected = {};
 
         function resolveStatement() {
             if (tag.injectedData) {
@@ -62,13 +62,10 @@ module.exports = {
                 scopeData = injected;
                 scopeData[rootVar] = scopeData;
                 return this._process(data[assignModuleVar], scopeData);
-            } else {
-                scopeData = (injected ? injected : data[assignModuleVar.trim()]);
-                console.log(tag, data);
-                scopeData[rootVar] = scopeData;
-                return this._process(tag.children, scopeData);
             }
-
+            scopeData = (injected ? injected : data[assignModuleVar.trim()]);
+            scopeData[rootVar] = scopeData;
+            return this._process(tag.children, scopeData);
         }
         return function partialResolve() {
             return resolveStatement.call(this);
