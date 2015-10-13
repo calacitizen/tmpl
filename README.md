@@ -200,11 +200,11 @@ This is types for passing data from specific tags:
 ```
 ```js
 [
-  StringStringStringString, 
+  "StringStringStringString", 
   7812634821634.237582735, 
-  StringStringStringString, 
+  "StringStringStringString", 
   7812634821634.237582735, 
-  StringStringStringString, 
+  "StringStringStringString", 
   7812634821634.237582735
 ]
 ```
@@ -231,11 +231,11 @@ This is types for passing data from specific tags:
   prop2: 23212352.2323,
   prop3: 23212352.2323,
   prop4: [
-    StringStringStringString, 
+    "StringStringStringString", 
     7812634821634.237582735, 
-    StringStringStringString, 
+    "StringStringStringString", 
     7812634821634.237582735, 
-    StringStringStringString, 
+    "StringStringStringString", 
     7812634821634.237582735
   ]
 }
