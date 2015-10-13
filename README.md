@@ -1,8 +1,8 @@
 # TMPL [![Travis](https://travis-ci.org/calacitizen/tmpl.svg?branch=master)](https://travis-ci.org/calacitizen/tmpl)
 ## Javascript API
-Templating engine with valid html directives. TMPL uses two step to generate form you need to get html.
+Templating engine with valid html directives. TMPL uses two step to generate form you need to get html. You can pass any resolver function you want for including external files.
 ```javascript
-tmpl.template(source).handle(
+tmpl.template(source, resolver).handle(
   function handle(traversed) {
     tmpl.html(traversed, data);
   },
@@ -132,7 +132,134 @@ or in loop:
   <ws-partial template="button" data="rabbit" />
 </ws-for>
 ```
-In the partial template you can grab main data object with var name of "root".
+
+If you using resolver you can include templates on the go. For example:
+```html
+<ws:Button></ws:Button>
+```
+Name of this tag (Button) will be used in resolver.
+
+In the partial template you can grab main data object with var name of "__root".
+
+###Inline Templates
+You can create inline templates:
+```html
+<ws:template name="example">
+  <div class="{{class}}">
+    {{Text}}
+  </div>
+</ws:template>
+```
+And use them with partial tag:
+```html
+<ws:partial template="example"></ws:partial>
+```
+
+###Passing data for template modules
+
+When you using partial tag, you can pass data to the template you evaluating. For example:
+
+```html
+<ws:template name="example">
+  <div class="{{class}}">
+    {{base}}
+  </div>
+</ws:template>
+```
+
+```html
+<ws:partial template="example">
+  <ws:class>
+    <ws:string>SomeClass</ws:string>
+  </ws:class>
+  <ws:base>
+    <ws:string>Some Text Here</ws:string>
+  </ws:base>
+</ws:partial>
+```
+
+Additionally you can pass this parameters with the help of attributes:
+
+```html
+<ws:partial template="example" class="SomeClass" base="Some Text Here"></ws:partial>
+```
+
+This is types for passing data from specific tags:
+
+```js
+"StringStringStringString"
+```
+```html
+<ws:string>StringStringStringString</ws:string>
+```
+```js
+7812634821634.237582735
+```
+```html
+<ws:number>7812634821634.237582735</ws:number>
+```
+```js
+[StringStringStringString, 7812634821634.237582735, StringStringStringString, 7812634821634.237582735, StringStringStringString, 7812634821634.237582735]
+```
+```html
+<ws:array>
+  <ws:string>StringStringStringString</ws:string>
+  <ws:number>7812634821634.237582735</ws:number>
+  <ws:string>StringStringStringString</ws:string>
+  <ws:number>7812634821634.237582735</ws:number>
+  <ws:string>StringStringStringString</ws:string>
+  <ws:number>7812634821634.237582735</ws:number>
+</ws:array>
+```
+```js
+{
+  someOption: "Option",
+  someNumber: 123,
+  prop0: {
+    inProp0: {
+      inInProp0: "String"
+    }
+  },
+  prop1: "String",
+  prop2: 23212352.2323,
+  prop3: 23212352.2323,
+  prop4: [StringStringStringString, 7812634821634.237582735, StringStringStringString, 7812634821634.237582735, StringStringStringString, 7812634821634.237582735]
+}
+```
+```html
+<ws:object someOption="Option" someNumber="{{123}}">
+  <ws:prop0>
+    <ws:inProp0>
+      <ws:inInProp0>
+        <ws:string>String</ws:string>
+      </ws:inInProp0>
+    </ws:inProp0>
+  </ws:prop0>
+  <ws:prop1>
+    <ws:string>String</ws:string>
+  </ws:prop1>
+  <ws:prop2>
+    <ws:number>23212352.2323</ws:number>
+  </ws:prop2>
+  <ws:prop3>
+    <ws:number>23212352.2323</ws:number>
+  </ws:prop3>
+  <ws:prop4>
+    <ws:array>
+      <ws:string>StringStringStringString</ws:string>
+      <ws:number>7812634821634.237582735</ws:number>
+      <ws:string>StringStringStringString</ws:string>
+      <ws:number>7812634821634.237582735</ws:number>
+      <ws:string>StringStringStringString</ws:string>
+      <ws:number>7812634821634.237582735</ws:number>
+    </ws:array>
+  </ws:prop4>
+</ws:object>
+```
+
+
+
+
 
 
 
