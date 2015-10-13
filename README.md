@@ -199,7 +199,14 @@ This is types for passing data from specific tags:
 <ws:number>7812634821634.237582735</ws:number>
 ```
 ```js
-[StringStringStringString, 7812634821634.237582735, StringStringStringString, 7812634821634.237582735, StringStringStringString, 7812634821634.237582735]
+[
+  StringStringStringString, 
+  7812634821634.237582735, 
+  StringStringStringString, 
+  7812634821634.237582735, 
+  StringStringStringString, 
+  7812634821634.237582735
+]
 ```
 ```html
 <ws:array>
@@ -223,7 +230,14 @@ This is types for passing data from specific tags:
   prop1: "String",
   prop2: 23212352.2323,
   prop3: 23212352.2323,
-  prop4: [StringStringStringString, 7812634821634.237582735, StringStringStringString, 7812634821634.237582735, StringStringStringString, 7812634821634.237582735]
+  prop4: [
+    StringStringStringString, 
+    7812634821634.237582735, 
+    StringStringStringString, 
+    7812634821634.237582735, 
+    StringStringStringString, 
+    7812634821634.237582735
+  ]
 }
 ```
 ```html
