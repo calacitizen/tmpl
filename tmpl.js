@@ -1549,7 +1549,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    isTagInclude: function isTagInclude(name) {
 	        return name === 'ws-include';
 	    },
-	    isTagRequirable: function isTagRequreable() {
+	    isTagRequirable: function isTagRequreable(name) {
 	        var wsName = utils.splitWs(name);
 	        if (wsName) {
 	            return utils.isUpperCase(utils.getFirstLetter(wsName));
