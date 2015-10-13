@@ -55,7 +55,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var traversing = __webpack_require__(1),
-	    processing = __webpack_require__(17);
+	    processing = __webpack_require__(20);
 	module.exports = {
 	    template: function template(html, resolver) {
 	        var parsed = traversing.parse(html);
@@ -80,13 +80,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    utils = __webpack_require__(3),
 	    skipVars = __webpack_require__(4),
 	    State = __webpack_require__(7),
+	    moduleC = __webpack_require__(10),
 	    entityHelpers = __webpack_require__(6);
 	module.exports = {
 	    _modules: {
-	        'ws:include': __webpack_require__(10),
-	        'ws:template': __webpack_require__(12),
-	        'ws:applytemplate': __webpack_require__(13),
-	        'ws:partial': __webpack_require__(14)
+	        'ws:include': __webpack_require__(18),
+	        'ws:template': __webpack_require__(19),
+	        'ws:partial': __webpack_require__(12)
 	    },
 	    _regex: {
 	        forVariables: /\{\{ ?(.*?) ?\}\}/g
@@ -98,11 +98,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @type {Object}
 	     */
 	    includeStack: {},
-	    /**
-	     * Include template stack
-	     * @type {Object}
-	     */
-	    templateStack: {},
 	    /**
 	     * Parsing html string to the directive state
 	     * @param  {String} tmpl     string html template
@@ -156,9 +151,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @return {Array}              array with objects
 	     */
 	    _replaceAndCreateStatements: function replaceAndCreateStatements(data, arrOfVars) {
-	        return utils.mapForLoop(data, function searchInScope(value) {
-	            return skipVars.checkStatementForInners(value, arrOfVars);
-	        }.bind(this));
+	        var array = [], i, emptyString = "";
+	        for (i = 0; i < data.length; i++) {
+	            if (data[i] !== emptyString) {
+	                array.push(skipVars.checkStatementForInners(data[i], arrOfVars));
+	            }
+	        }
+	        return array;
 	    },
 	    /**
 	     * Looking for variables in string data object
@@ -187,7 +186,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (arrOfVars) {
 	            arrOfVarsClean = this._searchForVars(arrOfVars);
 	        }
-
 	        strObjectData.data = resString.split(this._regex.forVariables);
 	        return this._createDataObject(strObjectData, arrOfVarsClean);
 	    },
@@ -208,6 +206,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (entityHelpers.isTag(entity.type)) {
 	            if (this._modules[entity.name]) {
 	                return this._traverseModule;
+	            }
+	            if (entityHelpers.isTagRequirable(entity.name)) {
+	                return this._traverseOptionModule;
 	            }
 	            return this._traverseTag;
 	        }
@@ -327,6 +328,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            state.keep(this._generatorFunctionForTags(takeTag))
 	            return state.promise;
 	        }
+	    },
+	    _traverseOptionModule: function traverseOptionModule(tag) {
+	        return entityHelpers.loadModuleFunction.call(this, moduleC.parse, tag)
 	    },
 	    /**
 	     * Main function for finding traverse method for module
@@ -1259,8 +1263,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        return f;
 	    },
+	    isNumber: function isNumber(string) {
+	        return /^((?=\.\d|\d)(?:\d+)?(?:\.?\d*)(?:[eE][+-]?\d+)?)$/.test(string.trim());
+	    },
 	    isVar: function isVar(string) {
 	        return !/['"].*?['"]/.test(string) && isNaN(parseInt(string));
+	    },
+	    getFirstLetter: function getFirstLetter(string) {
+	        return string.charAt(0);
+	    },
+	    isUpperCase: function isUpperCase(firstLetter) {
+	        return firstLetter === firstLetter.toUpperCase();
 	    },
 	    splitVarsAndFunctions: function splitVarsAndFunctions(s) {
 	        var depth = 0, seg = 0, rv = [];
@@ -1298,6 +1311,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    removeAllSpaces: function removeAllSpaces(string) {
 	        return string.replace(/\s/g, "");
 	    },
+	    splitWs: function splitWs(string) {
+	        var ws;
+	        if (string !== undefined) {
+	            ws = string.split('ws:');
+	            return ws[1];
+	        }
+	        return undefined;
+	    },
 	    clone: function clone(src) {
 	        function mixin(dest, source, copyFunc) {
 	            var name, s, i, empty = {};
@@ -1334,6 +1355,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	            r = src.constructor ? new src.constructor() : {};
 	        }
 	        return mixin(r, src, clone);
+	    },
+	    merge: function merge(target, source) {
+	        if ( typeof target !== 'object' ) {
+	            target = {};
+	        }
+	        for (var property in source) {
+	            if ( source.hasOwnProperty(property) ) {
+	                var sourceProperty = source[ property ];
+	                if ( typeof sourceProperty === 'object' ) {
+	                    target[ property ] = merge( target[ property ], sourceProperty );
+	                    continue;
+	                }
+	                target[ property ] = sourceProperty;
+	            }
+	        }
+	        for (var a = 2, l = arguments.length; a < l; a++) {
+	            this.merge(target, arguments[a]);
+	        }
+	        return target;
 	    }
 	}
 
@@ -1352,6 +1392,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            isUseful = utils.inArray(arrVars, value),
 	            expressionObj;
 	        if (isUseful === true) {
+	            if (utils.isNumber(value)) {
+	                return entityHelpers.createDataText(entityHelpers.createNumberFromString(value));
+	            }
 	            if (!utils.isImplicitVar(value) && !utils.isFunction(value)) {
 	                expressionObj = conditionalResolver(value);
 	                if (expressionObj.condition === undefined) {
@@ -1360,6 +1403,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return entityHelpers.createDataExpression(expressionObj.condition, expressionObj.valOne, expressionObj.valTwo);
 	            }
 	            return entityHelpers.createDataVar(value, undefined);
+
 	        }
 	        return entityHelpers.createDataText(value);
 	    }
@@ -1449,8 +1493,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 6 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
+	var utils = __webpack_require__(3);
 	module.exports = {
 	    /**
 	     * is entity - tag
@@ -1475,7 +1520,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    parserMatcher: function parserMatcher(tag) {
 	        return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].parse : false;
-	        return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].parse : false;
 	    },
 	    /**
 	     * Match parse by name
@@ -1483,7 +1527,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @return {Function}
 	     */
 	    moduleMatcher: function moduleMatcher(tag) {
-	        return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].module : false;
+	        var moduleName = utils.splitWs(tag.name);
+	        return (this._modules[moduleName] !== undefined) ? this._modules[moduleName].module : false;
 	    },
 	    /**
 	     * Load module and execute function
@@ -1503,6 +1548,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    isTagInclude: function isTagInclude(name) {
 	        return name === 'ws-include';
+	    },
+	    isTagRequirable: function isTagRequreable() {
+	        var wsName = utils.splitWs(name);
+	        if (wsName) {
+	            return utils.isUpperCase(utils.getFirstLetter(wsName));
+	        }
+	        return false;
+	    },
+	    isTagRequirableBool: function isTagRequreableBool(name) {
+	        return utils.isUpperCase(utils.getFirstLetter(name));
 	    },
 	    /**
 	     * is expression
@@ -1559,6 +1614,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	            valueOne: valueOne,
 	            valueTwo: valueTwo
 	        };
+	    },
+	    createNumberFromString: function createNumberFromString(value) {
+	        return Number(value);
+	    },
+	    parseAttributesForData: function parseAttributesForData(attrs, data) {
+	        var attr, obj = {};
+	        function processDataSequence(attributesData, data) {
+	            var string = '', attrData = attributesData.data, i;
+	            if (attrData.length) {
+	                if (attrData.length === 1) {
+	                    return this._processDataTypes(attrData[0], data);
+	                }
+	                for (i = 0; i < attrData.length; i++) {
+	                    string += this._processDataTypes(attrData[i], data);
+	                }
+	                return string;
+	            }
+	            return this._processDataTypes(attrData, data);
+	        }
+	        if (attrs !== undefined) {
+	            for (attr in attrs) {
+	                if (attrs.hasOwnProperty(attr) && attr !== 'template') {
+	                    obj[attr] = processDataSequence.call(this, attrs[attr], data);
+	                }
+	            }
+	        }
+	        return obj;
 	    }
 	};
 
@@ -1936,26 +2018,49 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var requireFile = __webpack_require__(11),
 	    entityHelpers = __webpack_require__(6),
+	    utils = __webpack_require__(3),
+	    partial = __webpack_require__(12),
 	    State = __webpack_require__(7);
 	module.exports = {
 	    parse: function requireOrRetire(tag) {
-	        var name = tag.attribs.name.trim(),
-	            template = tag.attribs.template.trim();
-
-	        function resolveInclude(object) {
-	            return object;
-	        }
-
-	        function resolveStatement() {
+	        var name = utils.splitWs(tag.name.trim());
+	        function straightFromFile() {
 	            var unState = State.make();
-	            this.includeStack[name] = requireFile.call(this, template).when(resolveInclude);
-	            unState.keep(entityHelpers.createDataRequest(name));
+	            requireFile.call(this, name).when(
+	                function includeTraverse(templateData) {
+	                    this.traversingAST(templateData).when(
+	                        function includeTraverseState(modAST) {
+	                            unState.keep(modAST);
+	                        }.bind(this),
+	                        function brokenTraverse(reason) {
+	                            throw new Error(reason);
+	                        }
+	                    );
+	                }.bind(this),
+	                function (reason) {
+	                    throw new Error(reason);
+	                }
+	            );
 	            return unState.promise;
 	        }
-
+	        function resolveStatement() {
+	            var moduleFunction;
+	            if (!this.includeStack[name]) {
+	                this.includeStack[name] = straightFromFile.call(this);
+	            }
+	            if (tag.attribs === undefined) {
+	                tag.attribs = {};
+	            }
+	            tag.attribs.template = name;
+	            moduleFunction = partial.parse(tag);
+	            return moduleFunction.call(this);
+	        }
 	        return function includeResolve() {
 	            return resolveStatement.call(this);
 	        };
+	    },
+	    module: function requireModule(tag, data) {
+	        return partial.module(tag, data);
 	    }
 	};
 
@@ -2049,137 +2154,72 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var State = __webpack_require__(7),
-	    entityHelpers = __webpack_require__(6);
-	module.exports = {
-	    parse: function templateParse(tag) {
-	        var name;
-	        try {
-	            name = tag.attribs.name.trim();
-	        } catch (e) {
-	            throw new Error("Something wrong with name attribute in ws-template tag");
-	        }
-	        if (tag.children.length === 0) {
-	            throw new Error("There is got to be a children in ws-template tag");
-	        }
-	        function resolveStatement() {
-	            var unState = State.make();
-	            this.templateStack[name] = tag.children;
-	            unState.keep(entityHelpers.createDataRequest(name));
-	            return unState.promise;
-	        }
-	        return function templateResolve() {
-	            return resolveStatement.call(this);
-	        };
-	    }
-	};
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var State = __webpack_require__(7);
-	module.exports = {
-	    parse: function templateModule(tag) {
-	        var name;
-	        try {
-	            name = tag.attribs.name.trim();
-	        } catch (e) {
-	            throw new Error('Something wrong with name attribute in ws-applytemplate tag');
-	        }
-	        function resolveStatement() {
-	            var stateTemplate = State.make();
-	            if (this.templateStack[name] === undefined) {
-	                throw new Error('There is no ws-template tag with "' + name + '" name');
-	            }
-	            this.traversingAST(this.templateStack[name]).when(
-	                function partialTraversing(modAST) {
-	                    tag.children = modAST;
-	                    stateTemplate.keep(tag);
-	                },
-	                function brokenTraverse(reason) {
-	                    throw new Error(reason);
-	                }
-	            );
-	            return stateTemplate.promise;
-	        }
-	        return function templateResolve() {
-	            return resolveStatement.call(this);
-	        };
-	    },
-	    module: function templateModule(tag, data) {
-	        var assignVar;
-	        if (tag.attribs.data) {
-	            assignVar = tag.attribs.data.trim();
-	        }
-	        function resolveStatement() {
-	            return this._process(tag.children, data[assignVar]);
-	        }
-	        return function templateResolve() {
-	            return resolveStatement.call(this);
-	        };
-	    }
-	};
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var State = __webpack_require__(7),
 	    utils = __webpack_require__(3),
-	    injectedDataForce = __webpack_require__(15);
+	    injectedDataForce = __webpack_require__(13);
 	module.exports = {
-	    parse: function partialModule(tag) {
-	        var template = tag.attribs.template.trim(),
-	            tagData = tag.children;
-
-	        function resolveStatement() {
-	            var state = State.make();
-
-	            if (this.includeStack[template] === undefined) {
-	                throw new Error('Include tag for "' + template + '" is not found!');
+	    parse: function partialParse(tag) {
+	        var tagData = tag.children;
+	        function resolveInjectedData(state, tag, injectingData) {
+	            if (injectingData) {
+	                this.traversingAST(injectingData).when(
+	                    function dataTraversing(tagDataAst) {
+	                        tag.injectedData = tagDataAst;
+	                        state.keep(tag);
+	                    }.bind(this)
+	                );
+	            } else {
+	                state.keep(tag);
 	            }
-
-	            this.includeStack[template].when(
-	                function partialInclude(templateData) {
-	                    if (templateData) {
-	                        this.traversingAST(templateData).when(
-	                            function partialTraversing(modAST) {
-	                                if (tagData) {
-	                                    tag.injectedData = tagData;
-	                                }
-	                                tag.children = modAST;
-	                                state.keep(tag);
-	                            },
-	                            function brokenTraverse(reason) {
-	                                throw new Error(reason);
-	                            }
-	                        );
-	                    } else {
-	                        state.break('Include tag for "' + template + '" is not found!');
-	                    }
-	                }.bind(this),
-	                function brokenPartial(reason) {
-	                    throw new Error(reason);
+	            return state;
+	        }
+	        function resolveStatement() {
+	            var state = State.make(),
+	                attribs = this._traverseTagAttributes(tag.attribs),
+	                template;
+	            if (attribs.template === undefined) {
+	                throw new Error("No template tag for partial " + tag.name);
+	            }
+	            template = attribs.template.data;
+	            tag.attribs = attribs;
+	            if (template.length > 0) {
+	                tag.injectedTemplate = template[0];
+	                state = resolveInjectedData.call(this, state, tag, tagData);
+	            } else {
+	                template = template.value.trim();
+	                if (this.includeStack[template] === undefined) {
+	                    throw new Error('Tag for "' + template + '" is not found!');
 	                }
-	            );
+	                this.includeStack[template].when(
+	                    function partialInclude(modAST) {
+	                        if (modAST) {
+	                            tag.children = modAST;
+	                            state = resolveInjectedData.call(this, state, tag, tagData);
+	                        } else {
+	                            state.break('Include tag for "' + template + '" is not found!');
+	                        }
+	                    }.bind(this),
+	                    function brokenPartial(reason) {
+	                        throw new Error(reason);
+	                    }
+	                );
+	            }
 	            return state.promise;
 	        }
-
 	        return function partialResolve() {
 	            return resolveStatement.call(this);
 	        };
 	    },
 	    module: function partialModule(tag, data) {
-	        var assignModuleVar = tag.attribs.data.trim(),
-	            rootVar = 'root',
+	        var assignModuleVar = tag.attribs.data,
+	            rootVar = '__root',
 	            scopeData = {};
-
-	        if (tag.injectedData) {
-	            injectedDataForce(tag.injectedData);
-	        }
-
 	        function resolveStatement() {
-	            scopeData[rootVar] = data[assignModuleVar];
+	            scopeData = injectedDataForce.call(this, { children: tag.injectedData, attribs: tag.attribs }, data);
+	            scopeData[rootVar] = scopeData;
+	            if (tag.injectedTemplate) {
+	                assignModuleVar = tag.injectedTemplate.name.trim();
+	                return this._process(data[assignModuleVar], scopeData);
+	            }
 	            return this._process(tag.children, scopeData);
 	        }
 	        return function partialResolve() {
@@ -2190,86 +2230,219 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = function injectedDataForce(data) {
-	    var preparedObject = {},
-	        types = {
-	            string: __webpack_require__(16)
+	module.exports = function injectedDataForce(data, scopeData) {
+	    var types = {
+	            string: __webpack_require__(14),
+	            array: __webpack_require__(15),
+	            object: __webpack_require__(16),
+	            number: __webpack_require__(17)
 	        };
-
-	    function splitWs(string) {
-	        var ws;
-	        if (string !== undefined) {
-	            ws = string.split('ws:');
-	            return ws[1];
-	        }
-	        return undefined;
-	    }
-
-	    function traverseInjectedData(injected) {
-	        var mFunction, propName, tValue, tObject;
-	        for (var i=0; i<injected.length; i++) {
-	            if (splitWs(injected[i].name)) {
-	                if (injected[i].children) {
-	                    if (types[splitWs(injected[i].name)]) {
-	                        mFunction = types[splitWs(injected[i].name)](injected[i]);
-	                        tValue = mFunction();
-	                    } else {
-	                        propName = splitWs(injected[i].name);
-	                        tObject[propName] = tValue;
-	                    }
-	                    traverseInjectedData(injected[i].children);
-	                }
-	            }
-	        }
-	        return tObject;
-	    }
-	    traverseInjectedData(data);
-	    return preparedObject;
+	    return types.object.call(this, types, data, scopeData);
 	};
 
 /***/ },
-/* 16 */
+/* 14 */
 /***/ function(module, exports) {
 
-	module.exports = function stringTag(tag) {
+	module.exports = function stringTag(types, tag, scopeData) {
+	    var children, string = '', i;
+	    if (tag.children) {
+	        children = tag.children;
+	        for (i = 0; i < children.length; i++) {
+	            if (children[i].type === "text") {
+	                string += this._processData(children[i].data, scopeData);
+	            }
+	        }
+	    }
+	    return string;
+	}
 
-	    function resolveStatement() {
-	        var children,
-	            string = '';
-	        if (tag.children) {
-	            children = tag.children;
-	            for (var i=0; i < children.length; i++) {
-	                if (children[i].type === "text") {
-	                    string += children[i].data;
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var utils = __webpack_require__(3);
+	module.exports = function arrayTag(types, tag, scopeData) {
+	    var children, array = [], nameExists, typeFunction, i;
+	    if (tag.children) {
+	        children = tag.children;
+	        for (i = 0; i < children.length; i++) {
+	            nameExists = utils.splitWs(children[i].name);
+	            if (nameExists) {
+	                if (children[i].children) {
+	                    typeFunction = types[nameExists];
+	                    if (typeFunction) {
+	                        array.push(typeFunction.call(this, types, children[i], scopeData));
+	                    } else {
+	                        throw new Error(children[i].name + ' property can\'t be in the root of ws:array tag');
+	                    }
 	                }
 	            }
 	        }
-	        return string;
 	    }
-
-	    return function stringReturnable() {
-	        return resolveStatement.call(this);
-	    };
+	    return array;
 	}
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var utils = __webpack_require__(3),
+	    entityHelpers = __webpack_require__(6);
+	module.exports = function objectTag(types, injected, scopeData) {
+	    var tObject = {}, typeFunction, nameExists, i, objectForMerge = {}, htmlArray = [];
+	    function isEntityUsefulOrHTML(nameExists) {
+	        return nameExists && !this._modules.hasOwnProperty(nameExists) && !entityHelpers.isTagRequirableBool(nameExists);
+	    }
+	    objectForMerge = entityHelpers.parseAttributesForData.call(this, injected.attribs, scopeData);
+	    if (injected.children) {
+	        injected = injected.children;
+	    }
+	    for (i = 0; i < injected.length; i++) {
+	        nameExists = utils.splitWs(injected[i].name);
+	        if (isEntityUsefulOrHTML.call(this, nameExists)) {
+	            if (injected[i].children) {
+	                typeFunction = types[nameExists];
+	                if (typeFunction) {
+	                    return typeFunction.call(this, types, injected[i], scopeData);
+	                }
+	                tObject[nameExists] = objectTag.call(this, types, injected[i].children, scopeData);
+	            }
+	        } else {
+	            htmlArray.push(injected[i]);
+	        }
+	    }
+	    if (objectForMerge !== undefined) {
+	        tObject = utils.merge(tObject, objectForMerge);
+	    }
+	    if (htmlArray.length > 0) {
+	        return htmlArray;
+	    }
+	    return tObject;
+	};
+
 
 /***/ },
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var entityHelpers = __webpack_require__(6);
+	module.exports = function stringTag(types, tag, scopeData) {
+	    var children, i;
+	    if (tag.children) {
+	        children = tag.children;
+	        for (i = 0; i < children.length; i++) {
+	            if (children[i].type === "text") {
+	                return entityHelpers.createNumberFromString(children[i].data.value);
+	            }
+	        }
+	    }
+	}
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var requireFile = __webpack_require__(11),
+	    entityHelpers = __webpack_require__(6),
+	    State = __webpack_require__(7);
+	module.exports = {
+	    parse: function requireOrRetire(tag) {
+	        var name = tag.attribs.name.trim(),
+	            template = tag.attribs.template.trim();
+	        function straightFromFile() {
+	            var unState = State.make();
+	            requireFile.call(this, template).when(
+	                function includeTraverse(templateData) {
+	                    this.traversingAST(templateData).when(
+	                        function includeTraverseState(modAST) {
+	                            unState.keep(modAST);
+	                        }.bind(this),
+	                        function brokenTraverse(reason) {
+	                            throw new Error(reason);
+	                        }
+	                    );
+	                }.bind(this),
+	                function (reason) {
+	                    throw new Error(reason);
+	                }
+	            );
+	            return unState.promise;
+	        }
+	        function resolveStatement() {
+	            var st = State.make();
+	            this.includeStack[name] = straightFromFile.call(this);
+	            st.keep(entityHelpers.createDataRequest(name));
+	            return st.promise;
+	        }
+	        return function includeResolve() {
+	            return resolveStatement.call(this);
+	        };
+	    }
+	};
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var State = __webpack_require__(7),
+	    entityHelpers = __webpack_require__(6);
+	module.exports = {
+	    parse: function templateParse(tag) {
+	        var name;
+	        try {
+	            name = tag.attribs.name.trim();
+	        } catch (e) {
+	            throw new Error("Something wrong with name attribute in ws-template tag");
+	        }
+	        if (tag.children === undefined || tag.children.length === 0) {
+	            throw new Error("There is got to be a children in ws-template tag");
+	        }
+	        function templateAST() {
+	            var unState = State.make();
+	            this.traversingAST(tag.children).when(
+	                function partialTraversing(modAST) {
+	                    unState.keep(modAST);
+	                },
+	                function brokenTraverse(reason) {
+	                    throw new Error(reason);
+	                }
+	            );
+	            return unState.promise;
+	        }
+	        function resolveStatement() {
+	            var requestState = State.make();
+	            this.includeStack[name] = templateAST.call(this);
+	            requestState.keep(entityHelpers.createDataRequest(name));
+	            return requestState.promise;
+	        }
+	        return function templateResolve() {
+	            return resolveStatement.call(this);
+	        };
+	    }
+	};
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var utils = __webpack_require__(3),
-	    seekingForVars = __webpack_require__(18),
-	    whatType = __webpack_require__(23),
+	    seekingForVars = __webpack_require__(21),
+	    whatType = __webpack_require__(26),
+	    moduleC = __webpack_require__(10),
 	    entityHelpers = __webpack_require__(6);
 	module.exports = {
 	    _modules: {
-	        'ws:if': __webpack_require__(24),
-	        'ws:for': __webpack_require__(25),
-	        'ws:else': __webpack_require__(26),
-	        'ws:partial': __webpack_require__(14),
-	        'ws:applytemplate': __webpack_require__(13)
+	        'if': __webpack_require__(27),
+	        'for': __webpack_require__(28),
+	        'else': __webpack_require__(29),
+	        'partial': __webpack_require__(12),
+	        'include': __webpack_require__(18),
+	        'template': __webpack_require__(19)
 	    },
 	    /**
 	     * Getting html string
@@ -2280,13 +2453,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    getHTMLString: function getHTMLString(ast, data) {
 	        return this._process(ast, data);
 	    },
+	    _processOptionModule: function processOptionModule(tag, data) {
+	        return entityHelpers.loadModuleFunction.call(this, moduleC.module, tag, data);
+	    },
 	    /**
 	     * Main function for finding process method for module
 	     * @param  {Object} tag  Tag
 	     * @param  {Object} data Data object
 	     * @return {Object}      Entity: tag or text
 	     */
-	    _processModule: function traverseModule(tag, data) {
+	    _processModule: function processModule(tag, data) {
 	        var moduleFunction = entityHelpers.moduleMatcher.call(this, tag);
 	        return entityHelpers.loadModuleFunction.call(this, moduleFunction, tag, data);
 	    },
@@ -2297,8 +2473,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    _whatMethodShouldYouUse: function whatMethodShouldYouUse(entity) {
 	        if (entityHelpers.isTag(entity.type)) {
-	            if (this._modules[entity.name]) {
+	            if (this._modules[utils.splitWs(entity.name)]) {
 	                return this._processModule;
+	            }
+	            if (entityHelpers.isTagRequirable(entity.name)) {
+	                return this._processOptionModule;
 	            }
 	            return this._processTag;
 	        }
@@ -2401,7 +2580,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    /**
 	     * Recursive function for string generation
-	     * @param  {Array} ast  AST array
+	     * @param  {Array} ast  AS T array
 	     * @param  {Object} data Data
 	     * @return {String}
 	     */
@@ -2414,33 +2593,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 	        return string;
-	    },
-	    // _processNon: function _processNon(ast, data) {
-	    //   var stack = [];
-	    //   stack.push(ast);
-	    //   while (stack.length) {
-	    //       for (var j in stack[0]) {
-	    //           if (typeof stack[0][j] === 'object') {
-	    //               stack.push(stack[0][j]);
-	    //               if (stack[0][j].raw !== undefined) {
-	    //                 console.log(stack[0][j]);
-	    //               }
-	    //           }
-	    //       }
-	    //       stack.shift();
-	    //   }
-	    // }
+	    }
 	};
 
 
 /***/ },
-/* 18 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var conditional = __webpack_require__(19),
+	var conditional = __webpack_require__(22),
 	    utils = __webpack_require__(3),
 	    entityHelpers = __webpack_require__(6),
-	    resolveVariables = __webpack_require__(22);
+	    resolveVariables = __webpack_require__(25);
 	module.exports = function seekForVars(textData, scopeData) {
 
 	    function expressionResolve(value, scopeData) {
@@ -2472,10 +2636,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var scopeHold = __webpack_require__(20),
+	var scopeHold = __webpack_require__(23),
 	    utils = __webpack_require__(3);
 	module.exports = function conditional(source, data) {
 	    var
@@ -2512,7 +2676,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    /**
-	     * Looking up for unqiue variables in expression
+	     * Looking up for unique variables in expression
 	     * @param  {String} expression String with expression
 	     * @return {Array}            Array with unqiue variables
 	     */
@@ -2547,10 +2711,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 20 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var checkStatements = __webpack_require__(21);
+	var checkStatements = __webpack_require__(24);
 	module.exports = function scopeHold(arrVars, scope) {
 	  var ms = [],
 	      stepVar;
@@ -2567,11 +2731,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 21 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3),
-	    resolveVariables = __webpack_require__(22);
+	    resolveVariables = __webpack_require__(25);
 	module.exports = function checkStatementForInners(value, scopeData, arrVars) {
 	    var isVar = utils.inArray(arrVars, value);
 
@@ -2617,7 +2781,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 22 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3);
@@ -2625,11 +2789,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    /**
 	     * If function call, prepare arguments
 	     * @param  {String} args
-	     * @return {Array}        Array witj function arguments
+	     * @return {Array}        Array with function arguments
 	     */
 	    function prepareFargs(args) {
 	        var argsArr = args.split(',');
-	        if (argsArr.length > 0 ) {
+	        if (argsArr.length > 0) {
 	            argsArr = utils.mapForLoop(argsArr, function trimming(val) {
 	                val = val.trim();
 	                if (utils.isVar(val)) {
@@ -2650,7 +2814,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @param  {number} i         Iterator
 	     * @return {Array}           Array with data
 	     */
-	    function fLookUp(f, compress, scopeData, variable, i) {
+	    function fLookUp(f, compress, scopeData, i) {
 	        var fName = f[0],
 	            args = prepareFargs(f[1]);
 	        if (scopeData.hasOwnProperty(fName) && i === 0) {
@@ -2674,7 +2838,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function compressLookUp(compress, scopeData, stScope, i) {
 	        var f = utils.isFunction(stScope[i]);
 	        if (f) {
-	            compress = fLookUp(f, compress, scopeData, stScope[i], i);
+	            compress = fLookUp(f, compress, scopeData, i);
 	        } else {
 	            if (i === 0) {
 	                compress = scopeData[stScope[i]];
@@ -2694,8 +2858,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @return {Array}
 	     */
 	    function searching(scopeData, stScope) {
-	        var compress;
-	        for (var i = 0; i < stScope.length; i++) {
+	        var compress, i;
+	        for (i = 0; i < stScope.length; i++) {
 	            compress = compressLookUp(compress, scopeData, stScope, i);
 	        }
 	        return compress;
@@ -2716,7 +2880,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 23 */
+/* 26 */
 /***/ function(module, exports) {
 
 	module.exports = function checkType(value) {
@@ -2777,20 +2941,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var conditional = __webpack_require__(19);
+	var conditional = __webpack_require__(22);
 	module.exports = {
 	    module: function ifModule(tag, data) {
 	        var source;
-
 	        if (tag.attribs.data.data === undefined) {
 	            throw new Error('There is no data for "if" module to use');
 	        }
-
 	        source =  tag.attribs.data.data.value.trim();
-
 	        function resolveStatement() {
 	            if (conditional(source, data)) {
 	                if (tag.children !== undefined) {
@@ -2799,7 +2960,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            return;
 	        }
-
 	        return function ifModuleReturnable() {
 	            if (tag.children !== undefined) {
 	                return resolveStatement.call(this);
@@ -2810,11 +2970,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 25 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var checkStatements = __webpack_require__(21),
-	    whatType = __webpack_require__(23),
+	var checkStatements = __webpack_require__(24),
+	    whatType = __webpack_require__(26),
 	    utils = __webpack_require__(3);
 	module.exports = {
 	    module: function forModule(tag, data) {
@@ -2920,10 +3080,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 26 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var conditional = __webpack_require__(19);
+	var conditional = __webpack_require__(22);
 	module.exports = {
 	    module: function elseModule(tag, data) {
 	        var source;

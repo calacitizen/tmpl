@@ -8,7 +8,7 @@ module.exports = {
         } catch (e) {
             throw new Error("Something wrong with name attribute in ws-template tag");
         }
-        if (tag.children.length === 0) {
+        if (tag.children === undefined || tag.children.length === 0) {
             throw new Error("There is got to be a children in ws-template tag");
         }
         function templateAST() {

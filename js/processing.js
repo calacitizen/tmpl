@@ -44,7 +44,7 @@ module.exports = {
             if (this._modules[utils.splitWs(entity.name)]) {
                 return this._processModule;
             }
-            if (entityHelpers.isTagRequreable(entity.name)) {
+            if (entityHelpers.isTagRequirable(entity.name)) {
                 return this._processOptionModule;
             }
             return this._processTag;

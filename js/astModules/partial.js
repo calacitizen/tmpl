@@ -32,7 +32,7 @@ module.exports = {
             } else {
                 template = template.value.trim();
                 if (this.includeStack[template] === undefined) {
-                    throw new Error('Include tag for "' + template + '" is not found!');
+                    throw new Error('Tag for "' + template + '" is not found!');
                 }
                 this.includeStack[template].when(
                     function partialInclude(modAST) {

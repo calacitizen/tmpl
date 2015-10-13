@@ -130,7 +130,7 @@ module.exports = {
             if (this._modules[entity.name]) {
                 return this._traverseModule;
             }
-            if (entityHelpers.isTagRequreable(entity.name)) {
+            if (entityHelpers.isTagRequirable(entity.name)) {
                 return this._traverseOptionModule;
             }
             return this._traverseTag;

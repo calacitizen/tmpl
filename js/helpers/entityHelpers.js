@@ -52,12 +52,15 @@ module.exports = {
     isTagInclude: function isTagInclude(name) {
         return name === 'ws-include';
     },
-    isTagRequreable: function isTagRequreable(name) {
+    isTagRequirable: function isTagRequreable() {
         var wsName = utils.splitWs(name);
         if (wsName) {
             return utils.isUpperCase(utils.getFirstLetter(wsName));
         }
         return false;
+    },
+    isTagRequirableBool: function isTagRequreableBool(name) {
+        return utils.isUpperCase(utils.getFirstLetter(name));
     },
     /**
      * is expression
