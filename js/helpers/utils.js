@@ -36,8 +36,17 @@ module.exports = {
         }
         return f;
     },
+    isNumber: function isNumber(string) {
+        return /^((?=\.\d|\d)(?:\d+)?(?:\.?\d*)(?:[eE][+-]?\d+)?)$/.test(string.trim());
+    },
     isVar: function isVar(string) {
         return !/['"].*?['"]/.test(string) && isNaN(parseInt(string));
+    },
+    getFirstLetter: function getFirstLetter(string) {
+        return string.charAt(0);
+    },
+    isUpperCase: function isUpperCase(firstLetter) {
+        return firstLetter === firstLetter.toUpperCase();
     },
     splitVarsAndFunctions: function splitVarsAndFunctions(s) {
         var depth = 0, seg = 0, rv = [];
@@ -75,6 +84,14 @@ module.exports = {
     removeAllSpaces: function removeAllSpaces(string) {
         return string.replace(/\s/g, "");
     },
+    splitWs: function splitWs(string) {
+        var ws;
+        if (string !== undefined) {
+            ws = string.split('ws:');
+            return ws[1];
+        }
+        return undefined;
+    },
     clone: function clone(src) {
         function mixin(dest, source, copyFunc) {
             var name, s, i, empty = {};
@@ -111,5 +128,24 @@ module.exports = {
             r = src.constructor ? new src.constructor() : {};
         }
         return mixin(r, src, clone);
+    },
+    merge: function merge(target, source) {
+        if ( typeof target !== 'object' ) {
+            target = {};
+        }
+        for (var property in source) {
+            if ( source.hasOwnProperty(property) ) {
+                var sourceProperty = source[ property ];
+                if ( typeof sourceProperty === 'object' ) {
+                    target[ property ] = merge( target[ property ], sourceProperty );
+                    continue;
+                }
+                target[ property ] = sourceProperty;
+            }
+        }
+        for (var a = 2, l = arguments.length; a < l; a++) {
+            this.merge(target, arguments[a]);
+        }
+        return target;
     }
 }

@@ -3,13 +3,13 @@ var
     utils = require('./helpers/utils'),
     skipVars = require('./helpers/skipVars'),
     State = require('./helpers/State'),
+    moduleC = require('./astModules/module'),
     entityHelpers = require('./helpers/entityHelpers');
 module.exports = {
     _modules: {
-        'ws-include': require('./astModules/include'),
-        'ws-template': require('./astModules/template'),
-        'ws-applytemplate': require('./astModules/applytemplate'),
-        'ws-partial': require('./astModules/partial')
+        'ws:include': require('./astModules/include'),
+        'ws:template': require('./astModules/template'),
+        'ws:partial': require('./astModules/partial')
     },
     _regex: {
         forVariables: /\{\{ ?(.*?) ?\}\}/g
@@ -21,11 +21,6 @@ module.exports = {
      * @type {Object}
      */
     includeStack: {},
-    /**
-     * Include template stack
-     * @type {Object}
-     */
-    templateStack: {},
     /**
      * Parsing html string to the directive state
      * @param  {String} tmpl     string html template
@@ -79,9 +74,13 @@ module.exports = {
      * @return {Array}              array with objects
      */
     _replaceAndCreateStatements: function replaceAndCreateStatements(data, arrOfVars) {
-        return utils.mapForLoop(data, function searchInScope(value) {
-            return skipVars.checkStatementForInners(value, arrOfVars);
-        }.bind(this));
+        var array = [], i, emptyString = "";
+        for (i = 0; i < data.length; i++) {
+            if (data[i] !== emptyString) {
+                array.push(skipVars.checkStatementForInners(data[i], arrOfVars));
+            }
+        }
+        return array;
     },
     /**
      * Looking for variables in string data object
@@ -110,7 +109,6 @@ module.exports = {
         if (arrOfVars) {
             arrOfVarsClean = this._searchForVars(arrOfVars);
         }
-
         strObjectData.data = resString.split(this._regex.forVariables);
         return this._createDataObject(strObjectData, arrOfVarsClean);
     },
@@ -131,6 +129,9 @@ module.exports = {
         if (entityHelpers.isTag(entity.type)) {
             if (this._modules[entity.name]) {
                 return this._traverseModule;
+            }
+            if (entityHelpers.isTagRequirable(entity.name)) {
+                return this._traverseOptionModule;
             }
             return this._traverseTag;
         }
@@ -242,7 +243,7 @@ module.exports = {
     _traverseTag: function traverseTag(tag, prev, next) {
         var state,
             attribs = this._traverseTagAttributes(tag.attribs),
-            takeTag = this._createTag(tag.name, tag.data, tag.raw, attribs, tag.children, prev, next);
+            takeTag = this._createTag({ name: tag.name, data: tag.data, raw: tag.raw, attribs: attribs, children: tag.children, prev: prev, next: next });
         if (takeTag.children && takeTag.children.length > 0) {
             return this.traverseTagWithChildren(takeTag);
         } else {
@@ -250,6 +251,9 @@ module.exports = {
             state.keep(this._generatorFunctionForTags(takeTag))
             return state.promise;
         }
+    },
+    _traverseOptionModule: function traverseOptionModule(tag) {
+        return entityHelpers.loadModuleFunction.call(this, moduleC.parse, tag)
     },
     /**
      * Main function for finding traverse method for module
@@ -284,16 +288,16 @@ module.exports = {
      * @param  {Array} children
      * @return {Object}
      */
-    _createTag: function createTag(name, data, raw, attribs, children, prev, next) {
+    _createTag: function createTag(tag) {
         return {
-            name: name,
-            data: data,
-            raw: raw,
-            attribs: attribs,
-            children: children,
+            name: tag.name,
+            data: tag.data,
+            raw: tag.raw,
+            attribs: tag.attribs,
+            children: tag.children,
             type: "tag",
-            prev: prev,
-            next: next
+            prev: tag.prev,
+            next: tag.next
         };
     },
     /**

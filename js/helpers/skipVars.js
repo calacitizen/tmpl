@@ -7,6 +7,9 @@ module.exports = {
             isUseful = utils.inArray(arrVars, value),
             expressionObj;
         if (isUseful === true) {
+            if (utils.isNumber(value)) {
+                return entityHelpers.createDataText(entityHelpers.createNumberFromString(value));
+            }
             if (!utils.isImplicitVar(value) && !utils.isFunction(value)) {
                 expressionObj = conditionalResolver(value);
                 if (expressionObj.condition === undefined) {
@@ -15,6 +18,7 @@ module.exports = {
                 return entityHelpers.createDataExpression(expressionObj.condition, expressionObj.valOne, expressionObj.valTwo);
             }
             return entityHelpers.createDataVar(value, undefined);
+
         }
         return entityHelpers.createDataText(value);
     }

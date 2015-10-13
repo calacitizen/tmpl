@@ -8,14 +8,26 @@ module.exports = {
         } catch (e) {
             throw new Error("Something wrong with name attribute in ws-template tag");
         }
-        if (tag.children.length === 0) {
+        if (tag.children === undefined || tag.children.length === 0) {
             throw new Error("There is got to be a children in ws-template tag");
         }
-        function resolveStatement() {
+        function templateAST() {
             var unState = State.make();
-            this.templateStack[name] = tag.children;
-            unState.keep(entityHelpers.createDataRequest(name));
+            this.traversingAST(tag.children).when(
+                function partialTraversing(modAST) {
+                    unState.keep(modAST);
+                },
+                function brokenTraverse(reason) {
+                    throw new Error(reason);
+                }
+            );
             return unState.promise;
+        }
+        function resolveStatement() {
+            var requestState = State.make();
+            this.includeStack[name] = templateAST.call(this);
+            requestState.keep(entityHelpers.createDataRequest(name));
+            return requestState.promise;
         }
         return function templateResolve() {
             return resolveStatement.call(this);
