@@ -2,7 +2,6 @@ var conditional = require('../helpers/conditional');
 module.exports = {
     module: function ifModule(tag, data) {
         var source;
-
         if (tag.attribs.data.data === undefined) {
             throw new Error('There is no data for "if" module to use');
         }

@@ -1,3 +1,4 @@
+var utils = require("./utils");
 module.exports = {
     /**
      * is entity - tag
@@ -29,7 +30,8 @@ module.exports = {
      * @return {Function}
      */
     moduleMatcher: function moduleMatcher(tag) {
-        return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].module : false;
+        var moduleName = utils.splitWs(tag.name);
+        return (this._modules[moduleName] !== undefined) ? this._modules[moduleName].module : false;
     },
     /**
      * Load module and execute function
@@ -49,6 +51,13 @@ module.exports = {
      */
     isTagInclude: function isTagInclude(name) {
         return name === 'ws-include';
+    },
+    isTagRequreable: function isTagRequreable(name) {
+        var wsName = utils.splitWs(name);
+        if (wsName) {
+            return utils.isUpperCase(utils.getFirstLetter(wsName));
+        }
+        return false;
     },
     /**
      * is expression
@@ -126,7 +135,7 @@ module.exports = {
         }
         if (attrs !== undefined) {
             for (attr in attrs) {
-                if (attrs.hasOwnProperty(attr)) {
+                if (attrs.hasOwnProperty(attr) && attr !== 'template') {
                     obj[attr] = processDataSequence.call(this, attrs[attr], data);
                 }
             }

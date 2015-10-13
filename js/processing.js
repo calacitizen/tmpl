@@ -1,14 +1,16 @@
 var utils = require('./helpers/utils'),
     seekingForVars = require('./helpers/seekingForVars'),
     whatType = require('./helpers/whatType'),
+    moduleC = require('./astModules/module'),
     entityHelpers = require('./helpers/entityHelpers');
 module.exports = {
     _modules: {
-        'ws:if': require('./astModules/if'),
-        'ws:for': require('./astModules/for'),
-        'ws:else': require('./astModules/else'),
-        'ws:partial': require('./astModules/partial'),
-        'ws:applytemplate': require('./astModules/applytemplate')
+        'if': require('./astModules/if'),
+        'for': require('./astModules/for'),
+        'else': require('./astModules/else'),
+        'partial': require('./astModules/partial'),
+        'include': require('./astModules/include'),
+        'template': require('./astModules/template')
     },
     /**
      * Getting html string
@@ -19,13 +21,16 @@ module.exports = {
     getHTMLString: function getHTMLString(ast, data) {
         return this._process(ast, data);
     },
+    _processOptionModule: function processOptionModule(tag, data) {
+        return entityHelpers.loadModuleFunction.call(this, moduleC.module, tag, data);
+    },
     /**
      * Main function for finding process method for module
      * @param  {Object} tag  Tag
      * @param  {Object} data Data object
      * @return {Object}      Entity: tag or text
      */
-    _processModule: function traverseModule(tag, data) {
+    _processModule: function processModule(tag, data) {
         var moduleFunction = entityHelpers.moduleMatcher.call(this, tag);
         return entityHelpers.loadModuleFunction.call(this, moduleFunction, tag, data);
     },
@@ -36,8 +41,11 @@ module.exports = {
      */
     _whatMethodShouldYouUse: function whatMethodShouldYouUse(entity) {
         if (entityHelpers.isTag(entity.type)) {
-            if (this._modules[entity.name]) {
+            if (this._modules[utils.splitWs(entity.name)]) {
                 return this._processModule;
+            }
+            if (entityHelpers.isTagRequreable(entity.name)) {
+                return this._processOptionModule;
             }
             return this._processTag;
         }
@@ -140,7 +148,7 @@ module.exports = {
     },
     /**
      * Recursive function for string generation
-     * @param  {Array} ast  AST array
+     * @param  {Array} ast  AS T array
      * @param  {Object} data Data
      * @return {String}
      */
@@ -153,20 +161,5 @@ module.exports = {
             }
         }
         return string;
-    },
-    // _processNon: function _processNon(ast, data) {
-    //   var stack = [];
-    //   stack.push(ast);
-    //   while (stack.length) {
-    //       for (var j in stack[0]) {
-    //           if (typeof stack[0][j] === 'object') {
-    //               stack.push(stack[0][j]);
-    //               if (stack[0][j].raw !== undefined) {
-    //                 console.log(stack[0][j]);
-    //               }
-    //           }
-    //       }
-    //       stack.shift();
-    //   }
-    // }
+    }
 };

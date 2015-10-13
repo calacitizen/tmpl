@@ -42,6 +42,12 @@ module.exports = {
     isVar: function isVar(string) {
         return !/['"].*?['"]/.test(string) && isNaN(parseInt(string));
     },
+    getFirstLetter: function getFirstLetter(string) {
+        return string.charAt(0);
+    },
+    isUpperCase: function isUpperCase(firstLetter) {
+        return firstLetter === firstLetter.toUpperCase();
+    },
     splitVarsAndFunctions: function splitVarsAndFunctions(s) {
         var depth = 0, seg = 0, rv = [];
         s.replace(/[^().]*([)]*)([(]*)(.)?/g,

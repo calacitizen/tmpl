@@ -3,12 +3,12 @@ var
     utils = require('./helpers/utils'),
     skipVars = require('./helpers/skipVars'),
     State = require('./helpers/State'),
+    moduleC = require('./astModules/module'),
     entityHelpers = require('./helpers/entityHelpers');
 module.exports = {
     _modules: {
         'ws:include': require('./astModules/include'),
         'ws:template': require('./astModules/template'),
-        'ws:applytemplate': require('./astModules/applytemplate'),
         'ws:partial': require('./astModules/partial')
     },
     _regex: {
@@ -21,11 +21,6 @@ module.exports = {
      * @type {Object}
      */
     includeStack: {},
-    /**
-     * Include template stack
-     * @type {Object}
-     */
-    templateStack: {},
     /**
      * Parsing html string to the directive state
      * @param  {String} tmpl     string html template
@@ -134,6 +129,9 @@ module.exports = {
         if (entityHelpers.isTag(entity.type)) {
             if (this._modules[entity.name]) {
                 return this._traverseModule;
+            }
+            if (entityHelpers.isTagRequreable(entity.name)) {
+                return this._traverseOptionModule;
             }
             return this._traverseTag;
         }
@@ -253,6 +251,9 @@ module.exports = {
             state.keep(this._generatorFunctionForTags(takeTag))
             return state.promise;
         }
+    },
+    _traverseOptionModule: function traverseOptionModule(tag) {
+        return entityHelpers.loadModuleFunction.call(this, moduleC.parse, tag)
     },
     /**
      * Main function for finding traverse method for module

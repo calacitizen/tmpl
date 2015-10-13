@@ -1,13 +1,14 @@
 var requireFile = require('../helpers/requireFile'),
     entityHelpers = require('../helpers/entityHelpers'),
+    utils = require('../helpers/utils'),
+    partial = require('./partial'),
     State = require('../helpers/State');
 module.exports = {
     parse: function requireOrRetire(tag) {
-        var name = tag.attribs.name.trim(),
-            template = tag.attribs.template.trim();
+        var name = utils.splitWs(tag.name.trim());
         function straightFromFile() {
             var unState = State.make();
-            requireFile.call(this, template).when(
+            requireFile.call(this, name).when(
                 function includeTraverse(templateData) {
                     this.traversingAST(templateData).when(
                         function includeTraverseState(modAST) {
@@ -25,13 +26,22 @@ module.exports = {
             return unState.promise;
         }
         function resolveStatement() {
-            var st = State.make();
-            this.includeStack[name] = straightFromFile.call(this);
-            st.keep(entityHelpers.createDataRequest(name));
-            return st.promise;
+            var moduleFunction;
+            if (!this.includeStack[name]) {
+                this.includeStack[name] = straightFromFile.call(this);
+            }
+            if (tag.attribs === undefined) {
+                tag.attribs = {};
+            }
+            tag.attribs.template = name;
+            moduleFunction = partial.parse(tag);
+            return moduleFunction.call(this);
         }
         return function includeResolve() {
             return resolveStatement.call(this);
         };
+    },
+    module: function requireModule(tag, data) {
+        return partial.module(tag, data);
     }
 };

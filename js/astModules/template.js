@@ -23,14 +23,12 @@ module.exports = {
             );
             return unState.promise;
         }
-
         function resolveStatement() {
             var requestState = State.make();
             this.includeStack[name] = templateAST.call(this);
             requestState.keep(entityHelpers.createDataRequest(name));
             return requestState.promise;
         }
-
         return function templateResolve() {
             return resolveStatement.call(this);
         };
