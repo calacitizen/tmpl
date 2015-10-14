@@ -82,6 +82,12 @@ module.exports = {
         }
         return array;
     },
+    _createDataObjectWorkWithProperty: function createDataObjectWorkWithProperty(data, arrOfVarsClean) {
+      if (arrOfVarsClean) {
+          return (data = this._replaceAndCreateStatements(data, arrOfVarsClean));
+      }
+      return (data = entityHelpers.createDataText(data[0]));
+    },
     /**
      * Looking for variables in string data object
      * @param  {Object} strObjectData
@@ -89,11 +95,7 @@ module.exports = {
      * @return {Object}
      */
     _createDataObject: function createDataObject(strObjectData, arrOfVarsClean) {
-        if (arrOfVarsClean) {
-            strObjectData.data = this._replaceAndCreateStatements(strObjectData.data, arrOfVarsClean);
-        } else {
-            strObjectData.data = entityHelpers.createDataText(strObjectData.data[0]);
-        }
+        strObjectData.data = this._createDataObjectWorkWithProperty(strObjectData.data, arrOfVarsClean);
         return strObjectData;
     },
     /**
@@ -120,6 +122,15 @@ module.exports = {
     _lookForStatements: function lookForStatements(statement) {
         return this._replaceMatch(statement);
     },
+    _handlingTag: function handlingTag(name) {
+      if (this._modules[name]) {
+          return this._traverseModule;
+      }
+      if (entityHelpers.isTagRequirable(name)) {
+          return this._traverseOptionModule;
+      }
+      return this._traverseTag;
+    },
     /**
      * Resolving method to handle tree childs
      * @param  {Object} entity  tag, text or module
@@ -127,21 +138,13 @@ module.exports = {
      */
     _whatMethodShouldYouUse: function whatMethodShouldYouUse(entity) {
         if (entityHelpers.isTag(entity.type)) {
-            if (this._modules[entity.name]) {
-                return this._traverseModule;
-            }
-            if (entityHelpers.isTagRequirable(entity.name)) {
-                return this._traverseOptionModule;
-            }
-            return this._traverseTag;
+            return this._handlingTag(entity.name)
         }
         if (entityHelpers.isText(entity.type)) {
             return this._traverseText;
         }
     },
-    /**
-     * Concating childs into the main array
-     */
+
     /**
      * Perform action on main data array
      * @param  {Array} modAST         AST array
@@ -149,13 +152,9 @@ module.exports = {
      * @return {Array}                AST array
      */
     actionOnMainArray: function actionOnMainArray(modAST, traverseObject) {
-        if (traverseObject !== undefined) {
-            if (traverseObject.length > 0) {
-                for (var i = 0; i < traverseObject.length; i++) {
-                    modAST.concat(this.actionOnMainArray(modAST, traverseObject[i]));
-                }
-            } else {
-                modAST.push(traverseObject);
+        if (traverseObject !== undefined && traverseObject.length > 0) {
+            for (var i = 0; i < traverseObject.length; i++) {
+                modAST.push(traverseObject[i]);
             }
         }
         traverseObject = null;
@@ -168,8 +167,7 @@ module.exports = {
      * @return {Object}                State promise
      */
     _collect: function collect(traverseMethod, value, prev, next) {
-        var ps = traverseMethod.call(this, value, prev, next);
-        return ps;
+        return traverseMethod.call(this, value, prev, next);
     },
 
     /**
@@ -243,14 +241,13 @@ module.exports = {
     _traverseTag: function traverseTag(tag, prev, next) {
         var state,
             attribs = this._traverseTagAttributes(tag.attribs),
-            takeTag = this._createTag({ name: tag.name, data: tag.data, raw: tag.raw, attribs: attribs, children: tag.children, prev: prev, next: next });
+            takeTag = this._acceptTag(tag, attribs, prev, next);
         if (takeTag.children && takeTag.children.length > 0) {
             return this.traverseTagWithChildren(takeTag);
-        } else {
-            state = State.make();
-            state.keep(this._generatorFunctionForTags(takeTag))
-            return state.promise;
         }
+        state = State.make();
+        state.keep(this._generatorFunctionForTags(takeTag))
+        return state.promise;
     },
     _traverseOptionModule: function traverseOptionModule(tag) {
         return entityHelpers.loadModuleFunction.call(this, moduleC.parse, tag)
@@ -299,6 +296,18 @@ module.exports = {
             prev: tag.prev,
             next: tag.next
         };
+    },
+    _acceptTag: function acceptTag(tag, attribs, prev, next) {
+        return this._createTag({
+            name: tag.name,
+            data: tag.data,
+            raw: tag.raw,
+            attribs: attribs,
+            children:
+            tag.children,
+            prev: prev,
+            next: next
+        });
     },
     /**
      * Default handler for parsing

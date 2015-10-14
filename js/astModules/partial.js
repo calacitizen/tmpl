@@ -17,6 +17,32 @@ module.exports = {
             }
             return state;
         }
+        function resolveInjectedTemplate(tag, state, tagData) {
+            var template = tag.attribs.template.data;
+            tag.injectedTemplate = template[0];
+            state = resolveInjectedData.call(this, state, tag, tagData);
+            return state.promise;
+        }
+        function resolveTemplate(tag, state, tagData, template) {
+            var template = tag.attribs.template.data.value.trim();
+            if (this.includeStack[template] === undefined) {
+                throw new Error('Requiring tag for "' + template + '" is not found!');
+            }
+            this.includeStack[template].when(
+                function partialInclude(modAST) {
+                    if (modAST) {
+                        tag.children = modAST;
+                        state = resolveInjectedData.call(this, state, tag, tagData);
+                    } else {
+                        state.break('Requiring tag for "' + template + '" is not found!');
+                    }
+                }.bind(this),
+                function brokenPartial(reason) {
+                    throw new Error(reason);
+                }
+            );
+            return state.promise;
+        }
         function resolveStatement() {
             var state = State.make(),
                 attribs = this._traverseTagAttributes(tag.attribs),
@@ -24,48 +50,32 @@ module.exports = {
             if (attribs.template === undefined) {
                 throw new Error("No template tag for partial " + tag.name);
             }
-            template = attribs.template.data;
             tag.attribs = attribs;
-            if (template.length > 0) {
-                tag.injectedTemplate = template[0];
-                state = resolveInjectedData.call(this, state, tag, tagData);
-            } else {
-                template = template.value.trim();
-                if (this.includeStack[template] === undefined) {
-                    throw new Error('Tag for "' + template + '" is not found!');
-                }
-                this.includeStack[template].when(
-                    function partialInclude(modAST) {
-                        if (modAST) {
-                            tag.children = modAST;
-                            state = resolveInjectedData.call(this, state, tag, tagData);
-                        } else {
-                            state.break('Include tag for "' + template + '" is not found!');
-                        }
-                    }.bind(this),
-                    function brokenPartial(reason) {
-                        throw new Error(reason);
-                    }
-                );
+            if (attribs.template.data.length > 0) {
+                return resolveInjectedTemplate.call(this, tag, state, tagData);
             }
-            return state.promise;
+            return resolveTemplate.call(this, tag, state, tagData);
         }
         return function partialResolve() {
             return resolveStatement.call(this);
         };
     },
     module: function partialModule(tag, data) {
-        var assignModuleVar = tag.attribs.data,
-            rootVar = '__root',
-            scopeData = {};
+        function prepareScope(tag, data) {
+            var scope = {},
+                rootVar = '__root';
+            scope = injectedDataForce.call(this, { children: tag.injectedData, attribs: tag.attribs }, data);
+            scope[rootVar] = scope;
+            return scope;
+        }
+
         function resolveStatement() {
-            scopeData = injectedDataForce.call(this, { children: tag.injectedData, attribs: tag.attribs }, data);
-            scopeData[rootVar] = scopeData;
+            var assignModuleVar;
             if (tag.injectedTemplate) {
                 assignModuleVar = tag.injectedTemplate.name.trim();
-                return this._process(data[assignModuleVar], scopeData);
+                return this._process(data[assignModuleVar], prepareScope.call(this, tag, data));
             }
-            return this._process(tag.children, scopeData);
+            return this._process(tag.children, prepareScope.call(this, tag, data));
         }
         return function partialResolve() {
             return resolveStatement.call(this);

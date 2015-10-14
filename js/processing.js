@@ -34,6 +34,15 @@ module.exports = {
         var moduleFunction = entityHelpers.moduleMatcher.call(this, tag);
         return entityHelpers.loadModuleFunction.call(this, moduleFunction, tag, data);
     },
+    _handlingTag: function handlingTag(name) {
+      if (this._modules[utils.splitWs(name)]) {
+          return this._processModule;
+      }
+      if (entityHelpers.isTagRequirable(name)) {
+          return this._processOptionModule;
+      }
+      return this._processTag;
+    },
     /**
      * Resolving method to handle tree childs
      * @param  {Object} entity Tag, text, module
@@ -41,13 +50,7 @@ module.exports = {
      */
     _whatMethodShouldYouUse: function whatMethodShouldYouUse(entity) {
         if (entityHelpers.isTag(entity.type)) {
-            if (this._modules[utils.splitWs(entity.name)]) {
-                return this._processModule;
-            }
-            if (entityHelpers.isTagRequirable(entity.name)) {
-                return this._processOptionModule;
-            }
-            return this._processTag;
+            return this._handlingTag(entity.name);
         }
         if (entityHelpers.isText(entity.type)) {
             return this._processText;
