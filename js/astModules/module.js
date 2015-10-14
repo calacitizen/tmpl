@@ -1,47 +1,25 @@
-var requireFile = require('../helpers/requireFile'),
-    entityHelpers = require('../helpers/entityHelpers'),
-    utils = require('../helpers/utils'),
+var utils = require('../helpers/utils'),
     partial = require('./partial'),
-    State = require('../helpers/State');
+    straightFromFile = require('../helpers/straightFromFile');
 module.exports = {
-    parse: function requireOrRetire(tag) {
+    parse: function modulePars(tag) {
         var name = utils.splitWs(tag.name.trim());
-        function straightFromFile() {
-            var unState = State.make();
-            requireFile.call(this, name).when(
-                function includeTraverse(templateData) {
-                    this.traversingAST(templateData).when(
-                        function includeTraverseState(modAST) {
-                            unState.keep(modAST);
-                        }.bind(this),
-                        function brokenTraverse(reason) {
-                            throw new Error(reason);
-                        }
-                    );
-                }.bind(this),
-                function (reason) {
-                    throw new Error(reason);
-                }
-            );
-            return unState.promise;
-        }
         function resolveStatement() {
             var moduleFunction;
             if (!this.includeStack[name]) {
-                this.includeStack[name] = straightFromFile.call(this);
+                this.includeStack[name] = straightFromFile.call(this, name);
             }
             if (tag.attribs === undefined) {
                 tag.attribs = {};
             }
             tag.attribs.template = name;
-            moduleFunction = partial.parse(tag);
-            return moduleFunction.call(this);
+            return partial.parse(tag).call(this);
         }
-        return function includeResolve() {
+        return function moduleParseResolve() {
             return resolveStatement.call(this);
         };
     },
-    module: function requireModule(tag, data) {
+    module: function moduleParsing(tag, data) {
         return partial.module(tag, data);
     }
 };
