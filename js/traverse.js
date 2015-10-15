@@ -83,10 +83,10 @@ module.exports = {
         return array;
     },
     _createDataObjectWorkWithProperty: function createDataObjectWorkWithProperty(data, arrOfVarsClean) {
-      if (arrOfVarsClean) {
-          return (data = this._replaceAndCreateStatements(data, arrOfVarsClean));
-      }
-      return (data = entityHelpers.createDataText(data[0]));
+        if (arrOfVarsClean) {
+            return (data = this._replaceAndCreateStatements(data, arrOfVarsClean));
+        }
+        return (data = entityHelpers.createDataText(data[0]));
     },
     /**
      * Looking for variables in string data object
@@ -123,13 +123,13 @@ module.exports = {
         return this._replaceMatch(statement);
     },
     _handlingTag: function handlingTag(name) {
-      if (this._modules[name]) {
-          return this._traverseModule;
-      }
-      if (entityHelpers.isTagRequirable(name)) {
-          return this._traverseOptionModule;
-      }
-      return this._traverseTag;
+        if (this._modules[name]) {
+            return this._traverseModule;
+        }
+        if (entityHelpers.isTagRequirable(name)) {
+            return this._traverseOptionModule;
+        }
+        return this._traverseTag;
     },
     /**
      * Resolving method to handle tree childs
@@ -304,7 +304,7 @@ module.exports = {
             raw: tag.raw,
             attribs: attribs,
             children:
-            tag.children,
+                tag.children,
             prev: prev,
             next: next
         });

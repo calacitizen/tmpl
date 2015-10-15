@@ -160,10 +160,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return array;
 	    },
 	    _createDataObjectWorkWithProperty: function createDataObjectWorkWithProperty(data, arrOfVarsClean) {
-	      if (arrOfVarsClean) {
-	          return (data = this._replaceAndCreateStatements(data, arrOfVarsClean));
-	      }
-	      return (data = entityHelpers.createDataText(data[0]));
+	        if (arrOfVarsClean) {
+	            return (data = this._replaceAndCreateStatements(data, arrOfVarsClean));
+	        }
+	        return (data = entityHelpers.createDataText(data[0]));
 	    },
 	    /**
 	     * Looking for variables in string data object
@@ -200,13 +200,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this._replaceMatch(statement);
 	    },
 	    _handlingTag: function handlingTag(name) {
-	      if (this._modules[name]) {
-	          return this._traverseModule;
-	      }
-	      if (entityHelpers.isTagRequirable(name)) {
-	          return this._traverseOptionModule;
-	      }
-	      return this._traverseTag;
+	        if (this._modules[name]) {
+	            return this._traverseModule;
+	        }
+	        if (entityHelpers.isTagRequirable(name)) {
+	            return this._traverseOptionModule;
+	        }
+	        return this._traverseTag;
 	    },
 	    /**
 	     * Resolving method to handle tree childs
@@ -381,7 +381,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            raw: tag.raw,
 	            attribs: attribs,
 	            children:
-	            tag.children,
+	                tag.children,
 	            prev: prev,
 	            next: next
 	        });
@@ -1404,15 +1404,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (utils.isNumber(value)) {
 	                return entityHelpers.createDataText(entityHelpers.createNumberFromString(value));
 	            }
-	            if (!utils.isImplicitVar(value) && !utils.isFunction(value)) {
-	                expressionObj = conditionalResolver(value);
-	                if (expressionObj.condition === undefined) {
-	                    throw new Error('Wrong conditional expression: ' + value);
-	                }
+	            if (utils.isImplicitVar(value)) {
+	                return entityHelpers.createDataVar(value, undefined);
+	            }
+	            expressionObj = conditionalResolver(value);
+	            if (expressionObj.condition !== undefined) {
 	                return entityHelpers.createDataExpression(expressionObj.condition, expressionObj.valOne, expressionObj.valTwo);
 	            }
-	            return entityHelpers.createDataVar(value, undefined);
-
+	            if (utils.isFunction(value)) {
+	                return entityHelpers.createDataVar(value, undefined);
+	            }
+	            throw new Error('Wrong conditional expression: ' + value);
 	        }
 	        return entityHelpers.createDataText(value);
 	    }
@@ -2472,13 +2474,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return entityHelpers.loadModuleFunction.call(this, moduleFunction, tag, data);
 	    },
 	    _handlingTag: function handlingTag(name) {
-	      if (this._modules[utils.splitWs(name)]) {
-	          return this._processModule;
-	      }
-	      if (entityHelpers.isTagRequirable(name)) {
-	          return this._processOptionModule;
-	      }
-	      return this._processTag;
+	        if (this._modules[utils.splitWs(name)]) {
+	            return this._processModule;
+	        }
+	        if (entityHelpers.isTagRequirable(name)) {
+	            return this._processOptionModule;
+	        }
+	        return this._processTag;
 	    },
 	    /**
 	     * Resolving method to handle tree childs
@@ -2677,7 +2679,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @return {String}        String with replaced directives
 	     */
 	    function replaceGreaterLess(source) {
-	        for (var i = 0; i < sourceStrings.operators.length; i++) {
+	        var i;
+	        for (i = 0; i < sourceStrings.operators.length; i++) {
 	            source = source.replace(sourceStrings.operators[i].name, sourceStrings.operators[i].value);
 	        }
 	        return source;
@@ -2692,9 +2695,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var variables = expression.match(/([A-z0-9'"]+)/g),
 	            length = variables.length,
 	            uniqueVariables = [],
-	            index = 0;
+	            index = 0,
+	            variable;
 	        while (index < length) {
-	            var variable = variables[index++];
+	            variable = variables[index++];
 	            if (uniqueVariables.indexOf(variable) < 0 && !utils.inArray(reservedVarStrings, variable)) {
 	                if (utils.isVar(variable)) {
 	                    uniqueVariables.push(variable);

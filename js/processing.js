@@ -35,13 +35,13 @@ module.exports = {
         return entityHelpers.loadModuleFunction.call(this, moduleFunction, tag, data);
     },
     _handlingTag: function handlingTag(name) {
-      if (this._modules[utils.splitWs(name)]) {
-          return this._processModule;
-      }
-      if (entityHelpers.isTagRequirable(name)) {
-          return this._processOptionModule;
-      }
-      return this._processTag;
+        if (this._modules[utils.splitWs(name)]) {
+            return this._processModule;
+        }
+        if (entityHelpers.isTagRequirable(name)) {
+            return this._processOptionModule;
+        }
+        return this._processTag;
     },
     /**
      * Resolving method to handle tree childs

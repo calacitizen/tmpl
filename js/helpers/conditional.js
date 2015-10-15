@@ -28,7 +28,8 @@ module.exports = function conditional(source, data) {
      * @return {String}        String with replaced directives
      */
     function replaceGreaterLess(source) {
-        for (var i = 0; i < sourceStrings.operators.length; i++) {
+        var i;
+        for (i = 0; i < sourceStrings.operators.length; i++) {
             source = source.replace(sourceStrings.operators[i].name, sourceStrings.operators[i].value);
         }
         return source;
@@ -43,9 +44,10 @@ module.exports = function conditional(source, data) {
         var variables = expression.match(/([A-z0-9'"]+)/g),
             length = variables.length,
             uniqueVariables = [],
-            index = 0;
+            index = 0,
+            variable;
         while (index < length) {
-            var variable = variables[index++];
+            variable = variables[index++];
             if (uniqueVariables.indexOf(variable) < 0 && !utils.inArray(reservedVarStrings, variable)) {
                 if (utils.isVar(variable)) {
                     uniqueVariables.push(variable);

@@ -10,15 +10,17 @@ module.exports = {
             if (utils.isNumber(value)) {
                 return entityHelpers.createDataText(entityHelpers.createNumberFromString(value));
             }
-            if (!utils.isImplicitVar(value) && !utils.isFunction(value)) {
-                expressionObj = conditionalResolver(value);
-                if (expressionObj.condition === undefined) {
-                    throw new Error('Wrong conditional expression: ' + value);
-                }
+            if (utils.isImplicitVar(value)) {
+                return entityHelpers.createDataVar(value, undefined);
+            }
+            expressionObj = conditionalResolver(value);
+            if (expressionObj.condition !== undefined) {
                 return entityHelpers.createDataExpression(expressionObj.condition, expressionObj.valOne, expressionObj.valTwo);
             }
-            return entityHelpers.createDataVar(value, undefined);
-
+            if (utils.isFunction(value)) {
+                return entityHelpers.createDataVar(value, undefined);
+            }
+            throw new Error('Wrong conditional expression: ' + value);
         }
         return entityHelpers.createDataText(value);
     }
