@@ -1414,7 +1414,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (utils.isFunction(value)) {
 	                return entityHelpers.createDataVar(value, undefined);
 	            }
-	            throw new Error('Wrong conditional expression: ' + value);
+	            throw new Error('Wrong expression: ' + value);
 	        }
 	        return entityHelpers.createDataText(value);
 	    }
