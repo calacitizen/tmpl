@@ -1,4 +1,5 @@
-var conditional = require('../helpers/conditional');
+var jsResolver = require('../jison/jsCat'),
+    decorators = require('../helpers/decorators');
 module.exports = {
     module: function ifModule(tag, data) {
         var source;
@@ -7,7 +8,7 @@ module.exports = {
         }
         source =  tag.attribs.data.data.value.trim();
         function resolveStatement() {
-            if (conditional(source, data)) {
+            if (jsResolver.parse(source)(data, decorators)) {
                 if (tag.children !== undefined) {
                     return this._process(tag.children, data);
                 }

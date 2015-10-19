@@ -2,6 +2,7 @@ var utils = require('./helpers/utils'),
     seekingForVars = require('./helpers/seekingForVars'),
     whatType = require('./helpers/whatType'),
     moduleC = require('./astModules/module'),
+    decorators = {},
     entityHelpers = require('./helpers/entityHelpers');
 module.exports = {
     _modules: {

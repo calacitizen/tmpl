@@ -1,20 +1,8 @@
 var utils = require('./utils'),
-    resolveVariables = require('./resolveVariables');
+    jsResolver = require('../jison/jsCat'),
+    decorators = require('./decorators');
 module.exports = function checkStatementForInners(value, scopeData, arrVars) {
     var isVar = utils.inArray(arrVars, value);
-
-    /**
-     * Crate type for empty data tag
-     * @param  {Boolean} isVar
-     * @return {String}
-     */
-    function restrictType(isVar) {
-        if (isVar) {
-            return "var";
-        }
-        return "text";
-    }
-
     /**
      * Variable or node
      * @param  {Boolean} isVar
@@ -37,7 +25,7 @@ module.exports = function checkStatementForInners(value, scopeData, arrVars) {
     }
 
     if (isVar === true) {
-        return varOrNot(isVar, resolveVariables({ type: restrictType(isVar), name: value, value: undefined }, scopeData), value);
+        return varOrNot(isVar, jsResolver.parse(value)(scopeData, decorators), value);
     }
 
     return varOrNot(isVar, value);
