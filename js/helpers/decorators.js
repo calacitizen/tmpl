@@ -1,19 +1,19 @@
 module.exports = {
-    ucFirst: function ucFirst() {
-        return this.replace(/^\w/, function (match) {
+    ucFirst: function ucFirst(string) {
+        return string.replace(/^\w/, function (match) {
             return match.toUpperCase();
         });
     },
-    toUpperCase: function toUpperCase() {
-        return this.toUpperCase();
+    toUpperCase: function toUpperCase(string) {
+        return string.toUpperCase();
     },
-    trim: function trim() {
-        return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    trim: function trim(string) {
+        return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
     },
-    substr: function substr(start, length) {
-        return this.substr(start, length);
+    substr: function substr(string, start, length) {
+        return string.substr(start, length);
     },
-    replace: function replace(pattern, newPattern) {
-        return this.replace(pattern, newPattern);
+    replace: function replace(string, pattern, newPattern) {
+        return string.replace(pattern, newPattern);
     }
 };
