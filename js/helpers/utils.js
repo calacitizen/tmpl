@@ -1,14 +1,16 @@
 module.exports = {
     mapForLoop: function mapForLoop(array, mapFunction) {
-        var arrayLen = array.length;
-        var newArray = new Array(arrayLen);
-        for (var i = 0; i < arrayLen; i++) {
+        var arrayLen = array.length,
+            newArray = new Array(arrayLen),
+            i;
+        for (i = 0; i < arrayLen; i++) {
             newArray[i] = mapFunction(array[i], i, array);
         }
         return newArray;
     },
     eachObject: function eachObject(object, modifier) {
-        for (var value in object) {
+        var value;
+        for (value in object) {
             if (object.hasOwnProperty(value)) {
                 object[value] = modifier(object[value]);
             }
@@ -16,7 +18,8 @@ module.exports = {
         return object;
     },
     inArray: function inArray(array, needle) {
-        for (var i = 0; i < array.length; i++) {
+        var i;
+        for (i = 0; i < array.length; i++) {
             if (array[i] === needle) {
                 return true;
             }
@@ -130,22 +133,23 @@ module.exports = {
         return mixin(r, src, clone);
     },
     merge: function merge(target, source) {
-        if ( typeof target !== 'object' ) {
+        var property, a, sourceProperty, l;
+        if (typeof target !== 'object') {
             target = {};
         }
-        for (var property in source) {
-            if ( source.hasOwnProperty(property) ) {
-                var sourceProperty = source[ property ];
-                if ( typeof sourceProperty === 'object' ) {
-                    target[ property ] = merge( target[ property ], sourceProperty );
+        for (property in source) {
+            if (source.hasOwnProperty(property)) {
+                sourceProperty = source[property];
+                if (typeof sourceProperty === 'object') {
+                    target[property] = merge(target[property], sourceProperty);
                     continue;
                 }
-                target[ property ] = sourceProperty;
+                target[property] = sourceProperty;
             }
         }
-        for (var a = 2, l = arguments.length; a < l; a++) {
+        for (a = 2, l = arguments.length; a < l; a++) {
             this.merge(target, arguments[a]);
         }
         return target;
     }
-}
+};

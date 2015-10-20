@@ -5,7 +5,6 @@ module.exports = {
     parse: function modulePars(tag) {
         var name = utils.splitWs(tag.name.trim());
         function resolveStatement() {
-            var moduleFunction;
             if (!this.includeStack[name]) {
                 this.includeStack[name] = straightFromFile.call(this, name);
             }
