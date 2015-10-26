@@ -101,19 +101,19 @@ JavaScript Operator | TMPL Equivalent
 `>=`                | `ge`
 
 ```html
-<ws-if data="number === 123">
+<ws:if data="{{ number === 123 }}">
   <div class="sample">Sample</div>
-</ws-if>
+</ws:if>
 ```
 ###For
 For директива может использоваться как для массивов так и для объектов.
 ```html
-<ws-for data="rabbit in rabbits.names">
+<ws:for data="rabbit in rabbits.names">
   <div class="rabbit {{ rabbit.type }}">{{ rabbit.name }}</div>
     <div class="runs">
-      <ws-for data="run in rabbit.runs">
+      <ws:for data="run in rabbit.runs">
         {{ run.num }} ll{{pumb}}
-      </ws-for>
+      </ws:for>
     </div>
   </div>
 </ws-for>
@@ -121,17 +121,17 @@ For директива может использоваться как для м�
 ###Include && Partials
 Include директивы в настоящее время работает только с requirejs. Для того чтобы её использовать, сначала нужно подключить шаблон:
 ```html
-<ws-include template="tmpl/button" name="button" />
+<ws:include template="tmpl/button" name="button" />
 ```
 а потом использовать partial:
 ```html
-<ws-partial template="button" data="rabbit" />
+<ws:partial template="button" data="rabbit" />
 ```
 Или в цикле:
 ```html
-<ws-for data="rabbit in rabbits.names">
-  <ws-partial template="button" data="rabbit" />
-</ws-for>
+<ws:for data="rabbit in rabbits.names">
+  <ws:partial template="button" data="rabbit" />
+</ws:for>
 ```
 В partial-шаблонах корневой объект можно использовать через переменную "root".
 
