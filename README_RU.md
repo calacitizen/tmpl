@@ -133,7 +133,143 @@ Include директивы в настоящее время работает т�
   <ws:partial template="button" data="rabbit" />
 </ws:for>
 ```
-В partial-шаблонах корневой объект можно использовать через переменную "root".
+При использовании резолвера для имён. Например:
+```html
+<ws:Button></ws:Button>
+```
+Name of this tag (Button) will be used in resolver.
+
+In the partial template you can grab main data object with var name of "__root".
+
+###Inline Templates
+Можно создавать inline шаблоны
+```html
+<ws:template name="example">
+  <div class="{{class}}">
+    {{Text}}
+  </div>
+</ws:template>
+```
+Можно использовать их применяя через partial тэг:
+```html
+<ws:partial template="example"></ws:partial>
+```
+
+###Передача данных для модуля template
+
+При использовании тэга partial можно передавать данные для исполняемого шаблона. Например:
+
+```html
+<ws:template name="example">
+  <div class="{{class}}">
+    {{base}}
+  </div>
+</ws:template>
+```
+
+```html
+<ws:partial template="example">
+  <ws:class>
+    <ws:string>SomeClass</ws:string>
+  </ws:class>
+  <ws:base>
+    <ws:string>Some Text Here</ws:string>
+  </ws:base>
+</ws:partial>
+```
+
+В добавок к этому можно передавать простые типы данных через атрибуты
+
+```html
+<ws:partial template="example" class="SomeClass" base="Some Text Here"></ws:partial>
+```
+
+Это типы данных представленные в виде тегов для передачи в область видимости
+
+```js
+"StringStringStringString"
+```
+```html
+<ws:string>StringStringStringString</ws:string>
+```
+```js
+7812634821634.237582735
+```
+```html
+<ws:number>7812634821634.237582735</ws:number>
+```
+```js
+[
+  "StringStringStringString", 
+  7812634821634.237582735, 
+  "StringStringStringString", 
+  7812634821634.237582735, 
+  "StringStringStringString", 
+  7812634821634.237582735
+]
+```
+```html
+<ws:array>
+  <ws:string>StringStringStringString</ws:string>
+  <ws:number>7812634821634.237582735</ws:number>
+  <ws:string>StringStringStringString</ws:string>
+  <ws:number>7812634821634.237582735</ws:number>
+  <ws:string>StringStringStringString</ws:string>
+  <ws:number>7812634821634.237582735</ws:number>
+</ws:array>
+```
+```js
+{
+  someOption: "Option",
+  someNumber: 123,
+  prop0: {
+    inProp0: {
+      inInProp0: "String"
+    }
+  },
+  prop1: "String",
+  prop2: 23212352.2323,
+  prop3: 23212352.2323,
+  prop4: [
+    "StringStringStringString", 
+    7812634821634.237582735, 
+    "StringStringStringString", 
+    7812634821634.237582735, 
+    "StringStringStringString", 
+    7812634821634.237582735
+  ]
+}
+```
+```html
+<ws:object someOption="Option" someNumber="{{123}}">
+  <ws:prop0>
+    <ws:inProp0>
+      <ws:inInProp0>
+        <ws:string>String</ws:string>
+      </ws:inInProp0>
+    </ws:inProp0>
+  </ws:prop0>
+  <ws:prop1>
+    <ws:string>String</ws:string>
+  </ws:prop1>
+  <ws:prop2>
+    <ws:number>23212352.2323</ws:number>
+  </ws:prop2>
+  <ws:prop3>
+    <ws:number>23212352.2323</ws:number>
+  </ws:prop3>
+  <ws:prop4>
+    <ws:array>
+      <ws:string>StringStringStringString</ws:string>
+      <ws:number>7812634821634.237582735</ws:number>
+      <ws:string>StringStringStringString</ws:string>
+      <ws:number>7812634821634.237582735</ws:number>
+      <ws:string>StringStringStringString</ws:string>
+      <ws:number>7812634821634.237582735</ws:number>
+    </ws:array>
+  </ws:prop4>
+</ws:object>
+```
 
 
 
