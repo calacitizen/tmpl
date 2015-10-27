@@ -61,11 +61,7 @@ module.exports = {
     },
     module: function partialModule(tag, data) {
         function prepareScope(tag, data) {
-            var scope,
-                rootVar = '__root';
-            scope = injectedDataForce.call(this, { children: tag.injectedData, attribs: tag.attribs }, data);
-            scope[rootVar] = scope;
-            return scope;
+            return injectedDataForce.call(this, { children: tag.injectedData, attribs: tag.attribs }, data);
         }
 
         function resolveStatement() {

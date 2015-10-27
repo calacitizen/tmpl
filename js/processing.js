@@ -63,9 +63,9 @@ module.exports = {
      * @return {String}
      */
     _stopArrs: function stopArrs(entity) {
-        var string = '';
+        var string = '', i;
         if (whatType(entity) === 'array') {
-            for (var i = 0; i < entity.length; i++) {
+            for (i = 0; i < entity.length; i++) {
                 string += entity[i];
             }
             return string;
@@ -78,12 +78,13 @@ module.exports = {
      * @param  {Object} data   Data object
      * @return {String}        Generated string
      */
-    _seek: function _seek(entity, data) {
+    _seek: function _seek(entity, data, prev, next) {
         var method = this._whatMethodShouldYouUse(entity);
+        entity.prev = prev;
+        entity.next = next;
         if (method) {
             return this._stopArrs(method.call(this, entity, data));
         }
-        return;
     },
     /**
      * Processing data types of entities
@@ -103,7 +104,7 @@ module.exports = {
      */
     _processData: function processData(textData, data) {
         var string = '';
-        if (textData.length !== undefined) {
+        if (textData.length) {
             for (var i = 0; i < textData.length; i++) {
                 string += this._processDataTypes(textData[i], data);
             }
@@ -152,14 +153,14 @@ module.exports = {
     },
     /**
      * Recursive function for string generation
-     * @param  {Array} ast  AS T array
+     * @param  {Array} ast  AST array
      * @param  {Object} data Data
      * @return {String}
      */
     _process: function process(ast, data) {
         var string = '', st;
         for (var i = 0; i < ast.length; i++) {
-            st = this._seek(ast[i], data);
+            st = this._seek(ast[i], data, ast[i-1], ast[i+1]);
             if (st) {
                 string += st;
             }

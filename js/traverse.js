@@ -1,5 +1,5 @@
 var
-    htmlparser = require('htmlparser'),
+    htmlparser = require('./jison/htmlparser'),
     utils = require('./helpers/utils'),
     skipVars = require('./helpers/skipVars'),
     State = require('./helpers/State'),
@@ -166,8 +166,8 @@ module.exports = {
      * @param  {Object} value          Tag, text or module
      * @return {Object}                State promise
      */
-    _collect: function collect(traverseMethod, value, prev, next) {
-        return traverseMethod.call(this, value, prev, next);
+    _collect: function collect(traverseMethod, value) {
+        return traverseMethod.call(this, value);
     },
 
     /**
@@ -182,7 +182,7 @@ module.exports = {
         for (var i = 0; i < ast.length; i++) {
             traverseMethod = this._whatMethodShouldYouUse(ast[i]);
             if (traverseMethod) {
-                collect = this._collect(traverseMethod, ast[i], ast[i-1], ast[i+1]);
+                collect = this._collect(traverseMethod, ast[i]);
                 if (collect !== undefined) {
                     psArray.push(collect);
                 }
@@ -238,15 +238,15 @@ module.exports = {
      * @param  {Object} tag
      * @return {Object}     State promise
      */
-    _traverseTag: function traverseTag(tag, prev, next) {
+    _traverseTag: function traverseTag(tag) {
         var state,
             attribs = this._traverseTagAttributes(tag.attribs),
-            takeTag = this._acceptTag(tag, attribs, prev, next);
+            takeTag = this._acceptTag(tag, attribs);
         if (takeTag.children && takeTag.children.length > 0) {
             return this.traverseTagWithChildren(takeTag);
         }
         state = State.make();
-        state.keep(this._generatorFunctionForTags(takeTag))
+        state.keep(this._generatorFunctionForTags(takeTag));
         return state.promise;
     },
     _traverseOptionModule: function traverseOptionModule(tag) {
@@ -292,21 +292,16 @@ module.exports = {
             raw: tag.raw,
             attribs: tag.attribs,
             children: tag.children,
-            type: "tag",
-            prev: tag.prev,
-            next: tag.next
+            type: "tag"
         };
     },
-    _acceptTag: function acceptTag(tag, attribs, prev, next) {
+    _acceptTag: function acceptTag(tag, attribs) {
         return this._createTag({
             name: tag.name,
             data: tag.data,
             raw: tag.raw,
             attribs: attribs,
-            children:
-                tag.children,
-            prev: prev,
-            next: next
+            children: tag.children
         });
     },
     /**
