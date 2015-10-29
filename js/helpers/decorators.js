@@ -27,6 +27,9 @@ module.exports = {
     trim: function trim(string) {
         return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
     },
+    parseInt: function trim(entity, count) {
+        return parseInt(entity, count);
+    },
     substr: function substr(string, start, length) {
         return string.substr(start, length);
     },
