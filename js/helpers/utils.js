@@ -51,6 +51,9 @@ module.exports = {
     isUpperCase: function isUpperCase(firstLetter) {
         return firstLetter === firstLetter.toUpperCase();
     },
+    isWsIncluded: function isWsIncluded() {
+        return (typeof $ws !== 'undefined');
+    },
     splitVarsAndFunctions: function splitVarsAndFunctions(s) {
         var depth = 0, seg = 0, rv = [];
         s.replace(/[^().]*([)]*)([(]*)(.)?/g,

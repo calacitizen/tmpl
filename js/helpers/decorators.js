@@ -24,6 +24,15 @@ module.exports = {
     toUpperCase: function toUpperCase(string) {
         return string.toUpperCase();
     },
+    toString: function toString(entity) {
+        return entity.toString();
+    },
+    split: function split(string, delimeter) {
+        return string.split(delimeter);
+    },
+    strftime: function strftime(time, type) {
+        return time.strftime(type);
+    },
     trim: function trim(string) {
         return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
     },
@@ -35,6 +44,9 @@ module.exports = {
     },
     replace: function replace(string, pattern, newPattern) {
         return string.replace(pattern, newPattern);
+    },
+    removeParentheses: function removeParentheses(string) {
+        return string.replace(/[()]/g, '');
     },
     command: function command(array, name) {
         return embraceChain(array, createEv("command", slice.call(arguments, 2), name));

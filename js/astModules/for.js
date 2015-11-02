@@ -50,7 +50,13 @@ module.exports = {
         }
 
         function scrapeChildren(object, data, key, firstArgument) {
-            data[firstArgument.value] = object[key];
+            if (utils.isWsIncluded()) {
+                if ($ws.helpers.instanceOfModule(object, 'SBIS3.CONTROLS.Record') || $ws.helpers.instanceOfModule(object, 'SBIS3.CONTROLS.DataSet')) {
+                    data[firstArgument.value] = object;
+                }
+            } else {
+                data[firstArgument.value] = object[key];
+            }
             if (firstArgument.key) {
                 data[firstArgument.key] = key;
             }
@@ -63,6 +69,14 @@ module.exports = {
                 data[firstArgument.key] = undefined;
             }
             return data;
+        }
+
+        function fDataSet(dataset, data) {
+            var children = [], i = 0;
+            dataset.each(function fDataSetCallBack(entity) {
+                children.push(this._process(utils.clone(tag.children), scrapeChildren(entity, data, i++, firstArgument)));
+            }.bind(this));
+            return children;
         }
 
         function fArray(array, data) {
@@ -85,8 +99,21 @@ module.exports = {
 
         function resolveStatement(dataToIterate) {
             var scopeArray = dataToIterate.value,
-                typeFunction = types[whatType(scopeArray)],
+                type = whatType(scopeArray),
+                typeFunction,
                 result;
+
+            if (type === 'object') {
+                if (utils.isWsIncluded()) {
+                    $ws.helpers.instanceOfModule(scopeArray, 'SBIS3.CONTROLS.DataSet');
+                    typeFunction = fDataSet;
+                } else {
+                    typeFunction = types[type];
+                }
+            } else {
+                typeFunction = types[type];
+            }
+
             if (typeFunction === undefined) {
                 throw new Error('Wrong type in for statement arguments');
             }
