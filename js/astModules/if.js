@@ -13,10 +13,11 @@ module.exports = {
          return;
       }
       var source;
-      if (tag.attribs.data.data === undefined) {
+      try {
+         source =  tag.attribs.data.data[0].name.trim();
+      } catch (err) {
          throw new Error('There is no data for "if" module to use');
       }
-      source =  tag.attribs.data.data[0].name.trim();
       return function ifModuleReturnable() {
          if (tag.children !== undefined) {
             return resolveStatement.call(this, source);
