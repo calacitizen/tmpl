@@ -1,5 +1,5 @@
 var utils = require('../../helpers/utils');
-module.exports = function arrayTag(types, tag, scopeData) {
+module.exports = function arrayTag(tag, types, scopeData) {
    var children, array = [], nameExists, typeFunction, i;
    if (tag.children) {
       children = tag.children;

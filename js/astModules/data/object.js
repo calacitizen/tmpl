@@ -1,6 +1,6 @@
 var utils = require('../../helpers/utils'),
    entityHelpers = require('../../helpers/entityHelpers');
-module.exports = function objectTag(types, injected, scopeData) {
+module.exports = function objectTag(injected, types, scopeData) {
    var tObject = {}, typeFunction, nameExists, i, objectForMerge = {}, htmlArray = [];
    function isEntityUsefulOrHTML(nameExists) {
       return nameExists && !this._modules.hasOwnProperty(nameExists) && !entityHelpers.isTagRequirableBool(nameExists);

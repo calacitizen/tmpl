@@ -5,5 +5,5 @@ module.exports = function injectedDataForce(data, scopeData) {
       object: require('../astModules/data/object'),
       number: require('../astModules/data/number')
    };
-   return types.object.call(this, types, data, scopeData);
+   return types.object.call(this, data, types, scopeData);
 };

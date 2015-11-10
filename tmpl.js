@@ -1435,6 +1435,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
+
 /***/ },
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
@@ -2082,14 +2083,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      object: __webpack_require__(14),
 	      number: __webpack_require__(15)
 	   };
-	   return types.object.call(this, types, data, scopeData);
+	   return types.object.call(this, data, types, scopeData);
 	};
 
 /***/ },
 /* 12 */
 /***/ function(module, exports) {
 
-	module.exports = function stringTag(types, tag, scopeData) {
+	module.exports = function stringTag(tag, types, scopeData) {
 	   var children, string = '', i;
 	   if (tag.children) {
 	      children = tag.children;
@@ -2107,7 +2108,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(3);
-	module.exports = function arrayTag(types, tag, scopeData) {
+	module.exports = function arrayTag(tag, types, scopeData) {
 	   var children, array = [], nameExists, typeFunction, i;
 	   if (tag.children) {
 	      children = tag.children;
@@ -2134,7 +2135,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var utils = __webpack_require__(3),
 	   entityHelpers = __webpack_require__(5);
-	module.exports = function objectTag(types, injected, scopeData) {
+	module.exports = function objectTag(injected, types, scopeData) {
 	   var tObject = {}, typeFunction, nameExists, i, objectForMerge = {}, htmlArray = [];
 	   function isEntityUsefulOrHTML(nameExists) {
 	      return nameExists && !this._modules.hasOwnProperty(nameExists) && !entityHelpers.isTagRequirableBool(nameExists);
@@ -2172,7 +2173,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var entityHelpers = __webpack_require__(5);
-	module.exports = function stringTag(types, tag, scopeData) {
+	module.exports = function stringTag(tag, types, scopeData) {
 	   var children, i;
 	   if (tag.children) {
 	      children = tag.children;

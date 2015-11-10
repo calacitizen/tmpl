@@ -1,5 +1,5 @@
 var entityHelpers = require('../../helpers/entityHelpers');
-module.exports = function stringTag(types, tag, scopeData) {
+module.exports = function stringTag(tag, types, scopeData) {
    var children, i;
    if (tag.children) {
       children = tag.children;

@@ -1,4 +1,4 @@
-module.exports = function stringTag(types, tag, scopeData) {
+module.exports = function stringTag(tag, types, scopeData) {
    var children, string = '', i;
    if (tag.children) {
       children = tag.children;
