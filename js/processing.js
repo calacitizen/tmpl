@@ -142,6 +142,12 @@ module.exports = {
    _processText: function processText(text, data) {
       return this._processData(text.data, data);
    },
+   _checkForManageableAttributes: function checkForManageableAttributes(tag, data) {
+      if (tag.attribs) {
+
+      }
+      return '<' + tag.name + this._processAttributes(tag.attribs, data) + '>' + this._process(tag.children, data) + '</' + tag.name + '>';
+   },
    /**
     * Process Tag entity
     * @param  {Object} tag  Tag
@@ -149,7 +155,7 @@ module.exports = {
     * @return {String}
     */
    _processTag: function processTag(tag, data) {
-      return '<' + tag.name + this._processAttributes(tag.attribs, data) + '>' + this._process(tag.children, data) + '</' + tag.name + '>';
+      return this._checkForManageableAttributes(tag, data);
    },
    /**
     * Recursive function for string generation

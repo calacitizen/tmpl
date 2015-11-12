@@ -12,7 +12,7 @@ module.exports = {
       var value;
       for (value in object) {
          if (object.hasOwnProperty(value)) {
-            object[value] = modifier(object[value]);
+            object[value] = modifier(object[value], value);
          }
       }
       return object;

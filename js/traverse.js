@@ -37,7 +37,7 @@ module.exports = {
       return handlerObject.dom;
    },
    /**
-    * Atribute traverse in order to find variables
+    * Attribute traverse in order to find variables
     * @param  {Array}        array of attributes
     * @return {Array}        array of attributes with variables
     */
@@ -84,9 +84,9 @@ module.exports = {
    },
    _createDataObjectWorkWithProperty: function createDataObjectWorkWithProperty(data, arrOfVarsClean) {
       if (arrOfVarsClean) {
-         return (data = this._replaceAndCreateStatements(data, arrOfVarsClean));
+         return this._replaceAndCreateStatements(data, arrOfVarsClean);
       }
-      return (data = entityHelpers.createDataText(data[0]));
+      return entityHelpers.createDataText(data[0]);
    },
    /**
     * Looking for variables in string data object
