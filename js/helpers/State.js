@@ -4,7 +4,7 @@ var State = (function StateFunction() {
    if (typeof setImmediate !== 'function') {
       setImmediate = function setImmediate(func, fate) {
          'use strict';
-         return setTimeout(function setTimeoutHandle() {
+         return setTimeout(function setTimeoutHandler() {
             func(fate);
          }, 0);
       };
