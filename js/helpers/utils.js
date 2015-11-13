@@ -1,4 +1,20 @@
 module.exports = {
+   reduceArray: function reduceArray(array, callback) {
+      var len = array.length >>> 0, k = 0, value;
+      while (k < len && ! k in array) {
+         k++;
+      }
+      if (k >= len) {
+         throw new TypeError('Reduce of empty array with no initial value');
+      }
+      value = array[k];
+      for (; k <= len; k++) {
+         if (k in array) {
+            value = callback(value, array[k], k, array);
+         }
+      }
+      return value;
+   },
    mapForLoop: function mapForLoop(array, mapFunction) {
       var arrayLen = array.length,
          newArray = new Array(arrayLen),

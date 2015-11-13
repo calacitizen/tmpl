@@ -25,6 +25,14 @@ module.exports = {
       return (this._modules[tag.name] !== undefined) ? this._modules[tag.name].parse : false;
    },
    /**
+    * Match module by name
+    * @param  {Object} name
+    * @return {Function}
+    */
+   attributeParserMatcherByName: function attributeParserMatcherByName(name) {
+      return (name !== undefined) ? this._attributeModules[name].module : false;
+   },
+   /**
     * Match parse by name
     * @param  {Object} tag
     * @return {Function}

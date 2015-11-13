@@ -114,7 +114,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return handlerObject.dom;
 	   },
 	   /**
-	    * Atribute traverse in order to find variables
+	    * Attribute traverse in order to find variables
 	    * @param  {Array}        array of attributes
 	    * @return {Array}        array of attributes with variables
 	    */
@@ -161,9 +161,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	   },
 	   _createDataObjectWorkWithProperty: function createDataObjectWorkWithProperty(data, arrOfVarsClean) {
 	      if (arrOfVarsClean) {
-	         return (data = this._replaceAndCreateStatements(data, arrOfVarsClean));
+	         return this._replaceAndCreateStatements(data, arrOfVarsClean);
 	      }
-	      return (data = entityHelpers.createDataText(data[0]));
+	      return entityHelpers.createDataText(data[0]);
 	   },
 	   /**
 	    * Looking for variables in string data object
@@ -1271,7 +1271,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var value;
 	      for (value in object) {
 	         if (object.hasOwnProperty(value)) {
-	            object[value] = modifier(object[value]);
+	            object[value] = modifier(object[value], value);
 	         }
 	      }
 	      return object;
@@ -1600,7 +1600,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   if (typeof setImmediate !== 'function') {
 	      setImmediate = function setImmediate(func, fate) {
 	         'use strict';
-	         return setTimeout(function setTimeoutHandle() {
+	         return setTimeout(function setTimeoutHandler() {
 	            func(fate);
 	         }, 0);
 	      };
@@ -2380,6 +2380,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      'include': __webpack_require__(18),
 	      'template': __webpack_require__(19)
 	   },
+	   _attributeModules: {
+	      'if': __webpack_require__(25),
+	      'for': __webpack_require__(26),
+	      'else': __webpack_require__(28)
+	   },
 	   /**
 	    * Getting html string
 	    * @param  {Array} ast  AST array of entities
@@ -2509,6 +2514,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	   _processText: function processText(text, data) {
 	      return this._processData(text.data, data);
 	   },
+	   _processManageableAttributes: function processManageableAttributes(attribs) {
+	      var constructArray = [];
+	      for (var attrib in attribs) {
+	         if (this._attributeModules.hasOwnProperty(attrib)) {
+	            constructArray.push({ module: attrib, value: utils.clone(attribs[attrib])});
+	            attribs[attrib] = undefined;
+	         }
+	      }
+	      console.log(constructArray);
+	      return attribs;
+	   },
+	   _checkForManageableAttributes: function checkForManageableAttributes(tag, data) {
+	      if (tag.attribs) {
+	         tag.attribs = this._processManageableAttributes(tag.attribs);
+	      }
+	      return '<' + tag.name + this._processAttributes(tag.attribs, data) + '>' + this._process(tag.children, data) + '</' + tag.name + '>';
+	   },
 	   /**
 	    * Process Tag entity
 	    * @param  {Object} tag  Tag
@@ -2516,7 +2538,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    * @return {String}
 	    */
 	   _processTag: function processTag(tag, data) {
-	      return '<' + tag.name + this._processAttributes(tag.attribs, data) + '>' + this._process(tag.children, data) + '</' + tag.name + '>';
+	      return this._checkForManageableAttributes(tag, data);
 	   },
 	   /**
 	    * Recursive function for string generation

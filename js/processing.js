@@ -13,6 +13,11 @@ module.exports = {
       'include': require('./astModules/include'),
       'template': require('./astModules/template')
    },
+   _attributeModules: {
+      'if': require('./astModules/if'),
+      'for': require('./astModules/for'),
+      'else': require('./astModules/else')
+   },
    /**
     * Getting html string
     * @param  {Array} ast  AST array of entities
@@ -123,7 +128,7 @@ module.exports = {
          processed;
       if (attribs) {
          for (var attrib in attribs) {
-            if (attribs.hasOwnProperty(attrib)) {
+            if (attribs.hasOwnProperty(attrib) && attribs[attrib]) {
                processed = this._processData(attribs[attrib].data, data);
                if (utils.removeAllSpaces(processed) !== "") {
                   string += ' ' + (attrib + '="' + processed + '"');
@@ -142,11 +147,34 @@ module.exports = {
    _processText: function processText(text, data) {
       return this._processData(text.data, data);
    },
+   _generateTag: function generateTag(tag, data) {
+      return '<' + tag.name + this._processAttributes(tag.attribs, data) + '>' + this._process(tag.children, data) + '</' + tag.name + '>';
+   },
+   _processManageableAttributes: function processManageableAttributes(attribs) {
+      var constructArray = [];
+      for (var attrib in attribs) {
+         if (this._attributeModules.hasOwnProperty(attrib)) {
+            constructArray.push({ module: attrib, value: utils.clone(attribs[attrib]) });
+            attribs[attrib] = undefined;
+         }
+      }
+      return constructArray;
+   },
+   _useManageableAttributes: function useManageableAttributes(tag, data) {
+      var constructArray = this._processManageableAttributes(tag.attribs);
+      if (!!constructArray.length) {
+         utils.reduceArray(constructArray, function reduceToTag(value) {
+            console.log(entityHelpers.attributeParserMatcherByName.call(this, value.module));
+         }.bind(this));
+         return this._generateTag(tag, data);
+      }
+      return this._generateTag(tag, data);
+   },
    _checkForManageableAttributes: function checkForManageableAttributes(tag, data) {
       if (tag.attribs) {
-
+         return this._useManageableAttributes(tag, data);
       }
-      return '<' + tag.name + this._processAttributes(tag.attribs, data) + '>' + this._process(tag.children, data) + '</' + tag.name + '>';
+      return this._generateTag(tag, data);
    },
    /**
     * Process Tag entity
