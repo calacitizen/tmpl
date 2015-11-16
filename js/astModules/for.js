@@ -100,7 +100,6 @@ module.exports = {
 
          if (source.fromAttr) {
             statelessTag.attribs.for = undefined;
-            console.log(statelessTag);
          }
 
          if (type === 'object') {
