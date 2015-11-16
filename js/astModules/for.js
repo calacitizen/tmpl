@@ -1,5 +1,6 @@
 var checkStatements = require('../helpers/checkStatements'),
    whatType = require('../helpers/whatType'),
+   challenge = require('../helpers/challengeModuleValues'),
    utils = require('../helpers/utils');
 module.exports = {
    module: function forModule(tag, data) {
@@ -15,14 +16,10 @@ module.exports = {
          },
          forStampArguments,
          firstArgument,
+         statelessTag,
          mainData;
-
-      if (tag.attribs.data.data === undefined) {
-         throw new Error('There is no data for "for" module to use');
-      }
-
-      source = tag.attribs.data.data.value.trim();
-      forStampArguments = source.split(concreteSourceStrings.splittingKey);
+      source = challenge(tag, 'for', true);
+      forStampArguments = source.value.split(concreteSourceStrings.splittingKey);
 
       if (forStampArguments.length < 2) {
          throw new Error('Wrong arguments in for statement');
@@ -34,7 +31,7 @@ module.exports = {
       }
 
       firstArgument = forFindAllArguments(forStampArguments[0]);
-
+      statelessTag = { attribs: tag.attribs, children: tag.children, name: tag.name, raw: tag.raw, type: tag.type };
       function forFindAllArguments(value) {
          var crStringArray = value.split(concreteSourceStrings.key);
          if (crStringArray.length > 1) {
@@ -72,24 +69,24 @@ module.exports = {
       function fDataSet(dataset, data) {
          var children = [], i = 0;
          dataset.each(function fDataSetCallBack(entity) {
-            children.push(this._process(utils.clone(tag.children), scrapeChildren(entity, data, i++, firstArgument)));
+            children.push(this._process(utils.clone((source.fromAttr ? [statelessTag] : statelessTag.children)), scrapeChildren(entity, data, i++, firstArgument)));
          }.bind(this));
          return children;
       }
 
       function fArray(array, data) {
-         var children = [];
-         for (var i = 0; i < array.length; i++) {
-            children.push(this._process(utils.clone(tag.children), scrapeChildren(array, data, i, firstArgument)));
+         var children = [], i;
+         for (i = 0; i < array.length; i++) {
+            children.push(this._process(utils.clone((source.fromAttr ? [statelessTag] : statelessTag.children)), scrapeChildren(array, data, i, firstArgument)));
          }
          return children;
       }
 
       function fObject(object, data) {
-         var children = [];
-         for (var key in object) {
+         var children = [], key;
+         for (key in object) {
             if (object.hasOwnProperty(key)) {
-               children.push(this._process(utils.clone(tag.children), scrapeChildren(object, data, key, firstArgument)));
+               children.push(this._process(utils.clone((source.fromAttr ? [statelessTag] : statelessTag.children)), scrapeChildren(object, data, key, firstArgument)));
             }
          }
          return children;
@@ -100,6 +97,11 @@ module.exports = {
             type = whatType(scopeArray),
             typeFunction,
             result;
+
+         if (source.fromAttr) {
+            statelessTag.attribs.for = undefined;
+            console.log(statelessTag);
+         }
 
          if (type === 'object') {
             if (utils.isWsIncluded()) {

@@ -1,32 +1,52 @@
 var jsResolver = require('../jison/jsCat'),
+   challenge = require('../helpers/challengeModuleValues'),
+   utils = require('../helpers/utils'),
    decorators = require('../helpers/decorators');
 module.exports = {
    module: function elseModule(tag, data) {
-      var source, elseSource, captureElse = false;
-      if (tag.prev === undefined || (tag.prev.name !== 'ws:if' && tag.prev.name !== 'ws:else')) {
-         throw new Error('There is no "if" for "else" module to use');
-      }
+      'use strict';
+      var source, elseSource, elseSourceValue, captureElse = false;
       try {
-         source = tag.prev.attribs.data.data[0].value;
+         if (tag.prev !== undefined && (tag.prev.name === 'ws:if' || tag.prev.name === 'ws:else')) {
+            source = tag.prev.attribs.data.data[0].value;
+         } else {
+            if (tag.prev.attribs.if) {
+               source = tag.prev.attribs.if.data[0].value;
+            }
+            if (tag.prev.attribs.else) {
+               source = tag.prev.attribs.else.data[0].value;
+            }
+         }
       } catch (err) {
          throw new Error('There is no data for "else" module to use');
       }
       if (tag.attribs !== undefined) {
-         try {
-            elseSource = jsResolver.parse(tag.attribs.data.data[0].name.trim())(data, decorators);
-            tag.attribs.data.data[0].value = elseSource;
-            captureElse = true;
-         } catch (err) {
-            throw new Error('There is no data for "else" module to use for excluding place "elseif"');
-         }
+         elseSource = challenge(tag, 'else');
+         elseSourceValue = jsResolver.parse(elseSource.value)(data, decorators);
+         captureElse = true;
       }
       function resolveStatement() {
+         var clonedData, processed;
          if (captureElse) {
             if (!source) {
-               if (elseSource) {
-                  if (tag.children !== undefined) {
-                     return this._process(tag.children, data);
+               if (elseSourceValue) {
+                  if (elseSource.fromAttr) {
+                     clonedData = utils.clone(tag.attribs.else.data[0]);
+                     clonedData.value = elseSourceValue;
+                     tag.attribs.else = undefined;
+                     if (elseSourceValue) {
+                        processed = this._process([tag], data);
+                        tag.attribs.else = { data: [clonedData] };
+                        return processed;
+                     }
+                     tag.attribs.else = { data: [clonedData] };
+                  } else {
+                     tag.attribs.data.data[0].value = elseSourceValue;
+                     if (tag.children !== undefined) {
+                        return this._process(tag.children, data);
+                     }
                   }
+
                }
             }
          } else {
@@ -38,7 +58,6 @@ module.exports = {
          }
          return;
       }
-
       return function elseModuleReturnable() {
          if (tag.children !== undefined) {
             return resolveStatement.call(this);

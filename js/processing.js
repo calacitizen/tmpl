@@ -108,9 +108,9 @@ module.exports = {
     * @return {String}
     */
    _processData: function processData(textData, data) {
-      var string = '';
+      var string = '', i;
       if (textData.length) {
-         for (var i = 0; i < textData.length; i++) {
+         for (i = 0; i < textData.length; i++) {
             string += this._processDataTypes(textData[i], data);
          }
          return string;
@@ -125,9 +125,10 @@ module.exports = {
     */
    _processAttributes: function processAttributes(attribs, data) {
       var string = '',
-         processed;
+         processed,
+         attrib;
       if (attribs) {
-         for (var attrib in attribs) {
+         for (attrib in attribs) {
             if (attribs.hasOwnProperty(attrib) && attribs[attrib]) {
                processed = this._processData(attribs[attrib].data, data);
                if (utils.removeAllSpaces(processed) !== "") {
@@ -153,9 +154,8 @@ module.exports = {
    _processManageableAttributes: function processManageableAttributes(attribs) {
       var constructArray = [];
       for (var attrib in attribs) {
-         if (this._attributeModules.hasOwnProperty(attrib)) {
+         if (this._attributeModules.hasOwnProperty(attrib) && attribs[attrib]) {
             constructArray.push({ module: attrib, value: utils.clone(attribs[attrib]) });
-            attribs[attrib] = undefined;
          }
       }
       return constructArray;
@@ -163,10 +163,9 @@ module.exports = {
    _useManageableAttributes: function useManageableAttributes(tag, data) {
       var constructArray = this._processManageableAttributes(tag.attribs);
       if (!!constructArray.length) {
-         utils.reduceArray(constructArray, function reduceToTag(value) {
-            console.log(entityHelpers.attributeParserMatcherByName.call(this, value.module));
+         return utils.reduceArray(constructArray, function reduceToTag(value) {
+            return entityHelpers.loadModuleFunction.call(this, entityHelpers.attributeParserMatcherByName.call(this, value.module), tag, data);
          }.bind(this));
-         return this._generateTag(tag, data);
       }
       return this._generateTag(tag, data);
    },
