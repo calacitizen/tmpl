@@ -5,7 +5,19 @@ var jsResolver = require('../jison/jsCat'),
 module.exports = {
    module: function elseModule(tag, data) {
       'use strict';
-      var source, elseSource, elseSourceValue, captureElse = false;
+      var source,
+         elseSource,
+         elseSourceValue,
+         captureElse = false,
+         checkSimpleElse = function checkSimpleElse(attribs) {
+            var elseAttrib = attribs.else;
+            if (elseAttrib) {
+               if (elseAttrib.data.type === 'text' && elseAttrib.data.value === 'else') {
+                  return false;
+               }
+            }
+            return true;
+         };
       try {
          if (tag.prev !== undefined && (tag.prev.name === 'ws:if' || tag.prev.name === 'ws:else')) {
             source = tag.prev.attribs.data.data[0].value;
@@ -21,9 +33,11 @@ module.exports = {
          throw new Error('There is no data for "else" module to use');
       }
       if (tag.attribs !== undefined) {
-         elseSource = challenge(tag, 'else');
-         elseSourceValue = jsResolver.parse(elseSource.value)(data, decorators);
-         captureElse = true;
+         captureElse = checkSimpleElse(tag.attribs);
+         if (captureElse) {
+            elseSource = challenge(tag, 'else');
+            elseSourceValue = jsResolver.parse(elseSource.value)(data, decorators);
+         }
       }
       function resolveStatement() {
          var clonedData, processed;
