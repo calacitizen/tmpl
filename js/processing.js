@@ -152,10 +152,14 @@ module.exports = {
       return '<' + tag.name + this._processAttributes(tag.attribs, data) + '>' + this._process(tag.children, data) + '</' + tag.name + '>';
    },
    _processManageableAttributes: function processManageableAttributes(attribs) {
-      var constructArray = [];
-      for (var attrib in attribs) {
+      var constructArray = [], attrib;
+      for (attrib in attribs) {
          if (this._attributeModules.hasOwnProperty(attrib) && attribs[attrib]) {
-            constructArray.push({ module: attrib, value: utils.clone(attribs[attrib]) });
+            if (attrib === 'if') {
+               constructArray.unshift({ module: attrib, value: utils.clone(attribs[attrib]) });
+            } else {
+               constructArray.push({ module: attrib, value: utils.clone(attribs[attrib]) });
+            }
          }
       }
       return constructArray;

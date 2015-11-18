@@ -92,9 +92,9 @@ describe('Short for constructions', function () {
             }]
          }]
       };
-      tmpl.template('<div for="dog in dogs" class="{{ dog.type }}"><div for="car in dog.cars" if="{{car.type === \'stupid\'}}">{{dog.name}}{{car.name}}</div></div>').handle(function (traversed) {
+      tmpl.template('<div for="dog in dogs" class="{{ dog.type }}"><div for="car in dog.cars" if="{{dog.type === \'small\'}}">{{dog.name}}{{car.name}}</div></div>').handle(function (traversed) {
          setTimeout(function() {
-            expect(tmpl.html(traversed, data)).to.equal('<div class="big"><div>LacyLada</div></div><div class="small"><div>KevLada</div></div><div class="stupid"><div>MikeLada</div></div>');
+            expect(tmpl.html(traversed, data)).to.equal('<div class="big"></div><div class="small"><div>KevPorshe</div><div>KevMiniCooper</div><div>KevLada</div></div><div class="stupid"></div>');
             done();
          });
       });
