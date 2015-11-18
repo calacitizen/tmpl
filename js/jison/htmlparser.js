@@ -20,7 +20,7 @@
  ***********************************************/
 /* v1.7.6 */
 
-(function () {
+define('htmlparser', function () {
 
     function runningInNode () {
         return(
@@ -848,4 +848,6 @@
 
     exports.DomUtils = DomUtils;
 
-})();
+   return parser;
+
+});
