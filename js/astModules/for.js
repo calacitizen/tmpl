@@ -99,7 +99,7 @@ module.exports = {
             result;
 
          if (source.fromAttr) {
-            statelessTag.attribs.for = undefined;
+            tag.attribs.for = undefined;
          }
 
          if (type === 'object') {

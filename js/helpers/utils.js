@@ -1,4 +1,11 @@
 module.exports = {
+   reduceMap: function reduceMap(array, fn, bind, initial) {
+      var len = array.length, i = 0;
+      if (len == 0 && arguments.length == 1) return null;
+      var result = initial || array[i];
+      for (; i < len; i++) result = fn.call(bind, result, array[i], i, array);
+      return result;
+   },
    reduceArray: function reduceArray(array, callback) {
       var len = array.length >>> 0, k = 0, value;
       while (k < len && ! k in array) {

@@ -163,9 +163,7 @@ module.exports = {
    _useManageableAttributes: function useManageableAttributes(tag, data) {
       var constructArray = this._processManageableAttributes(tag.attribs);
       if (!!constructArray.length) {
-         return utils.reduceArray(constructArray, function reduceToTag(value) {
-            return entityHelpers.loadModuleFunction.call(this, entityHelpers.attributeParserMatcherByName.call(this, value.module), tag, data);
-         }.bind(this));
+         return entityHelpers.loadModuleFunction.call(this, entityHelpers.attributeParserMatcherByName.call(this, constructArray.shift().module), tag, data);
       }
       return this._generateTag(tag, data);
    },

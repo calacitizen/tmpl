@@ -1258,6 +1258,13 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {module.exports = {
+	   reduceMap: function reduceMap(array, fn, bind, initial) {
+	      var len = array.length, i = 0;
+	      if (len == 0 && arguments.length == 1) return null;
+	      var result = initial || array[i];
+	      for (; i < len; i++) result = fn.call(bind, result, array[i], i, array);
+	      return result;
+	   },
 	   reduceArray: function reduceArray(array, callback) {
 	      var len = array.length >>> 0, k = 0, value;
 	      while (k < len && ! k in array) {
@@ -2553,9 +2560,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   _useManageableAttributes: function useManageableAttributes(tag, data) {
 	      var constructArray = this._processManageableAttributes(tag.attribs);
 	      if (!!constructArray.length) {
-	         return utils.reduceArray(constructArray, function reduceToTag(value) {
-	            return entityHelpers.loadModuleFunction.call(this, entityHelpers.attributeParserMatcherByName.call(this, value.module), tag, data);
-	         }.bind(this));
+	         return entityHelpers.loadModuleFunction.call(this, entityHelpers.attributeParserMatcherByName.call(this, constructArray.shift().module), tag, data);
 	      }
 	      return this._generateTag(tag, data);
 	   },
@@ -4032,15 +4037,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      function resolveStatement(source) {
 	         var res = jsResolver.parse(source.value)(data, decorators), processed, clonedData;
 	         if (source.fromAttr) {
-	            clonedData = utils.clone(tag.attribs.if.data[0]);
-	            clonedData.value = res;
 	            tag.attribs.if = undefined;
 	            if (res) {
-	               processed = this._process([tag], data);
-	               tag.attribs.if = { data: [clonedData] };
-	               return processed;
+	               return this._process([tag], data);
 	            }
-	            tag.attribs.if = { data: [clonedData] };
 	         } else {
 	            tag.attribs.data.data[0].value = res;
 	            if (res) {
@@ -4190,7 +4190,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            result;
 
 	         if (source.fromAttr) {
-	            statelessTag.attribs.for = undefined;
+	            tag.attribs.for = undefined;
 	         }
 
 	         if (type === 'object') {
