@@ -4,10 +4,10 @@ var tmpl = require('../tmpl'),
 
 describe('Objects and children', function objectsAndChildrenTest() {
    it('Testing children vars', function childrenTest(done) {
-      tmpl.template('<div>123 {{ master }}</div>').handle(function childrenVarTest(traversed) {-
-         setTimeout(function() {
-            var child = traversed[0].children[0];
-            for (var i = 0; i < child.data.length; i++) {
+      tmpl.template('<div>123 {{ master }}</div>').handle(function childrenVarTest(traversed) {
+         setTimeout(function () {
+            var child = traversed[0].children[0], i;
+            for (i = 0; i < child.data.length; i++) {
                if (child.data[i].name === 'master') {
                   assert.equal(child.data[i].type, 'var');
                }
@@ -41,7 +41,7 @@ describe('Objects and children', function objectsAndChildrenTest() {
          number: 124,
          bam: 'hidden'
       };
-      tmpl.template('<ws:if data="number === 124"><div class="{{bam}}">{{tt}}</div></ws:if>').handle(function(traversed) {
+      tmpl.template('<ws:if data="{{ number === 124 }}"><div class="{{bam}}">{{tt}}</div></ws:if>').handle(function(traversed) {
          setTimeout(function() {
             expect(tmpl.html(traversed, data)).to.equal('<div class="hidden"></div>')
             done();

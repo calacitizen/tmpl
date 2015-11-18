@@ -15,9 +15,9 @@ module.exports = function objectTag(injected, types, scopeData) {
          if (injected[i].children) {
             typeFunction = types[nameExists];
             if (typeFunction) {
-               return typeFunction.call(this, types, injected[i], scopeData);
+               return typeFunction.call(this, injected[i], types, scopeData);
             }
-            tObject[nameExists] = objectTag.call(this, types, injected[i].children, scopeData);
+            tObject[nameExists] = types.object.call(this, injected[i].children, types, scopeData);
          }
       } else {
          htmlArray.push(injected[i]);

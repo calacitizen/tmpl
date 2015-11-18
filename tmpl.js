@@ -2080,7 +2080,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      function prepareScope(tag, data) {
 	         return injectedDataForce.call(this, { children: tag.injectedData, attribs: tag.attribs }, data);
 	      }
-
 	      function resolveStatement() {
 	         var assignModuleVar;
 	         if (tag.injectedTemplate) {
@@ -2174,9 +2173,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	         if (injected[i].children) {
 	            typeFunction = types[nameExists];
 	            if (typeFunction) {
-	               return typeFunction.call(this, types, injected[i], scopeData);
+	               return typeFunction.call(this, injected[i], types, scopeData);
 	            }
-	            tObject[nameExists] = objectTag.call(this, types, injected[i].children, scopeData);
+	            tObject[nameExists] = types.object.call(this, injected[i].children, types, scopeData);
 	         }
 	      } else {
 	         htmlArray.push(injected[i]);
@@ -2742,7 +2741,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	case 11:
 
 	            this.$ = $$[$0-2].concat(new IdentifierNode($$[$0]));
-	        
+
 	break;
 	case 13:
 
@@ -3423,7 +3422,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		if (computed) {
 		    return '((' + object + ' && typeof ' + object + '.get === "function" && typeof ' + object + '.set === "function") ? ' +  object + '.get(' + property + ') : ' + object + '[' + property + '])';
 		}
-		return '((' + object + ' && typeof ' + object + '.get === "function" && typeof ' + object + '.set === "function") ? ' + object + '.get(' + property + ') : ' +  object + '.' + property + ')';
+		return '((' + object + ' && typeof ' + object + '.get === "function" && typeof ' + object + '.set === "function") ? ' + object + '.get("' + property + '") : ' +  object + '.' + property + ')';
 	}
 
 	function DecoratorChainCallNode(identifier, argumentsDecorator) {
@@ -4265,68 +4264,34 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var jsResolver = __webpack_require__(22),
-	   challenge = __webpack_require__(26),
-	   utils = __webpack_require__(3),
 	   decorators = __webpack_require__(23);
 	module.exports = {
 	   module: function elseModule(tag, data) {
-	      'use strict';
-	      var source,
-	         elseSource,
-	         elseSourceValue,
-	         captureElse = false,
-	         checkSimpleElse = function checkSimpleElse(attribs) {
-	            var elseAttrib = attribs.else;
-	            if (elseAttrib) {
-	               if (elseAttrib.data.type === 'text' && elseAttrib.data.value === 'else') {
-	                  return false;
-	               }
-	            }
-	            return true;
-	         };
+	      var source, elseSource, captureElse = false;
+	      if (tag.prev === undefined || (tag.prev.name !== 'ws:if' && tag.prev.name !== 'ws:else')) {
+	         throw new Error('There is no "if" for "else" module to use');
+	      }
 	      try {
-	         if (tag.prev !== undefined && (tag.prev.name === 'ws:if' || tag.prev.name === 'ws:else')) {
-	            source = tag.prev.attribs.data.data[0].value;
-	         } else {
-	            if (tag.prev.attribs.if) {
-	               source = tag.prev.attribs.if.data[0].value;
-	            }
-	            if (tag.prev.attribs.else) {
-	               source = tag.prev.attribs.else.data[0].value;
-	            }
-	         }
+	         source = tag.prev.attribs.data.data[0].value;
 	      } catch (err) {
 	         throw new Error('There is no data for "else" module to use');
 	      }
 	      if (tag.attribs !== undefined) {
-	         captureElse = checkSimpleElse(tag.attribs);
-	         if (captureElse) {
-	            elseSource = challenge(tag, 'else');
-	            elseSourceValue = jsResolver.parse(elseSource.value)(data, decorators);
+	         try {
+	            elseSource = jsResolver.parse(tag.attribs.data.data[0].name.trim())(data, decorators);
+	            tag.attribs.data.data[0].value = elseSource;
+	            captureElse = true;
+	         } catch (err) {
+	            throw new Error('There is no data for "else" module to use for excluding place "elseif"');
 	         }
 	      }
 	      function resolveStatement() {
-	         var clonedData, processed;
 	         if (captureElse) {
 	            if (!source) {
-	               if (elseSourceValue) {
-	                  if (elseSource.fromAttr) {
-	                     clonedData = utils.clone(tag.attribs.else.data[0]);
-	                     clonedData.value = elseSourceValue;
-	                     tag.attribs.else = undefined;
-	                     if (elseSourceValue) {
-	                        processed = this._process([tag], data);
-	                        tag.attribs.else = { data: [clonedData] };
-	                        return processed;
-	                     }
-	                     tag.attribs.else = { data: [clonedData] };
-	                  } else {
-	                     tag.attribs.data.data[0].value = elseSourceValue;
-	                     if (tag.children !== undefined) {
-	                        return this._process(tag.children, data);
-	                     }
+	               if (elseSource) {
+	                  if (tag.children !== undefined) {
+	                     return this._process(tag.children, data);
 	                  }
-
 	               }
 	            }
 	         } else {
@@ -4338,6 +4303,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	         }
 	         return;
 	      }
+
 	      return function elseModuleReturnable() {
 	         if (tag.children !== undefined) {
 	            return resolveStatement.call(this);
@@ -4345,7 +4311,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	   }
 	};
-
 
 /***/ }
 /******/ ])

@@ -63,7 +63,6 @@ module.exports = {
       function prepareScope(tag, data) {
          return injectedDataForce.call(this, { children: tag.injectedData, attribs: tag.attribs }, data);
       }
-
       function resolveStatement() {
          var assignModuleVar;
          if (tag.injectedTemplate) {

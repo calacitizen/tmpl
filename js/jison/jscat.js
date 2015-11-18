@@ -116,7 +116,7 @@ break;
 case 11:
 
             this.$ = $$[$0-2].concat(new IdentifierNode($$[$0]));
-        
+
 break;
 case 13:
 
