@@ -1,4 +1,4 @@
-var tmpl = require('../tmpl'),
+var tmpl = require('../tmplw'),
     assert = require("assert"),
     expect = require('chai').expect;
 
@@ -7,9 +7,9 @@ describe('Variables', function varTest() {
         var data = {
             master: 'Michelangelo'
         };
-        tmpl.template('<div>{{ master }} Antonioni</div>').handle(function(traversed) {
+        tmplw.template('<div>{{ master }} Antonioni</div>').handle(function(traversed) {
             setTimeout(function() {
-                expect(tmpl.html(traversed, data)).to.equal('<div>Michelangelo Antonioni</div>');
+                expect(tmplw.html(traversed, data)).to.equal('<div>Michelangelo Antonioni</div>');
                 done();
             });
         });
@@ -19,9 +19,9 @@ describe('Variables', function varTest() {
             yes: true,
             no: true
         };
-        tmpl.template('<div>{{ yes === true ? "Stanley" }} {{ no === true ? "Kramer" }}</div>').handle(function(traversed) {
+        tmplw.template('<div>{{ yes === true ? "Stanley" }} {{ no === true ? "Kramer" }}</div>').handle(function(traversed) {
             setTimeout(function() {
-                expect(tmpl.html(traversed, data)).to.equal('<div>Stanley Kramer</div>');
+                expect(tmplw.html(traversed, data)).to.equal('<div>Stanley Kramer</div>');
                 done();
             });
         });
@@ -33,9 +33,9 @@ describe('Variables', function varTest() {
             he: 2,
             sumatra: "YEEEAAAHHH"
         };
-        tmpl.template('<div id="{{id}}" class="Change-{{me}}{{ he !== 1 ? \' upyours\' }}">{{sumatra}} yep</div>').handle(function(traversed) {
+        tmplw.template('<div id="{{id}}" class="Change-{{me}}{{ he !== 1 ? \' upyours\' }}">{{sumatra}} yep</div>').handle(function(traversed) {
             setTimeout(function() {
-                expect(tmpl.html(traversed, data)).to.equal('<div id="rr" class="Change-yourself upyours">YEEEAAAHHH yep</div>');
+                expect(tmplw.html(traversed, data)).to.equal('<div id="rr" class="Change-yourself upyours">YEEEAAAHHH yep</div>');
                 done();
             });
         });

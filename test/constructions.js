@@ -1,4 +1,4 @@
-var tmpl = require('../tmpl'),
+var tmpl = require('../tmplw'),
    assert = require("assert"),
    expect = require('chai').expect;
 
@@ -9,9 +9,9 @@ describe('Short for constructions', function () {
          fast: true,
          whatProperty: false
       };
-      tmpl.template('<div if="{{fast}}" class="{{ hiddenClass }}">Text</div>').handle(function(traversed) {
+      tmplw.template('<div if="{{fast}}" class="{{ hiddenClass }}">Text</div>').handle(function(traversed) {
          setTimeout(function() {
-            expect(tmpl.html(traversed, data)).to.equal('<div class="hidden">Text</div>');
+            expect(tmplw.html(traversed, data)).to.equal('<div class="hidden">Text</div>');
             done();
          });
       });
@@ -22,9 +22,9 @@ describe('Short for constructions', function () {
          fast: true,
          whatProperty: false
       };
-      tmpl.template('<div if="{{fast}}" class="{{ hiddenClass }}">Rest<div if="{{whatProperty}}" class="{{ hiddenClass }}">Text</div>Paste</div>').handle(function(traversed) {
+      tmplw.template('<div if="{{fast}}" class="{{ hiddenClass }}">Rest<div if="{{whatProperty}}" class="{{ hiddenClass }}">Text</div>Paste</div>').handle(function(traversed) {
          setTimeout(function() {
-            expect(tmpl.html(traversed, data)).to.equal('<div class="hidden">RestPaste</div>');
+            expect(tmplw.html(traversed, data)).to.equal('<div class="hidden">RestPaste</div>');
             done();
          });
       });
@@ -42,9 +42,9 @@ describe('Short for constructions', function () {
             name: 'Mike'
          }]
       };
-      tmpl.template('<span for="dog in dogs" class="{{ dog.type }}">{{dog.name}}</span>').handle(function (traversed) {
+      tmplw.template('<span for="dog in dogs" class="{{ dog.type }}">{{dog.name}}</span>').handle(function (traversed) {
          setTimeout(function() {
-            expect(tmpl.html(traversed, data)).to.equal('<span class="big">Lacy</span><span class="small">Kev</span><span class="stupid">Mike</span>');
+            expect(tmplw.html(traversed, data)).to.equal('<span class="big">Lacy</span><span class="small">Kev</span><span class="stupid">Mike</span>');
             done();
          });
       });
@@ -92,9 +92,9 @@ describe('Short for constructions', function () {
             }]
          }]
       };
-      tmpl.template('<div for="dog in dogs" class="{{ dog.type }}"><div for="car in dog.cars" if="{{dog.type === \'small\'}}">{{dog.name}}{{car.name}}</div></div>').handle(function (traversed) {
+      tmplw.template('<div for="dog in dogs" class="{{ dog.type }}"><div for="car in dog.cars" if="{{dog.type === \'small\'}}">{{dog.name}}{{car.name}}</div></div>').handle(function (traversed) {
          setTimeout(function() {
-            expect(tmpl.html(traversed, data)).to.equal('<div class="big"></div><div class="small"><div>KevPorshe</div><div>KevMiniCooper</div><div>KevLada</div></div><div class="stupid"></div>');
+            expect(tmplw.html(traversed, data)).to.equal('<div class="big"></div><div class="small"><div>KevPorshe</div><div>KevMiniCooper</div><div>KevLada</div></div><div class="stupid"></div>');
             done();
          });
       });

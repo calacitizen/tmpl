@@ -20,7 +20,7 @@
  ***********************************************/
 /* v1.7.6 */
 
-define('tmpl/jison/htmlparser', [],function () {
+define('jison/htmlparser', [],function () {
 
     function runningInNode () {
         return(
@@ -848,17 +848,11 @@ define('tmpl/jison/htmlparser', [],function () {
 
     exports.DomUtils = DomUtils;
 
-   return {
-      Parser: Parser,
-      DefaultHandler: DefaultHandler,
-      RssHandler: RssHandler,
-      ElementType: ElementType,
-      DomUtils: DomUtils
-   };
+   return Parser;
 
 });
 
-define('tmpl/helpers/utils', [],function utilsLoader() {
+define('helpers/utils', [],function utilsLoader() {
    var utils = {
       reduceMap: function reduceMap(array, fn, bind, initial) {
          var len = array.length, i = 0;
@@ -911,7 +905,7 @@ define('tmpl/helpers/utils', [],function utilsLoader() {
          return false;
       },
       isNode: function isNode() {
-         return (typeof global !== 'undefined' && Object.prototype.toString.call(global.process) === '[object process]');
+         return Object.prototype.toString.call(global.process) === '[object process]';
       },
       isImplicitVar: function isImplicitVar(string) {
          return /^([A-z0-9\.]+)$/.test(string.trim());
@@ -1042,7 +1036,7 @@ define('tmpl/helpers/utils', [],function utilsLoader() {
    };
    return utils;
 });
-define('tmpl/helpers/entityHelpers', ['tmpl/helpers/utils'], function entityHelpersLoader(utils) {
+define('helpers/entityHelpers', ['helpers/utils'], function entityHelpersLoader(utils) {
    var entityHelpers = {
       /**
        * is entity - tag
@@ -1200,7 +1194,7 @@ define('tmpl/helpers/entityHelpers', ['tmpl/helpers/utils'], function entityHelp
    };
    return entityHelpers;
 });
-define('tmpl/helpers/skipVars', ['tmpl/helpers/utils', 'tmpl/helpers/entityHelpers'], function (utils, entityHelpers) {
+define('helpers/skipVars', ['helpers/utils', 'helpers/entityHelpers'], function (utils, entityHelpers) {
    return {
       checkStatementForInners: function checkStatementForInners(value, arrVars) {
          var isUseful = utils.inArray(arrVars, value);
@@ -1212,8 +1206,9 @@ define('tmpl/helpers/skipVars', ['tmpl/helpers/utils', 'tmpl/helpers/entityHelpe
    };
 });
 
-define('tmpl/helpers/State', [],function StateLoader() {
+define('helpers/State', [],function StateLoader () {
    var State = (function StateFunction() {
+ 
 
       if (typeof setImmediate !== 'function') {
          setImmediate = function setImmediate(func, fate) {
@@ -1394,7 +1389,7 @@ define('tmpl/helpers/State', [],function StateLoader() {
    }());
    return State;
 });
-define('tmpl/astModules/data/string', [],function stringLoader() {
+define('astModules/data/string', [],function stringLoader() {
    return function stringTag(tag, types, scopeData) {
       var children, string = '', i;
       if (tag.children) {
@@ -1408,7 +1403,7 @@ define('tmpl/astModules/data/string', [],function stringLoader() {
       return string;
    };
 });
-define('tmpl/astModules/data/array', ['tmpl/helpers/utils'], function arrayLoader(utils) {
+define('astModules/data/array', ['helpers/utils'], function arrayLoader(utils) {
    return function arrayTag(tag, types, scopeData) {
       var children, array = [], nameExists, typeFunction, i;
       if (tag.children) {
@@ -1430,7 +1425,7 @@ define('tmpl/astModules/data/array', ['tmpl/helpers/utils'], function arrayLoade
       return array;
    };
 });
-define('tmpl/astModules/data/object', ['tmpl/helpers/utils', 'tmpl/helpers/entityHelpers'], function objectLoader(utils, entityHelpers) {
+define('astModules/data/object', ['helpers/utils', 'helpers/entityHelpers'], function objectLoader() {
    return function objectTag(injected, types, scopeData) {
       var tObject = {}, typeFunction, nameExists, i, objectForMerge = {}, htmlArray = [];
       function isEntityUsefulOrHTML(nameExists) {
@@ -1463,7 +1458,7 @@ define('tmpl/astModules/data/object', ['tmpl/helpers/utils', 'tmpl/helpers/entit
       return tObject;
    };
 });
-define('tmpl/astModules/data/number', ['tmpl/helpers/entityHelpers'], function numberLoader() {
+define('astModules/data/number', ['helpers/entityHelpers'], function numberLoader() {
    return function stringTag(tag, types, scopeData) {
       var children, i;
       if (tag.children) {
@@ -1476,7 +1471,7 @@ define('tmpl/astModules/data/number', ['tmpl/helpers/entityHelpers'], function n
       }
    };
 });
-define('tmpl/helpers/injectedDataForce', ['tmpl/astModules/data/string', 'tmpl/astModules/data/array', 'tmpl/astModules/data/object', 'tmpl/astModules/data/number'], function injectedDataForceLoader(str, arr, obj, num) {
+define('helpers/injectedDataForce', ['astModules/data/string', 'astModules/data/array', 'astModules/data/object', 'astModules/data/number'], function injectedDataForceLoader(str, arr, obj, num) {
    return function injectedDataForce(data, scopeData) {
       var types = {
          string: str,
@@ -1487,7 +1482,7 @@ define('tmpl/helpers/injectedDataForce', ['tmpl/astModules/data/string', 'tmpl/a
       return types.object.call(this, data, types, scopeData);
    };
 });
-define('tmpl/astModules/partial', ['tmpl/helpers/State', 'tmpl/helpers/injectedDataForce'], function partialLoader(State, injectedDataForce) {
+define('astModules/partial', ['helpers/State', 'helpers/utils', 'helpers/injectedDataForce'], function partialLoader(State, utils, injectedDataForce) {
    var partialM = {
       parse: function partialParse(tag) {
          var tagData = tag.children;
@@ -1565,7 +1560,7 @@ define('tmpl/astModules/partial', ['tmpl/helpers/State', 'tmpl/helpers/injectedD
    };
    return partialM;
 });
-define('tmpl/helpers/requireFile', ['tmpl/helpers/utils', 'tmpl/helpers/State'], function requireFileLoader(utils, State) {
+define('helpers/requireFile', ['helpers/utils', 'helpers/State'], function requireFileLoader(utils, State) {
    return function requireFile(url) {
       var isNode = utils.isNode(),
          resolver = function resolver(templatePath, ext) {
@@ -1643,7 +1638,7 @@ define('tmpl/helpers/requireFile', ['tmpl/helpers/utils', 'tmpl/helpers/State'],
    };
 });
 
-define('tmpl/helpers/straightFromFile', ['tmpl/helpers/State', 'tmpl/helpers/requireFile'], function straightFromFileLoader(State, requireFile) {
+define('helpers/straightFromFile', ['helpers/State', 'helpers/requireFile'], function straightFromFileLoader(State, requireFile) {
    return function straightFromFile(name) {
       var stateMark = State.make();
       requireFile.call(this, name).when(
@@ -1665,7 +1660,7 @@ define('tmpl/helpers/straightFromFile', ['tmpl/helpers/State', 'tmpl/helpers/req
    };
 });
 
-define('tmpl/astModules/module', ['tmpl/helpers/utils', 'tmpl/astModules/partial', 'tmpl/helpers/straightFromFile'], function moduleLoader(utils, partial, straightFromFile) {
+define('astModules/module', ['helpers/utils', 'astModules/partial', 'helpers/straightFromFile'], function moduleLoader(utils, partial, straightFromFile) {
    var moduleM = {
       parse: function modulePars(tag) {
          var name = utils.splitWs(tag.name.trim());
@@ -1690,7 +1685,7 @@ define('tmpl/astModules/module', ['tmpl/helpers/utils', 'tmpl/astModules/partial
    return moduleM;
 });
 
-define('tmpl/astModules/include', ['tmpl/helpers/straightFromFile', 'tmpl/helpers/entityHelpers', 'tmpl/helpers/State'], function (straightFromFile, entityHelpers, State) {
+define('astModules/include', ['helpers/straightFromFile', 'helpers/entityHelpers', 'helpers/State'], function (straightFromFile, entityHelpers, State) {
    var includeM = {
       parse: function requireOrRetire(tag) {
          var name = tag.attribs.name.trim(),
@@ -1708,7 +1703,7 @@ define('tmpl/astModules/include', ['tmpl/helpers/straightFromFile', 'tmpl/helper
    };
    return includeM;
 });
-define('tmpl/astModules/template', ['tmpl/helpers/State', 'tmpl/helpers/entityHelpers'], function templateLoader(State, entityHelpers) {
+define('astModules/template', ['helpers/State', 'helpers/entityHelpers'], function templateLoader(State, entityHelpers) {
    var templateM = {
       parse: function templateParse(tag) {
          var name;
@@ -1745,7 +1740,7 @@ define('tmpl/astModules/template', ['tmpl/helpers/State', 'tmpl/helpers/entityHe
    };
    return templateM;
 });
-define('tmpl/traverse', ['tmpl/jison/htmlparser', 'tmpl/helpers/utils', 'tmpl/helpers/skipVars', 'tmpl/helpers/State', 'tmpl/astModules/module', 'tmpl/helpers/entityHelpers', 'tmpl/astModules/include', 'tmpl/astModules/template', 'tmpl/astModules/partial'], function traverseLoader(htmlparser, utils, skipVars, State, moduleC, entityHelpers, inc, tmp, par) {
+define('traverse', ['jison/htmlparser', 'helpers/utils', 'helpers/skipVars', 'helpers/State', 'astModules/module', 'helpers/entityHelpers', 'astModules/include', 'astModules/template', 'astModules/partial'], function traverseLoader(htmlparser, utils, skipVars, State, moduleC, entityHelpers, inc, tmp, par) {
    var traverse = {
       _modules: {
          'ws:include': inc,
@@ -2059,6 +2054,86 @@ define('tmpl/traverse', ['tmpl/jison/htmlparser', 'tmpl/helpers/utils', 'tmpl/he
    };
    return traverse;
 });
+define('helpers/seekForVars', ['helpers/utils', 'jison/jsCat', 'helpers/decorators'], function seekForVarsLoader(utils, jsResolver, decorators) {
+   return function seekForVars(textData, scopeData) {
+      function resolveVariable(variable, data) {
+         return jsResolver.parse(variable)(data, decorators);
+      }
+      var res;
+      if (textData.type === 'expression') {
+         res = resolveVariable(textData.expression, scopeData);
+         textData.value = res;
+         return res;
+      }
+      if (textData.type === 'var') {
+         res = resolveVariable(textData.name, scopeData);
+         textData.value = res;
+         return res;
+      }
+      return textData.value;
+   };
+});
+
+define("helpers/seekingForVars", function(){});
+
+define('helpers/whatType', [],function whatTypeLoader() {
+   return function checkType(value) {
+
+      var type = function checkTypeInside(o) {
+
+         if (o === null) {
+            return 'null';
+         }
+
+         if (o && (o.nodeType === 1 || o.nodeType === 9)) {
+            return 'element';
+         }
+
+         var s = Object.prototype.toString.call(o);
+         var type = s.match(/\[object (.*?)\]/)[1].toLowerCase();
+
+         if (type === 'number') {
+            if (isNaN(o)) {
+               return 'nan';
+            }
+            if (!isFinite(o)) {
+               return 'infinity';
+            }
+         }
+
+         return type;
+      };
+
+      var types = [
+         'Null',
+         'Undefined',
+         'Object',
+         'Array',
+         'String',
+         'Number',
+         'Boolean',
+         'Function',
+         'RegExp',
+         'Element',
+         'NaN',
+         'Infinite'
+      ];
+
+      var generateMethod = function(t) {
+         type['is' + t] = function(o) {
+            return type(o) === t.toLowerCase();
+         };
+      };
+
+      for (var i = 0; i < types.length; i++) {
+         generateMethod(types[i]);
+      }
+
+      return type(value);
+
+   };
+});
+
 /* parser generated by jison 0.4.15 */
 /*
   Returns a Parser object of the following structure:
@@ -2132,7 +2207,7 @@ define('tmpl/traverse', ['tmpl/jison/htmlparser', 'tmpl/helpers/utils', 'tmpl/he
     recoverable: (boolean: TRUE when the parser has a error recovery rule available for this particular error)
   }
 */
-define('tmpl/jison/jsCat', [],function () {
+define('jison/jsCat', [],function () {
    var parser = (function(){
       var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[8,10,17,21,22,27,30,35,58,59,64,65,66,67,68,110,123,124,125,126,127],$V1=[1,9],$V2=[1,11],$V3=[1,32],$V4=[1,33],$V5=[1,29],$V6=[1,44],$V7=[1,45],$V8=[1,50],$V9=[1,51],$Va=[1,48],$Vb=[1,49],$Vc=[1,52],$Vd=[1,53],$Ve=[1,54],$Vf=[1,46],$Vg=[1,55],$Vh=[1,56],$Vi=[1,57],$Vj=[1,58],$Vk=[1,59],$Vl=[2,8,13,27,30,45,58,59,66,67,70,71,72,79,80,81,82,86,87,88,89,102,106,110,112],$Vm=[2,20],$Vn=[2,8,13],$Vo=[2,8,13,106,112],$Vp=[2,8,13,102,106,112],$Vq=[2,8,13,86,87,88,89,102,106,112],$Vr=[2,8,13,79,80,81,82,86,87,88,89,102,106,112],$Vs=[2,8,13,66,67,79,80,81,82,86,87,88,89,102,106,112],$Vt=[2,8,13,27,30,45,58,59,66,67,70,71,72,79,80,81,82,86,87,88,89,102,106,112],$Vu=[2,51],$Vv=[2,8,13,58,59,66,67,70,71,72,79,80,81,82,86,87,88,89,102,106,112],$Vw=[1,86],$Vx=[1,83],$Vy=[1,84],$Vz=[1,89],$VA=[1,90],$VB=[1,95],$VC=[2,8,13,66,67,70,71,72,79,80,81,82,86,87,88,89,102,106,112],$VD=[2,8,11,13,27,28,30,31,36,45,58,59,66,67,70,71,72,79,80,81,82,86,87,88,89,102,106,110,112],$VE=[1,123],$VF=[1,127],$VG=[1,135],$VH=[1,137],$VI=[1,141],$VJ=[1,139],$VK=[1,140],$VL=[1,138],$VM=[2,8,13,27,28,30,45,58,59,66,67,70,71,72,79,80,81,82,86,87,88,89,102,106,110,112],$VN=[2,168],$VO=[13,27,30,45,58,59,66,67,70,71,72,79,80,81,82,86,87,88,89,102,106,112],$VP=[1,180],$VQ=[1,182],$VR=[2,24],$VS=[1,183],$VT=[1,184],$VU=[13,28,31],$VV=[2,8,11,13,27,28,30,31,36,45,58,59,66,67,70,71,72,79,80,81,82,86,87,88,89,106,110,112],$VW=[1,187],$VX=[2,8,11,13,27,28,30,31,36,45,58,59,66,67,70,71,72,86,87,88,89,102,106,110,112],$VY=[1,192],$VZ=[1,193],$V_=[1,194],$V$=[1,195],$V01=[2,8,11,13,27,28,30,31,36,45,58,59,66,67,79,80,81,82,86,87,88,89,102,106,110,112],$V11=[1,198],$V21=[1,199],$V31=[1,200],$V41=[2,8,11,13,28,31,36,58,59,66,67,70,71,72,79,80,81,82,86,87,88,89,102,106,110,112],$V51=[1,210],$V61=[10,13,21,22,27,30,31,35,58,59,64,65,66,67,68,110,123,124,125,126,127],$V71=[13,31],$V81=[2,17],$V91=[13,36],$Va1=[2,8,13,27,28,30,31,36,45,58,59,66,67,70,71,72,79,80,81,82,86,87,88,89,102,106,110,112],$Vb1=[1,223],$Vc1=[27,30,45,58,59,66,67,70,71,72,79,80,81,82,86,87,88,89,102,106,112],$Vd1=[2,184],$Ve1=[2,183];
       var parser = {trace: function trace() { },
@@ -3325,7 +3400,28 @@ define('tmpl/jison/jsCat', [],function () {
 
    return parser;
 });
-define('tmpl/helpers/decorators', [],function decoratorsLoader() {
+define('helpers/challengeModuleValues', [],function () {
+   return function challenge(tag, property, isText) {
+      var source;
+      try {
+         if (tag.attribs.hasOwnProperty(property)) {
+            source = {
+               fromAttr: true,
+               value: isText ? tag.attribs[property].data.value.trim() : tag.attribs[property].data[0].name.trim()
+            };
+         } else {
+            source = {
+               fromAttr: false,
+               value: isText ? tag.attribs.data.data.value.trim() : tag.attribs.data.data[0].name.trim()
+            };
+         }
+      } catch (err) {
+         throw new Error('There is no data for "' + property + '" module to use');
+      }
+      return source;
+   };
+});
+define('helpers/decorators', [],function decoratorsLoader() {
    function embraceChain(array, ev) {
       if (array) {
          array.push(ev);
@@ -3392,106 +3488,7 @@ define('tmpl/helpers/decorators', [],function decoratorsLoader() {
    };
    return decorators;
 });
-define('tmpl/helpers/seekingForVars', ['tmpl/jison/jsCat', 'tmpl/helpers/decorators'], function seekForVarsLoader(jsResolver, decorators) {
-   return function seekForVars(textData, scopeData) {
-      function resolveVariable(variable, data) {
-         return jsResolver.parse(variable)(data, decorators);
-      }
-      var res;
-      if (textData.type === 'expression') {
-         res = resolveVariable(textData.expression, scopeData);
-         textData.value = res;
-         return res;
-      }
-      if (textData.type === 'var') {
-         res = resolveVariable(textData.name, scopeData);
-         textData.value = res;
-         return res;
-      }
-      return textData.value;
-   };
-});
-
-define('tmpl/helpers/whatType', [],function whatTypeLoader() {
-   return function checkType(value) {
-
-      var type = function checkTypeInside(o) {
-
-         if (o === null) {
-            return 'null';
-         }
-
-         if (o && (o.nodeType === 1 || o.nodeType === 9)) {
-            return 'element';
-         }
-
-         var s = Object.prototype.toString.call(o);
-         var type = s.match(/\[object (.*?)\]/)[1].toLowerCase();
-
-         if (type === 'number') {
-            if (isNaN(o)) {
-               return 'nan';
-            }
-            if (!isFinite(o)) {
-               return 'infinity';
-            }
-         }
-
-         return type;
-      };
-
-      var types = [
-         'Null',
-         'Undefined',
-         'Object',
-         'Array',
-         'String',
-         'Number',
-         'Boolean',
-         'Function',
-         'RegExp',
-         'Element',
-         'NaN',
-         'Infinite'
-      ];
-
-      var generateMethod = function(t) {
-         type['is' + t] = function(o) {
-            return type(o) === t.toLowerCase();
-         };
-      };
-
-      for (var i = 0; i < types.length; i++) {
-         generateMethod(types[i]);
-      }
-
-      return type(value);
-
-   };
-});
-
-define('tmpl/helpers/challengeModuleValues', [],function () {
-   return function challenge(tag, property, isText) {
-      var source;
-      try {
-         if (tag.attribs.hasOwnProperty(property)) {
-            source = {
-               fromAttr: true,
-               value: isText ? tag.attribs[property].data.value.trim() : tag.attribs[property].data[0].name.trim()
-            };
-         } else {
-            source = {
-               fromAttr: false,
-               value: isText ? tag.attribs.data.data.value.trim() : tag.attribs.data.data[0].name.trim()
-            };
-         }
-      } catch (err) {
-         throw new Error('There is no data for "' + property + '" module to use');
-      }
-      return source;
-   };
-});
-define('tmpl/astModules/if', ['tmpl/jison/jsCat', 'tmpl/helpers/challengeModuleValues', 'tmpl/helpers/decorators'], function ifLoader(jsResolver, challenge, decorators) {
+define('astModules/if', ['jison/jsCat', 'helpers/challengeModuleValues', 'helpers/decorators'], function ifLoader(jsResolver, challenge, decorators) {
    var ifM = {
       module: function ifModule(tag, data) {
          function resolveStatement(source) {
@@ -3521,7 +3518,7 @@ define('tmpl/astModules/if', ['tmpl/jison/jsCat', 'tmpl/helpers/challengeModuleV
    return ifM;
 });
 
-define('tmpl/helpers/checkStatements', ['tmpl/helpers/utils', 'tmpl/jison/jsCat', 'tmpl/helpers/decorators'], function checkStatementsLoader(utils, jsResolver, decorators) {
+define('helpers/checkStatements', ['helpers/utils', 'jison/jsCat', 'helpers/decorators'], function checkStatementsLoader(utils, jsResolver, decorators) {
    return function checkStatementForInners(value, scopeData, arrVars) {
       var isVar = utils.inArray(arrVars, value);
       /**
@@ -3552,7 +3549,7 @@ define('tmpl/helpers/checkStatements', ['tmpl/helpers/utils', 'tmpl/jison/jsCat'
       return varOrNot(isVar, value);
    };
 });
-define('tmpl/astModules/for', ['tmpl/helpers/checkStatements', 'tmpl/helpers/whatType', 'tmpl/helpers/challengeModuleValues', 'tmpl/helpers/utils'], function (checkStatements, whatType, challenge, utils) {
+define('astModules/for', ['helpers/checkStatements', 'helpers/whatType', 'helpers/challengeModuleValues', 'helpers/utils'], function (checkStatements, whatType, challenge, utils) {
    var forM = {
       module: function forModule(tag, data) {
          var
@@ -3681,7 +3678,7 @@ define('tmpl/astModules/for', ['tmpl/helpers/checkStatements', 'tmpl/helpers/wha
    };
    return forM;
 });
-define('tmpl/astModules/else', ['tmpl/jison/jsCat', 'tmpl/helpers/decorators'], function elseLoader(jsResolver, decorators) {
+define('astModules/else', ['jison/jsCat', 'helpers/decorators'], function elseLoader(jsResolver, decorators) {
    var elseM = {
       module: function elseModule(tag, data) {
          var source, elseSource, captureElse = false;
@@ -3730,7 +3727,7 @@ define('tmpl/astModules/else', ['tmpl/jison/jsCat', 'tmpl/helpers/decorators'], 
    };
    return elseM;
 });
-define('tmpl/processing', ['tmpl/helpers/utils', 'tmpl/helpers/seekingForVars', 'tmpl/helpers/whatType', 'tmpl/astModules/module', 'tmpl/helpers/entityHelpers', 'tmpl/astModules/if', 'tmpl/astModules/for', 'tmpl/astModules/else', 'tmpl/astModules/partial', 'tmpl/astModules/include', 'tmpl/astModules/template'], function processingModule(utils, seekingForVars, whatType, moduleC, entityHelpers, ifM, forM, elseM, par, inc, tmp) {
+define('processing', ['helpers/utils', 'helpers/seekingForVars', 'helpers/whatType', 'astModules/module', 'helpers/entityHelpers', 'astModules/if', 'astModules/for', 'astModules/else', 'astModules/partial', 'astModules/include', 'astModules/template'], function processingModule(utils, seekingForVars, whatType, moduleC, entityHelpers, ifM, forM, elseM, par, inc, tmp) {
    var processing = {
       _modules: {
          'if': ifM,
@@ -3933,7 +3930,7 @@ define('tmpl/processing', ['tmpl/helpers/utils', 'tmpl/helpers/seekingForVars', 
    return processing;
 });
 
-define('tmpl-engine', ['tmpl/traverse', 'tmpl/processing'], function (traversing, processing) {
+define('entry', ['traverse', 'processing'], function (traversing, processing) {
    return {
       template: function template(html, resolver) {
          var parsed = traversing.parse(html);

@@ -1,10 +1,10 @@
-var tmpl = require('../tmpl'),
+var tmpl = require('../tmplw'),
    assert = require("assert"),
    expect = require('chai').expect;
 
 describe('Objects and children', function objectsAndChildrenTest() {
    it('Testing children vars', function childrenTest(done) {
-      tmpl.template('<div>123 {{ master }}</div>').handle(function childrenVarTest(traversed) {
+      tmplw.template('<div>123 {{ master }}</div>').handle(function childrenVarTest(traversed) {
          setTimeout(function () {
             var child = traversed[0].children[0], i;
             for (i = 0; i < child.data.length; i++) {
@@ -29,9 +29,9 @@ describe('Objects and children', function objectsAndChildrenTest() {
             name: 'Mike'
          }]
       };
-      tmpl.template('<ws:for data="dog in dogs"><span class="{{ dog.type }}">{{dog.name}}</span></ws:for>').handle(function(traversed) {
+      tmplw.template('<ws:for data="dog in dogs"><span class="{{ dog.type }}">{{dog.name}}</span></ws:for>').handle(function(traversed) {
          setTimeout(function() {
-            expect(tmpl.html(traversed, data)).to.equal('<span class="big">Lacy</span><span class="small">Kev</span><span class="stupid">Mike</span>');
+            expect(tmplw.html(traversed, data)).to.equal('<span class="big">Lacy</span><span class="small">Kev</span><span class="stupid">Mike</span>');
             done();
          });
       });
@@ -41,9 +41,9 @@ describe('Objects and children', function objectsAndChildrenTest() {
          number: 124,
          bam: 'hidden'
       };
-      tmpl.template('<ws:if data="{{ number === 124 }}"><div class="{{bam}}">{{tt}}</div></ws:if>').handle(function(traversed) {
+      tmplw.template('<ws:if data="{{ number === 124 }}"><div class="{{bam}}">{{tt}}</div></ws:if>').handle(function(traversed) {
          setTimeout(function() {
-            expect(tmpl.html(traversed, data)).to.equal('<div class="hidden"></div>')
+            expect(tmplw.html(traversed, data)).to.equal('<div class="hidden"></div>')
             done();
          });
       });

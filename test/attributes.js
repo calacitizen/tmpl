@@ -1,4 +1,4 @@
-var tmpl = require('../tmpl'),
+var tmpl = require('../tmplw'),
     assert = require("assert"),
     expect = require('chai').expect;
 
@@ -7,9 +7,9 @@ describe('Conditional attributes', function() {
         var data = {
             hiddenClass: 'hidden'
         };
-        tmpl.template('<div class="{{hiddenClass}}" id="{{no}}">Text</div>').handle(function(traversed) {
+        tmplw.template('<div class="{{hiddenClass}}" id="{{no}}">Text</div>').handle(function(traversed) {
             setTimeout(function() {
-                expect(tmpl.html(traversed, data)).to.equal('<div class="hidden">Text</div>');
+                expect(tmplw.html(traversed, data)).to.equal('<div class="hidden">Text</div>');
                 done();
             });
         });
@@ -19,9 +19,9 @@ describe('Conditional attributes', function() {
             hiddenClass: true,
             no: 123
         };
-        tmpl.template('<div class="{{no}}{{ hiddenClass !== false ? \' hidden\' }}" id="{{ no === 321 ? \'first\' }}">Text</div>').handle(function(traversed) {
+        tmplw.template('<div class="{{no}}{{ hiddenClass !== false ? \' hidden\' }}" id="{{ no === 321 ? \'first\' }}">Text</div>').handle(function(traversed) {
             setTimeout(function() {
-                expect(tmpl.html(traversed, data)).to.equal('<div class="123 hidden">Text</div>');
+                expect(tmplw.html(traversed, data)).to.equal('<div class="123 hidden">Text</div>');
                 done();
             });
         });
@@ -33,9 +33,9 @@ describe('Conditional attributes', function() {
             mars: "pluto",
             pp: undefined
         };
-        tmpl.template('<div class="{{ hiddenClass !== false ? \'hidden\' }}" id="{{ mars }}" custom="{{pp}}">Text</div>').handle(function(traversed) {
+        tmplw.template('<div class="{{ hiddenClass !== false ? \'hidden\' }}" id="{{ mars }}" custom="{{pp}}">Text</div>').handle(function(traversed) {
             setTimeout(function() {
-                expect(tmpl.html(traversed, data)).to.equal('<div class="hidden" id="pluto">Text</div>');
+                expect(tmplw.html(traversed, data)).to.equal('<div class="hidden" id="pluto">Text</div>');
                 done();
             });
         });
