@@ -10,7 +10,6 @@ requirejs.config({
 describe('Conditional attributes', function() {
    it('Vars', function(done) {
       requirejs(['tmpl-engine'], function (tmpl) {
-         console.log(tmpl);
          var data = {
             hiddenClass: 'hidden'
          };
@@ -34,7 +33,7 @@ describe('Conditional attributes', function() {
                done();
             });
          });
-      })
+      });
    });
    it('Mixed', function(done) {
       requirejs(['tmpl-engine'], function (tmpl) {
