@@ -1,0 +1,87 @@
+{{__root}}
+SHOOOT! {{ 2 || 1 }}
+{{ boss.adore }}
+<ws:template name="edgar"><div>{{master}}</div></ws:template>
+<ws:partial template="edgar" master="{{mac.fries}}"></ws:partial>
+<ws:template name="step">
+    <div class="{{stepClass}}">
+        <span>Sharp 123</span>
+    </div>
+    <ws:partial template="{{injected}}"></ws:partial>
+</ws:template>
+<ws:partial ff="{{a}}" fk="{{20}}" template="step">
+    <ws:stepClass>
+        <ws:string>SomeStepClass</ws:string>
+    </ws:stepClass>
+    <ws:injected>
+        <h1>HASHAHAHAHAHA</h1>
+    </ws:injected>
+</ws:partial>
+<vv:case title="" class="{{ yy.get('123') ? 'mama' }}">
+    case
+</vv:case>
+<ws:if data="{{bool === false}}">,
+    <div class="{{ 0 > 1 }}" boss="{{0<1}}">
+        Agatha
+    </div>
+</ws:if>
+<ws:else>
+    asfasfasf
+</ws:else>
+<div class="">{{yy.get(0)}}</div>
+<!--<ws:if data="{{yy.get('123') === '123123'}}">-->
+    <!--<ws:Button rabbit="{{ { name: 'Marty' } }}"></ws:Button>-->
+    <!--<ws:Button rabbit="{{ { name: 'Macy' } }}"></ws:Button>-->
+<!--</ws:if>-->
+{{ mac.fries === '22' ? mt }}
+<main class="myGod {{ mac.fries }}">
+  <header class="maybe {{ activeClass }}">{{bambam}} I'm {{header|replace:"lsdkg","BOOOOOOOAAAAAA"}} biggest header in the world</header>
+  <div style="margin-top: {{ mt }}; color: {{red}};" class="{{y}}">{{ 112.23 }}I'm the biggest {{ header }} in the world</div>
+  <div class="mistress" for="rabbit in rabbits.names" if="{{ true }}">{{ yy.mm.kk }} {{ rabbit.name }} asdklfgskaldgkasdg asdgasdg. MISTRESS!!!!!!!!!!!!!!!!!!!</div>
+  <ws:if data="{{cookies === 22}}">YAHOOO!</ws:if>
+  <ws:if data="{{mac.fries === 21}}">
+    <article class="asfasa {{ activeClass }}">
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eos mollitia ullam consequatur, ut, aliquid, in vel dolorum laudantium a accusantium maxime, nobis ab repellendus sed natus tempora consequuntur numquam labore!
+      <ws:if data="{{mac.fries === 21}}">
+        <div class="trombone">
+          Pooh
+          <ws:if data="{{cookies === 23}}">
+            <div class="statement">
+              Prima
+              <ws:for data="rabbit in rabbits.names">
+                <div>{{rabbit.name}}</div>
+                <ws:for data="run in rabbit.runs">
+                  <div>{{run.num}}</div>
+                </ws:for>
+              </ws:for>
+            </div>
+          </ws:if>
+        </div>
+      </ws:if>
+    </article>
+  </ws:if>
+  <div class="master">
+    <span class="tata">123</span>
+  </div>
+  <ws:for data="rabbit in rabbits.names">
+    <div class="rabbit {{ rabbit.type }}">{{ rabbit.name }}</div>
+    <ws:if data="{{rabbit.runs}}">
+      <div class="runs">
+        <ws:for data="run in rabbit.runs">
+          {{ run.num }} ll{{pumb}}
+        </ws:for>
+      </div>
+    </ws:if>
+  </ws:for>
+  <div class="boom">
+    <ws:for data="cake in cakes">
+      <div>{{cake}}</div>
+    </ws:for>
+    <div for="key as vast in vasts">VASTS {{show(vast, activeClass, key)}}</div>
+  </div>
+  <footer>
+      <span>123</span>
+      My footer protection is so strong, that you will be begging ws:for me to stop you.
+  </footer>
+</main>
+<div class="bo">123</div>

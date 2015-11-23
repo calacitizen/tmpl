@@ -1,0 +1,13 @@
+<ws:if data="{{rabbit}}">
+    <div class="button {{ rabbit.name ? rabbit.name : activeClass }}">
+        <button>Click on me, man!</button>
+    </div>
+</ws:if>
+<ws:if data="{{stepIntoHtmlField}}">
+    <ws:partial template="{{stepIntoHtmlField}}">
+        <ws:yank>
+            <ws:string>123</ws:string>
+        </ws:yank>
+    </ws:partial>
+</ws:if>
+<ws:Mimic rabbit="{{rabbit}}"></ws:Mimic>

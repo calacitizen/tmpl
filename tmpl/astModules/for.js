@@ -1,4 +1,4 @@
-define('tmpl/astModules/for', ['tmpl/helpers/checkStatements', 'tmpl/helpers/whatType', 'tmpl/helpers/challengeModuleValues', 'tmpl/helpers/utils'], function (checkStatements, whatType, challenge, utils) {
+define('Core/tmpl/js/astModules/for', ['Core/tmpl/js/helpers/checkStatements', 'Core/tmpl/js/helpers/whatType', 'Core/tmpl/js/helpers/challengeModuleValues', 'Core/tmpl/js/helpers/utils'], function (checkStatements, whatType, challenge, utils) {
    var forM = {
       module: function forModule(tag, data) {
          var

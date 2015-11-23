@@ -1,4 +1,4 @@
-define('tmpl/helpers/checkStatements', ['tmpl/helpers/utils', 'tmpl/jison/jsCat', 'tmpl/helpers/decorators'], function checkStatementsLoader(utils, jsResolver, decorators) {
+define('Core/tmpl/js/helpers/checkStatements', ['Core/tmpl/js/helpers/utils', 'Core/tmpl/js/jison/jsCat', 'Core/tmpl/js/helpers/decorators'], function checkStatementsLoader(utils, jsResolver, decorators) {
    return function checkStatementForInners(value, scopeData, arrVars) {
       var isVar = utils.inArray(arrVars, value);
       /**
