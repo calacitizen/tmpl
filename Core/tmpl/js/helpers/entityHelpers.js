@@ -1,4 +1,4 @@
-define('Core/tmpl/js/helpers/entityHelpers', ['Core/tmpl/js/helpers/utils'], function entityHelpersLoader(utils) {
+define('Core/tmpl/js/helpers/entityHelpers', ['Core/tmpl/js/helpers/utils', 'Core/tmpl/js/helpers/processExpressions'], function entityHelpersLoader(utils, processExpressions) {
    var entityHelpers = {
       /**
        * is entity - tag
@@ -145,14 +145,14 @@ define('Core/tmpl/js/helpers/entityHelpers', ['Core/tmpl/js/helpers/utils'], fun
             var string = '', attrData = attributesData.data, i;
             if (attrData.length) {
                if (attrData.length === 1) {
-                  return this._processDataTypes(attrData[0], data);
+                  return processExpressions(attrData[0], data);
                }
                for (i = 0; i < attrData.length; i++) {
-                  string += this._processDataTypes(attrData[i], data);
+                  string += processExpressions(attrData[i], data);
                }
                return string;
             }
-            return this._processDataTypes(attrData, data);
+            return processExpressions(attrData, data);
          }
          if (attrs !== undefined) {
             for (attr in attrs) {

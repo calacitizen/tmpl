@@ -2,19 +2,19 @@ define('Core/tmpl/js/astModules/if', ['Core/tmpl/js/jison/jsCat', 'Core/tmpl/js/
    var ifM = {
       module: function ifModule(tag, data) {
          function resolveStatement(source) {
-            var res = jsResolver.parse(source.value)(data, decorators), processed, clonedData;
+            var processed, clonedData;
             if (source.fromAttr) {
                clonedData = tag.attribs.if;
                tag.attribs.if = undefined;
-               if (res) {
+               if (source.value) {
                   processed = this._process([tag], data);
                   tag.attribs.if = clonedData;
                   return processed;
                }
                tag.attribs.if = clonedData;
             } else {
-               tag.attribs.data.data[0].value = res;
-               if (res) {
+               tag.attribs.data.data[0].value = source.value;
+               if (source.value) {
                   if (tag.children !== undefined) {
                      return this._process(tag.children, data);
                   }
@@ -24,7 +24,7 @@ define('Core/tmpl/js/astModules/if', ['Core/tmpl/js/jison/jsCat', 'Core/tmpl/js/
          }
          return function ifModuleReturnable() {
             if (tag.children !== undefined) {
-               return resolveStatement.call(this, challenge(tag, 'if'));
+               return resolveStatement.call(this, challenge(tag, 'if', false, data));
             }
          };
       }

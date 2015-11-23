@@ -1,4 +1,4 @@
-define('Core/tmpl/js/astModules/partial', ['Core/tmpl/js/helpers/State', 'Core/tmpl/js/helpers/injectedDataForce'], function partialLoader(State, injectedDataForce) {
+define('Core/tmpl/js/astModules/partial', ['Core/tmpl/js/helpers/State', 'Core/tmpl/js/helpers/injectedDataForce', 'Core/tmpl/js/helpers/processExpressions'], function partialLoader(State, injectedDataForce, processExpressions) {
    var partialM = {
       parse: function partialParse(tag) {
          var tagData = tag.children;
@@ -62,10 +62,8 @@ define('Core/tmpl/js/astModules/partial', ['Core/tmpl/js/helpers/State', 'Core/t
             return injectedDataForce.call(this, { children: tag.injectedData, attribs: tag.attribs }, data);
          }
          function resolveStatement() {
-            var assignModuleVar;
             if (tag.injectedTemplate) {
-               assignModuleVar = tag.injectedTemplate.name.trim();
-               return this._process(data[assignModuleVar], prepareScope.call(this, tag, data));
+               return this._process(processExpressions(tag.injectedTemplate, data), prepareScope.call(this, tag, data));
             }
             return this._process(tag.children, prepareScope.call(this, tag, data));
          }

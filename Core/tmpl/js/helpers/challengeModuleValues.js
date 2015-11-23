@@ -1,16 +1,16 @@
-define('Core/tmpl/js/helpers/challengeModuleValues', function () {
-   return function challenge(tag, property, isText) {
+define('Core/tmpl/js/helpers/challengeModuleValues', ['Core/tmpl/js/helpers/processExpressions'], function (processExpressions) {
+   return function challenge(tag, property, isText, data) {
       var source;
       try {
          if (tag.attribs.hasOwnProperty(property)) {
             source = {
                fromAttr: true,
-               value: isText ? tag.attribs[property].data.value.trim() : tag.attribs[property].data[0].name.trim()
+               value: isText ? tag.attribs[property].data.value.trim() : processExpressions(tag.attribs[property].data[0].name, data)
             };
          } else {
             source = {
                fromAttr: false,
-               value: isText ? tag.attribs.data.data.value.trim() : tag.attribs.data.data[0].name.trim()
+               value: isText ? tag.attribs.data.data.value.trim() : processExpressions(tag.attribs.data.data[0].name, data)
             };
          }
       } catch (err) {

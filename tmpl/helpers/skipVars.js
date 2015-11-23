@@ -1,4 +1,4 @@
-define('tmpl/helpers/skipVars', ['tmpl/helpers/utils', 'tmpl/helpers/entityHelpers'], function (utils, entityHelpers) {
+define('tmpl/helpers/skipVars', ['tmpl/helpers/utils', 'tmpl/helpers/entityHelpers', 'Core/tmpl/js/jison/beforejs'], function (utils, entityHelpers, beforejs) {
    return {
       checkStatementForInners: function checkStatementForInners(value, arrVars) {
          var isUseful = utils.inArray(arrVars, value);

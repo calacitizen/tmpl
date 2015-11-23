@@ -1,4 +1,4 @@
-define('Core/tmpl/js/processing', ['Core/tmpl/js/helpers/utils', 'Core/tmpl/js/helpers/seekingForVars', 'Core/tmpl/js/helpers/whatType', 'Core/tmpl/js/astModules/module', 'Core/tmpl/js/helpers/entityHelpers', 'Core/tmpl/js/astModules/if', 'Core/tmpl/js/astModules/for', 'Core/tmpl/js/astModules/else', 'Core/tmpl/js/astModules/partial', 'Core/tmpl/js/astModules/include', 'Core/tmpl/js/astModules/template'], function processingModule(utils, seekingForVars, whatType, moduleC, entityHelpers, ifM, forM, elseM, par, inc, tmp) {
+define('Core/tmpl/js/processing', ['Core/tmpl/js/helpers/processExpressions', 'Core/tmpl/js/helpers/utils', 'Core/tmpl/js/helpers/seekingForVars', 'Core/tmpl/js/helpers/whatType', 'Core/tmpl/js/astModules/module', 'Core/tmpl/js/helpers/entityHelpers', 'Core/tmpl/js/astModules/if', 'Core/tmpl/js/astModules/for', 'Core/tmpl/js/astModules/else', 'Core/tmpl/js/astModules/partial', 'Core/tmpl/js/astModules/include', 'Core/tmpl/js/astModules/template'], function processingModule(processExpressions, utils, seekingForVars, whatType, moduleC, entityHelpers, ifM, forM, elseM, par, inc, tmp) {
    var processing = {
       _modules: {
          'if': ifM,
@@ -87,16 +87,6 @@ define('Core/tmpl/js/processing', ['Core/tmpl/js/helpers/utils', 'Core/tmpl/js/h
          }
       },
       /**
-       * Processing data types of entities
-       * @param  {String} unTextData Value of data object
-       * @param  {Object} data       Data
-       * @return {String}
-       */
-      _processDataTypes: function processDataTypes(unTextData, data) {
-         var textVar = seekingForVars(unTextData, data);
-         return (textVar !== undefined && textVar !== null) ? textVar : '';
-      },
-      /**
        * Processing entity data objects
        * @param  {Array} textData Array of data
        * @param  {Object} data     Data
@@ -106,11 +96,11 @@ define('Core/tmpl/js/processing', ['Core/tmpl/js/helpers/utils', 'Core/tmpl/js/h
          var string = '', i;
          if (textData.length) {
             for (i = 0; i < textData.length; i++) {
-               string += this._processDataTypes(textData[i], data);
+               string += processExpressions(textData[i], data) || '';
             }
             return string;
          }
-         return this._processDataTypes(textData, data);
+         return processExpressions(textData, data);
       },
       /**
        * Process attributes
