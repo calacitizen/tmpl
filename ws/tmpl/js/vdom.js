@@ -196,6 +196,14 @@ define('Core/tmpl/js/vdom', ['Core/tmpl/js/helpers/processExpressions', 'Core/tm
        */
       _processText: function processText(text, data) {
          var result = this._processData(text.data, data);
+         if (whatType(result) === 'array') {
+            for(var i=0; i<result.length; i++) {
+               if (!this.isVirtualNode(result[i])) {
+                  result[i] = this.vdomUtils.textNode(result[i]);
+               }
+            }
+            return result;
+         }
          if (this.isVirtualNode(result)) {
             return result;
          }
