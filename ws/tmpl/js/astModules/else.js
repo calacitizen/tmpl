@@ -1,25 +1,27 @@
-define('Core/tmpl/js/astModules/else', ['Core/tmpl/js/jison/jsCat', 'Core/tmpl/js/helpers/decorators'], function elseLoader(jsResolver, decorators) {
+define('Core/tmpl/js/astModules/else', ['Core/tmpl/js/helpers/processExpressions'], function elseLoader(processExpressions) {
    var elseM = {
       module: function elseModule(tag, data) {
-         var source, elseSource, captureElse = false;
-         if (tag.prev === undefined || (tag.prev.name !== 'ws:if' && tag.prev.name !== 'ws:else')) {
-            throw new Error('There is no "if" for "else" module to use');
-         }
-         try {
-            source = tag.prev.attribs.data.data[0].value;
-         } catch (err) {
-            throw new Error('There is no data for "else" module to use');
-         }
-         if (tag.attribs !== undefined) {
-            try {
-               elseSource = jsResolver.parse(tag.attribs.data.data[0].name.trim())(data, decorators);
-               tag.attribs.data.data[0].value = elseSource;
-               captureElse = true;
-            } catch (err) {
-               throw new Error('There is no data for "else" module to use for excluding place "elseif"');
-            }
-         }
          function resolveStatement() {
+
+            var source, elseSource, captureElse = false;
+            if (tag.prev === undefined || (tag.prev.name !== 'ws:if' && tag.prev.name !== 'ws:else')) {
+               throw new Error('There is no "if" for "else" module to use');
+            }
+            try {
+               source = tag.prev.attribs.data.data[0].value;
+            } catch (err) {
+               throw new Error('There is no data for "else" module to use');
+            }
+            if (tag.attribs !== undefined) {
+               try {
+                  elseSource = processExpressions(tag.attribs.data.data[0].name, data, this.calculators);
+                  tag.attribs.data.data[0].value = elseSource;
+                  captureElse = true;
+               } catch (err) {
+                  throw new Error('There is no data for "else" module to use for excluding place "elseif"');
+               }
+            }
+
             if (captureElse) {
                if (!source) {
                   if (elseSource) {

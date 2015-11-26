@@ -174,6 +174,14 @@ define('Core/tmpl/js/helpers/utils', function utilsLoader() {
          }
          return mixin(r, src, clone);
       },
+      plainMergeAttrs: function plainMergeAttrs(inner, attrs) {
+         for (var attr in attrs) {
+            if (attrs.hasOwnProperty(attr)) {
+               inner[attr] = attrs[attr];
+            }
+         }
+         return inner;
+      },
       merge: function merge(target, source) {
          var property, a, sourceProperty, l;
          if (typeof target !== 'object') {

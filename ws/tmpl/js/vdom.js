@@ -1,4 +1,4 @@
-define('Core/tmpl/js/vdom', ['Core/tmpl/js/helpers/processExpressions', 'Core/tmpl/js/helpers/utils', 'Core/tmpl/js/helpers/seekingForVars', 'Core/tmpl/js/helpers/whatType', 'Core/tmpl/js/astModules/module', 'Core/tmpl/js/helpers/entityHelpers', 'Core/tmpl/js/astModules/if', 'Core/tmpl/js/astModules/for', 'Core/tmpl/js/astModules/else', 'Core/tmpl/js/astModules/partial', 'Core/tmpl/js/astModules/includeAMD', 'Core/tmpl/js/astModules/template'], function processingModule(processExpressions, utils, seekingForVars, whatType, moduleC, entityHelpers, ifM, forM, elseM, par, inc, tmp) {
+define('Core/tmpl/js/vdom', ['Core/tmpl/js/helpers/processExpressions', 'Core/tmpl/js/helpers/utils', 'Core/tmpl/js/helpers/whatType', 'Core/tmpl/js/astModules/module', 'Core/tmpl/js/helpers/entityHelpers', 'Core/tmpl/js/astModules/if', 'Core/tmpl/js/astModules/for', 'Core/tmpl/js/astModules/else', 'Core/tmpl/js/astModules/partial', 'Core/tmpl/js/astModules/includeAMD', 'Core/tmpl/js/astModules/template'], function processingModule(processExpressions, utils, whatType, moduleC, entityHelpers, ifM, forM, elseM, par, inc, tmp) {
    var vdom = {
       _modules: {
          'if': ifM,
@@ -10,7 +10,7 @@ define('Core/tmpl/js/vdom', ['Core/tmpl/js/helpers/processExpressions', 'Core/tm
       },
       _attributeModules: {
          'if': ifM,
-         'for': forM,
+         'for': forM
       },
 
       vdomUtils: {},
@@ -34,9 +34,13 @@ define('Core/tmpl/js/vdom', ['Core/tmpl/js/helpers/processExpressions', 'Core/tm
             commandEvent: vdomUtils.commandEvent
          }
       },
-      getVdom: function getVdom(ast, data, vdomUtils) {
+      getVdom: function getVdom(ast, data, vdomUtils, handlers) {
          this.vdomUtils = this.vdomUtilsHandler(vdomUtils);
          this.vdomEvents = this.vdomEventsHandler(vdomUtils);
+         if (handlers) {
+            this.calculators = handlers.calculators;
+            this.iterators = handlers.iterators;
+         }
          return this._process(ast, data);
       },
       _processOptionModule: function processOptionModule(tag, data) {
@@ -113,15 +117,6 @@ define('Core/tmpl/js/vdom', ['Core/tmpl/js/helpers/processExpressions', 'Core/tm
          return ast;
       },
       /**
-       * Processing data types of entities
-       * @param  {String} unTextData Value of data object
-       * @param  {Object} data       Data
-       * @return {String}
-       */
-      _processDataTypes: function processDataTypes(unTextData, data) {
-         return seekingForVars.call(this, unTextData, data);
-      },
-      /**
        * Processing entity data objects
        * @param  {Array} textData Array of data
        * @param  {Object} data     Data
@@ -131,14 +126,14 @@ define('Core/tmpl/js/vdom', ['Core/tmpl/js/helpers/processExpressions', 'Core/tm
          var string = '', i;
          if (textData.length) {
             if (textData.length === 1) {
-               return processExpressions(textData[0], data);
+               return processExpressions(textData[0], data, this.calculators);
             }
             for (i = 0; i < textData.length; i++) {
-               string += processExpressions(textData[i], data);
+               string += processExpressions(textData[i], data, this.calculators);
             }
             return string;
          }
-         return processExpressions(textData, data);
+         return processExpressions(textData, data, this.calculators);
       },
       _checkForDeadAttributes: function checkForDeadAttributes(processed) {
          if (utils.isString(processed)) {

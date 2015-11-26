@@ -1,9 +1,10 @@
-define('Core/tmpl/js/traverse', ['Core/tmpl/js/jison/htmlparser', 'Core/tmpl/js/helpers/utils', 'Core/tmpl/js/helpers/skipVars', 'Core/tmpl/js/helpers/State', 'Core/tmpl/js/astModules/module', 'Core/tmpl/js/helpers/entityHelpers', 'Core/tmpl/js/astModules/includeAMD', 'Core/tmpl/js/astModules/template', 'Core/tmpl/js/astModules/partial', 'Core/tmpl/js/astModules/if'], function traverseLoader(htmlparser, utils, skipVars, State, moduleC, entityHelpers, inc, tmp, par, ifM) {
+define('Core/tmpl/js/traverse', ['Core/tmpl/js/jison/htmlparser', 'Core/tmpl/js/helpers/utils', 'Core/tmpl/js/helpers/skipVars', 'Core/tmpl/js/helpers/State', 'Core/tmpl/js/astModules/module', 'Core/tmpl/js/helpers/entityHelpers', 'Core/tmpl/js/astModules/includeAMD', 'Core/tmpl/js/astModules/template', 'Core/tmpl/js/astModules/partial', 'Core/tmpl/js/astModules/if', 'Core/tmpl/js/astModules/for'], function traverseLoader(htmlparser, utils, skipVars, State, moduleC, entityHelpers, inc, tmp, par, ifM, fr) {
    var traverse = {
       _modules: {
          'ws:include': inc,
          'ws:template': tmp,
-         'ws:partial': par
+         'ws:partial': par,
+         'ws:for': fr
       },
       _regex: {
          forVariables: /\{\{ ?(.*?) ?\}\}/g

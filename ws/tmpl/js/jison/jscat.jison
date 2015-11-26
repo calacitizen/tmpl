@@ -1084,16 +1084,22 @@ function CallExpressionNode(callee, args) {
 
 function MemberExpressionNode(object, property, computed) {
 	if (computed) {
-	    return '((' + object + ' && typeof ' + object + '.get === "function" && typeof ' + object + '.set === "function") ? ' +  object + '.get(' + property + ') : ' + object + '[' + property + '])';
+	    return object + '[' + property + ']';
 	}
-	return '((' + object + ' && typeof ' + object + '.get === "function" && typeof ' + object + '.set === "function") ? ' + object + '.get("' + property + '") : ' +  object + '.' + property + ')';
+	return object + '.' + property;
 }
 
 function DecoratorChainCallNode(identifier, argumentsDecorator) {
-    if (argumentsDecorator === undefined) {
-        return function DecoratorChainCallNodeUser(__context) { return 'decorators.' + identifier + '(' + __context + ')'; };
-    }
-    return function DecoratorChainCallNodeUser(__context) { return 'decorators.' + identifier + '(' + __context + ',' + argumentsDecorator + ')'; };
+   function debugCave(__context, debug) {
+      if (debug === 'trace') {
+         return __context + ',"' + __context + '"';
+      }
+      return __context;
+   }
+   if (argumentsDecorator === undefined) {
+      return function DecoratorChainCallNodeUser(__context) { return 'decorators.' + identifier + '(' + debugCave(__context, identifier) + ')'; };
+   }
+   return function DecoratorChainCallNodeUser(__context) { return 'decorators.' + identifier + '(' + debugCave(__context, identifier) + ',' + argumentsDecorator + ')'; };
 }
 
 function DecoratorChainContext(fn, entity) {

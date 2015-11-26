@@ -1,4 +1,4 @@
-define('Core/tmpl/js/astModules/if', ['Core/tmpl/js/jison/jsCat', 'Core/tmpl/js/helpers/challengeModuleValues', 'Core/tmpl/js/helpers/decorators'], function ifLoader(jsResolver, challenge, decorators) {
+define('Core/tmpl/js/astModules/if', ['Core/tmpl/js/helpers/challengeModuleValues', 'Core/tmpl/js/helpers/decorators'], function ifLoader(challenge, decorators) {
    var ifM = {
       module: function ifModule(tag, data) {
          function resolveStatement(source) {
@@ -24,7 +24,7 @@ define('Core/tmpl/js/astModules/if', ['Core/tmpl/js/jison/jsCat', 'Core/tmpl/js/
          }
          return function ifModuleReturnable() {
             if (tag.children !== undefined) {
-               return resolveStatement.call(this, challenge(tag, 'if', false, data));
+               return resolveStatement.call(this, challenge.call(this, tag, 'if', false, data));
             }
          };
       }

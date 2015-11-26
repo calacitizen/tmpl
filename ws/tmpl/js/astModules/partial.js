@@ -1,4 +1,4 @@
-define('Core/tmpl/js/astModules/partial', ['Core/tmpl/js/helpers/State', 'Core/tmpl/js/helpers/injectedDataForce', 'Core/tmpl/js/helpers/processExpressions'], function partialLoader(State, injectedDataForce, processExpressions) {
+define('Core/tmpl/js/astModules/partial', ['Core/tmpl/js/helpers/State', 'Core/tmpl/js/helpers/injectedDataForce', 'Core/tmpl/js/helpers/processExpressions', 'Core/tmpl/js/helpers/entityHelpers'], function partialLoader(State, injectedDataForce, processExpressions, entityHelpers) {
    var partialM = {
       parse: function partialParse(tag) {
          var tagData = tag.children;
@@ -64,10 +64,13 @@ define('Core/tmpl/js/astModules/partial', ['Core/tmpl/js/helpers/State', 'Core/t
          function resolveStatement() {
             var assignModuleVar, preparedScope = prepareScope.call(this, tag, data);
             if (tag.injectedTemplate) {
-               assignModuleVar = processExpressions(tag.injectedTemplate, data);
+               assignModuleVar = processExpressions(tag.injectedTemplate, data, this.calculators);
                if (assignModuleVar) {
                   if (entityHelpers.isControlClass(assignModuleVar)) {
                      return this._process([entityHelpers.createControlNode(assignModuleVar, preparedScope.key)], preparedScope);
+                  }
+                  if (entityHelpers.isFunction(assignModuleVar)) {
+                     return assignModuleVar(preparedScope);
                   }
                   return this._process(assignModuleVar, preparedScope);
                }

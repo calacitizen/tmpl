@@ -1,4 +1,4 @@
-define('Core/tmpl/js/astModules/data/number', ['Core/tmpl/js/helpers/entityHelpers'], function numberLoader() {
+define('Core/tmpl/js/astModules/data/number', ['Core/tmpl/js/helpers/entityHelpers'], function numberLoader(entityHelpers) {
    return function stringTag(tag, types, scopeData) {
       var children, i;
       if (tag.children) {

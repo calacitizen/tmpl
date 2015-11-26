@@ -726,16 +726,27 @@ define('Core/tmpl/js/jison/beforejs', function () {
       function ProgramNode(body) {
          this.type = "Program";
          this.body = body;
+         if (body) {
+            this.string = body[0].string;
+         } else {
+            this.string = '';
+         }
       }
 
 
       function EmptyStatementNode(statement) {
          this.type = "EmptyStatement";
+         this.string = '';
       }
 
       function ExpressionStatementNode(expression) {
          this.type = "ExpressionStatement";
          this.expression = expression;
+         if (expression) {
+            this.string = expression.string;
+         } else {
+            this.string = '';
+         }
       }
 
       function LabeledStatementNode(label, body) {
@@ -746,21 +757,36 @@ define('Core/tmpl/js/jison/beforejs', function () {
 
       function ThisExpressionNode() {
          this.type = "ThisExpression";
+         this.string = 'this';
       }
 
       function ArrayExpressionNode(elements) {
          this.type = "ArrayExpression";
          this.elements = elements;
+         this.string = '[';
+         for (var i=0; i < elements.length; i++) {
+            this.string += elements[i].string;
+         }
+         this.string += ']';
       }
 
       function ObjectExpressionNode(properties) {
          this.type = "ObjectExpression";
          this.properties = properties;
+         this.string = '{';
+         for (var i=0; i < properties.length; i++) {
+            this.string += properties[i].key.string + ':' + properties[i].value.string;
+         }
+         this.string += '}';
       }
 
       function SequenceExpressionNode(expressions) {
          this.type = "SequenceExpression";
          this.expressions = expressions;
+         this.string = '';
+         for (var i=0; i < expressions.length; i++) {
+            this.string += expressions[i].string + ',';
+         }
       }
 
       function UnaryExpressionNode(operator, prefix, argument) {
@@ -768,6 +794,15 @@ define('Core/tmpl/js/jison/beforejs', function () {
          this.operator = operator;
          this.prefix = prefix;
          this.argument = argument;
+         if (argument) {
+            if (!prefix) {
+               this.string = operator + argument.string;
+            } else {
+               this.string = argument.string + operator;
+            }
+         } else {
+            this.string = '';
+         }
       }
 
       function BinaryExpressionNode(operator, left, right) {
@@ -775,6 +810,11 @@ define('Core/tmpl/js/jison/beforejs', function () {
          this.operator = operator;
          this.left = left;
          this.right = right;
+         if (left && right) {
+            this.string = left.string + operator + right.string;
+         } else {
+            this.string = '';
+         }
       }
 
       function UpdateExpressionNode(operator, argument, prefix) {
@@ -782,6 +822,15 @@ define('Core/tmpl/js/jison/beforejs', function () {
          this.operator = operator;
          this.argument = argument;
          this.prefix = prefix;
+         if (argument) {
+            if (!prefix) {
+               this.string = operator + argument.string;
+            } else {
+               this.string = argument.string + operator;
+            }
+         } else {
+            this.string = '';
+         }
       }
 
       function LogicalExpressionNode(operator, left, right) {
@@ -789,6 +838,11 @@ define('Core/tmpl/js/jison/beforejs', function () {
          this.operator = operator;
          this.left = left;
          this.right = right;
+         if (left && right) {
+            this.string = left.string + operator + right.string;
+         } else {
+            this.string = '';
+         }
       }
 
       function ConditionalExpressionNode(test, consequent, alternate) {
@@ -796,12 +850,31 @@ define('Core/tmpl/js/jison/beforejs', function () {
          this.test = test;
          this.consequent = consequent;
          this.alternate = alternate;
+         if (test && consequent) {
+            if (alternate) {
+               this.string = test.string + '?' + consequent.string + alternate.string;
+            }
+            else {
+               this.string = test.string + '?' + consequent.string;
+            }
+         } else {
+            this.string = '';
+         }
       }
 
       function CallExpressionNode(callee, args) {
          this.type = "CallExpression";
          this.callee = callee;
          this.arguments = args;
+         if (callee) {
+            this.string = callee.string + '(';
+            for (var i=0; i<args.length; i++) {
+               this.string += args[i].string;
+            }
+            this.string += ')';
+         } else {
+            this.string = '';
+         }
       }
 
       function MemberExpressionNode(object, property, computed) {
@@ -809,29 +882,50 @@ define('Core/tmpl/js/jison/beforejs', function () {
          this.object = object;
          this.property = property;
          this.computed = computed;
+         if (object && property) {
+            if (computed) {
+               this.string = '' + object.string + '[' + property.string + ']';
+            }
+            else {
+               this.string = '' + object.string + '.' + property.string;
+            }
+         }
       }
 
       function DecoratorChainCallNode(identifier, argumentsDecorator) {
          this.type = "DecoratorChainCall";
          this.identifier = identifier;
          this.argumentsDecorator = argumentsDecorator;
+         this.string = identifier;
+         if (argumentsDecorator) {
+            for (var i=0; i < argumentsDecorator.length; i++) {
+               this.string += argumentsDecorator[i].string
+            }
+         }
       }
 
       function DecoratorChainContext(fn, entity) {
          this.type = "DecoratorChainContext";
          this.fn = fn;
          this.entity = entity;
+         this.string = fn.string;
       }
 
       function DecoratorCallNode(decorator, caller) {
          this.type = "DecoratorCall";
          this.decorator = decorator;
          this.caller = caller;
+         if (caller) {
+            this.string = caller.string + '|' + decorator.string;
+         } else {
+            this.string = '|' + decorator.string;
+         }
       }
 
       function IdentifierNode(name) {
          this.type = "Identifier";
          this.name = name;
+         this.string = name;
       }
 
       function LiteralNode(value, isString) {
@@ -840,6 +934,7 @@ define('Core/tmpl/js/jison/beforejs', function () {
          if (isString) {
             this.value = this.value.trim().replace(/^['"](.*)['"]$/, '$1')
          }
+         this.string = value;
       }
       /* End AST Node Constructors */
 

@@ -19,6 +19,15 @@ define('Core/tmpl/js/helpers/entityHelpers', ['Core/tmpl/js/helpers/utils', 'Cor
       isControl: function isText(type) {
          return type === 'control';
       },
+      isControlClass: function isControlClass(controlClass) {
+         if (controlClass && controlClass.prototype) {
+            return controlClass.prototype.$constructor && controlClass.prototype.superclass;
+         }
+         return false;
+      },
+      isFunction: function isFunction(fn) {
+         return Object.prototype.toString.call(fn) === '[object Function]';
+      },
       /**
        * Match module by name
        * @param  {Object} tag
@@ -145,14 +154,14 @@ define('Core/tmpl/js/helpers/entityHelpers', ['Core/tmpl/js/helpers/utils', 'Cor
             var string = '', attrData = attributesData.data, i;
             if (attrData.length) {
                if (attrData.length === 1) {
-                  return processExpressions(attrData[0], data);
+                  return processExpressions(attrData[0], data, this.calculators);
                }
                for (i = 0; i < attrData.length; i++) {
-                  string += processExpressions(attrData[i], data);
+                  string += processExpressions(attrData[i], data, this.calculators);
                }
                return string;
             }
-            return processExpressions(attrData, data);
+            return processExpressions(attrData, data, this.calculators);
          }
          if (attrs !== undefined) {
             for (attr in attrs) {

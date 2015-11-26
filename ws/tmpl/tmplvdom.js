@@ -8,8 +8,8 @@ define('Core/tmpl/tmplvdom', ['Core/tmpl/js/traverse', 'Core/tmpl/js/vdom'], fun
             }
          };
       },
-      vdom: function vdom(ast, data, vdomUtils) {
-         return processing.getVdom(ast, data, vdomUtils);
+      vdom: function vdom(ast, data, vdomUtils, handlers) {
+         return processing.getVdom(ast, data, vdomUtils, handlers);
       }
    };
 });

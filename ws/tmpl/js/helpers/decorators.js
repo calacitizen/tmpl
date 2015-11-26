@@ -24,6 +24,20 @@ define('Core/tmpl/js/helpers/decorators', function decoratorsLoader() {
       toUpperCase: function toUpperCase(string) {
          return string.toUpperCase();
       },
+      falseStr: function falseStr(value) {
+         if (!value && value !== 0) {
+            return '';
+         }
+         return value;
+      },
+      trace: function trace(expression, name, writeup) {
+         if (writeup) {
+            console.log('RUNNING TRACE DECORATOR: ', writeup, ' Result of expression: ', expression);
+         } else {
+            console.log('RUNNING TRACE DECORATOR: ', 'Your Expression: ', name, ' Result of expression: ', expression);
+         }
+         return expression;
+      },
       trim: function trim(string) {
          return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
       },

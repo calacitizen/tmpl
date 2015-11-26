@@ -4,7 +4,7 @@ define('Core/tmpl/js/astModules/data/object', ['Core/tmpl/js/helpers/utils', 'Co
       function isEntityUsefulOrHTML(nameExists) {
          return nameExists && !this._modules.hasOwnProperty(nameExists) && !entityHelpers.isTagRequirableBool(nameExists);
       }
-      objectForMerge = entityHelpers.parseAttributesForData.call(this, injected.attribs, scopeData);
+      objectForMerge = entityHelpers.parseAttributesForData.call(this, injected.attribs, scopeData, this.calculators);
       if (injected.children) {
          injected = injected.children;
       }
@@ -23,11 +23,7 @@ define('Core/tmpl/js/astModules/data/object', ['Core/tmpl/js/helpers/utils', 'Co
          }
       }
       if (objectForMerge !== undefined) {
-         if (utils.isWsIncluded()) {
-            tObject = $ws.core.merge(tObject, objectForMerge);
-         } else {
-            tObject = utils.merge(tObject, objectForMerge);
-         }
+         tObject = utils.plainMergeAttrs(tObject, objectForMerge);
       }
       if (htmlArray.length > 0) {
          return htmlArray;

@@ -1,26 +1,34 @@
 define('Core/tmpl/js/helpers/expressions', ['Core/tmpl/js/helpers/utils', 'Core/tmpl/js/helpers/calculator', 'Core/tmpl/js/helpers/decorators'], function (utils, calculator, decorators) {
+   var createExpressionObj = function createExpressionObj(value, string) {
+      return { value: value, string: string };
+   };
+
    var expressions = {
       'Identifier': function IdentifierCaller(node, data) {
-         return calculator(node.name, data);
+         return createExpressionObj(calculator(node.name, data), node.name);
       },
       'ExpressionStatement': function ExpressionStatementCaller(node, data) {
-         return this[node.expression.type](node.expression, data);
+         var expr = this[node.expression.type](node.expression, data);
+         return createExpressionObj(expr.value, expr.string);
       },
       'LogicalExpression': function LogicalExpressionCaller(node, data) {
+         var left = this[node.left.type](node.left, data),
+            right = this[node.right.type](node.right, data),
+            exprString = left.string + ' ' + node.operator + ' ' + right.string;
          function logicalExpressionTypes(operator, left, right) {
             if (operator) {
                switch (operator) {
                   case '||':
-                     return left || right;
+                     return left.value || right.value;
                   case '&&':
-                     return left && right;
+                     return left.value && right.value;
                   default:
-                     throw new Error('Wrong conditional expression ' + left + ' ' + operator + ' ' + right);
+                     throw new Error('Wrong conditional expression ' + exprString);
                }
             }
-            throw new Error('Wrong conditional expression ' + left + ' ' + operator + ' ' + right);
+            throw new Error('Wrong conditional expression ' + exprString);
          }
-         return logicalExpressionTypes(node.operator, this[node.left.type](node.left, data), this[node.right.type](node.right, data));
+         return logicalExpressionTypes(node.operator, left, right);
       },
       'Literal': function LiteralNodeCaller(node) {
          return node.value;
